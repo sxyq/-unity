@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e9f1ff"/>
+      <stop offset="1" stop-color="#dde9fd"/>
+    </linearGradient>
+  </defs>
+  <rect width="100" height="100" fill="url(#bg3)"/>
+  <circle cx="50" cy="104" r="46" fill="#5b8bf0" opacity=".14"/>
+  <path d="M26 46c0-15 11-25 24-25s24 10 24 25v9c0 3-2 5-4 5v-9c0-11-8-18-20-18s-20 7-20 18v9c-2 0-4-2-4-5z" fill="#39323c"/>
+  <path d="M43 62h14v11c0 4-14 4-14 0z" fill="#e8c4a8"/>
+  <ellipse cx="50" cy="48" rx="17" ry="19.5" fill="#f2d3bb"/>
+  <path d="M32 43c1-12 8-18 18-18s17 6 18 18c-4-5-10-8-18-8s-14 3-18 8z" fill="#39323c"/>
+  <!-- 眼镜 -->
+  <g stroke="#4a5a74" stroke-width="1.6" fill="none">
+    <rect x="37.6" y="43.4" width="11" height="9" rx="3.4"/>
+    <rect x="51.4" y="43.4" width="11" height="9" rx="3.4"/>
+    <path d="M48.6 47h2.8M37.6 46h-4M62.4 46h4"/>
+  </g>
+  <ellipse cx="43.2" cy="48" rx="1.8" ry="1.9" fill="#2f2a33"/>
+  <ellipse cx="56.8" cy="48" rx="1.8" ry="1.9" fill="#2f2a33"/>
+  <path d="M46.4 57c2 1.6 5.2 1.6 7.2 0" stroke="#b97a5f" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+  <!-- 白大褂 + 领带 -->
+  <path d="M27 100c0-16 10-26 23-26s23 10 23 26z" fill="#ffffff"/>
+  <path d="M50 74 44 82l6 6 6-6z" fill="#e8eefb"/>
+  <path d="M50 84v16" stroke="#35558c" stroke-width="2.4"/>
+  <path d="M44 74 50 82l6-8" fill="none" stroke="#dbe6f8" stroke-width="2.6"/>
+  <circle cx="50" cy="90" r="1.8" fill="#35558c"/>
+</svg>
