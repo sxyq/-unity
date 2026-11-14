@@ -223,6 +223,21 @@ agent /state:  phase=postop  postopDay=2  taskId=postop-psych  confidence=high
 | 启动链路 | ✅ `POST /api/Experiment/Launch` → **200**；随后页面尝试 `ws://127.0.0.1:9090/` → `ERR_CONNECTION_REFUSED`；回退 `mlauncher://&HLF10631030…&<ticket>&3&…` → `scheme does not have a registered handler` |
 | 平台自身的兜底提示 | ✅ 弹窗「检测你的电脑没有安装 mengoo 下载器，点击确认下载该插件」 |
 
+**成绩接口到底给了什么**（直接看返回结构，只记录字段名与数值）：
+
+```
+记录数: 3
+顶层字段: id, userUserName, userName, orgName, deptNames, experimentName,
+          status, timeUsed, startTime, endTime, score, createTime, roleName, roleId, userId
+数值字段: {"status":1,"timeUsed":1150,"score":98}
+嵌套字段: 无
+```
+
+**结论：`ExperimentResult/ItemsByUser` 只有「总分 + 用时 + 起止时间」，没有任何逐步骤/错项数组。**
+所以 09/10 只能做「总分趋势 + 用时对比」，不能推断具体哪一步做错了——这条限制现在有实证，
+不是保守估计。要步骤级数据，只能靠客户端日志里的 `SubStepDescription`，或让厂商开放接口。
+
+
 截图 `real-learning.png` 里能同时看到：真实成绩表（98/88）、安装提示弹窗、右侧面板已把实验身份写成
 「客户端实验 · 下肢骨折骨牵引护理技术虚拟仿真项目」。
 
@@ -292,7 +307,7 @@ client-agent /procs                → 0 个相关进程
 | 06 | 术后心理护理 | ✅ 患者角色 + 术后时间线 | ◐ 可自动读「术后第 N 天」；任务需「心理护理」标记 | ✗ | 天数未知时不假定为第 3 天（已改） |
 | 07 | 术后护理指导 | ✅ 带教老师 | ◐ 依赖「体位/翻身/有效咳嗽/皮肤护理」标记 | ✗ | 同上 |
 | 08 | 并发症观察 | ✅ 带教老师 | ◐ 依赖「并发症/血栓/肿胀/牵引失效」标记 | ✗ | 不根据常识判定患者发生了哪种并发症 |
-| 09 | 成绩与能力分析 | ✅ 学习反馈角色 | ✅ **真实会话下读到 98/88/68 + 进度/次数**（接口旁听） | ✅ 成绩数据（非操作级） | 依赖登录；不碰 token |
+| 09 | 成绩与能力分析 | ✅ 学习反馈角色 | ✅ **真实会话下读到 98/88/68 + 进度/次数**（接口旁听） | ✅ 成绩数据（非操作级） | 接口无逐步骤字段，只能做总分趋势 |
 | 10 | 个性化复习建议 | ✅ 同上（当前演示知识库） | ✅ 由 09 的成绩数据驱动 | ◐ 数据到手，建议文本仍走演示模型 | 只有总分时只做趋势分析，不推断具体错项 |
 
 **能明确回答的：**
