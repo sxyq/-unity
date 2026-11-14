@@ -86,9 +86,20 @@ function discoverLogs() {
     try { st = fs.statSync(file); } catch (e) { return; }
     if (!st.isFile()) return;
 
-    const rel = path.relative(rootOf(file), file).split(/[\\/]/);
-    const company = rel.length >= 3 ? rel[rel.length - 3] : '';
-    const product = rel.length >= 2 ? rel[rel.length - 2] : '';
+    const root = rootOf(file);
+    // 统一按 LocalLow\<company>\<product>\Player.log 的结构取名，避免相对路径算出 ".."
+    const segs = path.resolve(file).split(/[\\/]/);
+    const li = segs.findIndex((s) => s.toLowerCase() === 'locallow');
+    let company = '';
+    let product = '';
+    if (li >= 0 && segs.length >= li + 4) {
+      company = segs[li + 1];
+      product = segs[li + 2];
+    } else {
+      const rel = path.relative(root, file).split(/[\\/]/);
+      if (rel.length >= 3) { company = rel[rel.length - 3]; product = rel[rel.length - 2]; }
+      else { product = path.basename(root); company = path.basename(path.dirname(root)); }
+    }
 
     out.push({
       file,
@@ -321,28 +332,31 @@ let procCache = { at: 0, value: null };
 async function listProcs() {
   if (!IS_WIN) return [];
   if (Date.now() - procCache.at < 5000 && procCache.value) return procCache.value;
-  const script = `
-$pat = 'MCLocal|Mengoo|MLauncher|HLF|骨牵引|VirtualSim'
-$list = @()
-try {
-  $list = Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.ProcessName -match $pat } | ForEach-Object {
-    $p = $_
-    [pscustomobject]@{
-      pid = $p.Id
-      name = $p.ProcessName
-      title = $(try { $p.MainWindowTitle } catch { '' })
-      path = $(try { $p.Path } catch { '' })
-      started = $(try { $p.StartTime.ToString('HH:mm:ss') } catch { '' })
-    }
+
+  // 用 tasklist 而不是 PowerShell：后者在受限环境里经常起不来，且更慢。
+  const raw = await new Promise((resolve) => {
+    execFile('tasklist', ['/v', '/fo', 'csv'], { timeout: 8000, windowsHide: true, maxBuffer: 4 * 1024 * 1024 },
+      (err, stdout) => resolve(err ? '' : String(stdout || '')));
+  });
+
+  const out = [];
+  for (const line of raw.split(/\r?\n/)) {
+    if (!line.startsWith('"')) continue;
+    const cols = line.slice(1, -1).split('","');
+    if (cols.length < 9) continue;
+    const name = cols[0];
+    if (!/MCLocal|Mengoo|MLauncher|HLF|骨牵引|VirtualSim/i.test(name)) continue;
+    out.push({
+      pid: Number(cols[1]),
+      name,
+      title: cols[8] || '',
+      path: '',
+      started: '',
+      mem: cols[4]
+    });
   }
-} catch {}
-if ($list -eq $null) { $list = @() }
-$list | ConvertTo-Json -Depth 3 -Compress
-`;
-  const r = await psJson(script);
-  const arr = r == null ? [] : (Array.isArray(r) ? r : [r]);
-  procCache = { at: Date.now(), value: arr };
-  return arr;
+  procCache = { at: Date.now(), value: out };
+  return out;
 }
 
 let titleCache = { at: 0, value: '' };

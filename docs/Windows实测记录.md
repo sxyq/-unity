@@ -306,6 +306,50 @@ client-agent /procs                → 0 个相关进程
 即使装上了，进实验还要过一次平台登录（见 5.3，密码登录可用）。所以「跑真实 Unity 实验」这条链，
 在本机当前状态下只差**一个 UAC 确认**；代码、接口、票据下发都已经验证通了。
 
+### 6.1 绕过损坏的 MSI：手工部署（本机已跑通）
+
+这台机器的 Windows Installer 引擎对所有包都返回 1619（连系统自带的 45KB MSI 也一样），
+但 MSI 里的东西是好的。下面是实测可用的替代路径，全程不需要 MSI：
+
+```
+1) 解 MSI：MSI 是 OLE 复合文件，内嵌一个 MSZIP 的 CAB（MSCF 在 2,932,736 字节处，128 个文件）
+   → 用 zlib(-15) 逐块解压（每块以上一块末尾 32KB 作字典），按 CFFILE 表切片
+2) 重排成 Unity 期望的布局：
+   根目录       MCLocalLauncher.exe / UnityPlayer.dll / UnityCrashHandler32.exe / Version.json
+                MonoBleedingEdge/EmbedRuntime/mono-2.0-bdwgc.dll、MonoPosixHelper.dll
+   _Data/       globalgamemanagers*、level0、resources.assets*、sharedassets0.assets*、data.unity3d、app.info、boot.config
+   _Data/Managed/        所有托管 dll（Assembly-CSharp.dll 注意有连字符）
+   _Data/Resources/      unity default resources、unity_builtin_extra
+   _Data/StreamingAssets/ warehouse
+   MonoBleedingEdge/etc/mono/{,4.5}/  machine.config、config、web.config、settings.map…
+3) 以管理员运行（清单要求）：
+   MCLocalLauncher.exe "MLauncher://&HLF10631030&…&<ticket>&3&<host>&2&HLF10631030&"
+4) 启动器会读 Version.json 把实验本体下到
+   %TEMP%\Mengoo\MCLocalLauncher\HLF10631030\1.0.7\（198 个文件，data.unity3d 单个 293MB）
+   实测它下到 28MB 左右会崩，所以改为按清单自己下：
+   https://skeletaltraction.cqmu.edu.cn/mzl/HLF10631030/1.0.7/<fullName>，下完把 *.mengoo 去掉后缀
+5) 实验本体自己也能直接启动，但它要的 URL **字段顺序和平台给的不一样**：
+   平台原始 [16]=ticket、[18]=host；启动器传给实验时是 [16]=host、[18]=ticket
+   按后者重写后启动，日志出现：
+     GetToken requestBody: …/api/open/token?ticket=…&appid=…&signature=…
+     ExperimentId:HLF10631030
+     获取进度成功
+     Resources/Prefabs/UI/Load/UILoadPanel
+```
+
+**实测结论**：客户端能起来、票据能换、进度能取；
+但实验停在加载面板后进程退出（启动器那条链里，启动器退出时会 `KillProcess HLF10631030`，
+而没有 9090 本地服务时实验也拿不到后续指令）。服务已注册
+（`HKLM\SYSTEM\CurrentControlSet\Services\MCLocalLauncherService`，LocalSystem，自动启动），
+`net start` 返回成功但进程随即退出、9090 未监听——这一步还需要继续查。
+
+**日志位置（重要）**：实验本体不写 `Mengoo\MCLocalLauncher\Player.log`，
+而是写 `%USERPROFILE%\AppData\LocalLow\Mengoo\HLF10631030\Player.log`。
+`client-agent` 已能同时识别这两份（`Mengoo/MCLocalLauncher` 与 `Mengoo/HLF10631030`）。
+当前这份日志里只有启动/鉴权/加载行，**还没有出现术前/术中/术后或任务名**——
+这正好说明「阶段不能靠猜」，要等真正进入场景后再看它打印什么。
+
+
 
 ---
 
