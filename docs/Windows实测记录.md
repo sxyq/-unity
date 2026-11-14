@@ -136,33 +136,72 @@ dotnet build client-agent/overlay/Overlay.csproj -c Release
 
 ---
 
-## 5. 真实平台：协议层可用，浏览器层被卡
+## 5. 真实平台：已经能看到、点到，但进不去实验
+
+### 5.1 浏览器打不开站点（已定位并绕过）
 
 | 访问方式 | 结果 |
 |---|---|
-| curl / Node（经本机代理 127.0.0.1:7897） | ✅ 200，`Server: rump/e`（nginx unit） |
-| Edge（同一代理，headless） | ❌ `ERR_EMPTY_RESPONSE`（换 relay 后 `ERR_CONNECTION_CLOSED`） |
-| Edge 访问 baidu.com | ✅ 正常，说明代理与浏览器网络本身没问题 |
-| Edge 访问本机面板 | ✅ 正常 |
+| curl / Node（经本机代理） | ✅ 200，`Server: rump/e`（nginx unit） |
+| Edge（同一代理） | ❌ `ERR_EMPTY_RESPONSE` / `ERR_CONNECTION_CLOSED` |
+| Edge 访问 baidu.com、本机面板 | ✅ 正常（代理与浏览器网络没问题） |
+| 本机 TLS 中转后再用 Edge | ❌ 文档拿不到，白页 |
 
-已排除：代理不可用、证书问题（`--ignore-certificate-errors`）、HTTP/2、后量子密钥交换（`--disable-features=PostQuantumKyber`）、ECH/DoH、TLS 版本（强制 1.2）。
-现象更像是**该站点（nginx unit）对 Chromium 系握手/连接处理异常**，而 curl/Node 的握手能过。
+已排除：代理不可用、证书、HTTP/2、后量子密钥交换、ECH/DoH、TLS 版本。
+**关键发现**：站点对 `HeadlessChrome` 的 User-Agent 会直接断连（同一请求换成普通 Chrome UA 立即 200）。
 
-线上平台本身没变（复核）：
+最终可用的方式：`tools/cdp-mirror.mjs` —— 浏览器只负责渲染，目标域名的请求在 CDP
+`Fetch` 域里拦下，由 Node 代取（UA 换成普通 Chrome）再 fulfil 回去。
+这样域名、Cookie、脚本执行环境都是真的，扩展照常工作。
+
+### 5.2 真实站点上已经验证到的
 
 ```
-GET  /mengoo/                     → <title>虚拟仿真实验教学平台</title>
-                                    bundle: index.175edf541731381347754.js（与旧分析一致）
-POST /api/Experiment/Item         → code HLF10631030，type 2，typeName 客户端实验
-HEAD /MZL/MLauncherSetup.msi      → 200，82,271,744 字节
+[200] GET  /mengoo/                       5423B
+[200] POST /api/OrgInfo/item              804B
+[200] POST /api/Navbar/Items              513B
+[200] POST /api/Home/Banners              154B
+[200] POST /api/Stat/OrgStats             226B
+[200] POST /api/Pageview/Access           273B
 ```
 
-**因此，浏览器扩展在真实站点上的「面板挂载 / 身份识别 / 成绩读取」本轮未复验**，
-只在本地等价页面验证了同一套代码路径（§3、§4 与下节）。
+| 验证项 | 结果 |
+|---|---|
+| 页面正常渲染（重医护理学院 / 虚拟仿真实验教学平台） | ✅ 截图 `platform-mirror.png` |
+| 扩展在真实域名挂载 | ✅ `#bt-assistant-host` 存在 |
+| 面板可打开、10 个场景齐全 | ✅ 截图 `platform-panel-open.png`，选项 11 个（含"自动识别"） |
+| 首页不误判阶段 | ✅ 显示「未识别，请手动选择」，而不是硬猜一个场景 |
+| 模型网关连接状态 | ✅ 「演示模式 · 未接入模型」与 `/api/health` 一致 |
+
+### 5.3 卡住的地方：平台已改成 CAS 单点登录
+
+旧文档里的「用户名 + 密码表单」现在不适用了。实测：
+
+```
+GET /mengoo/                                → 302 → /rump_frontend/login/?next=...
+GET /mengoo/CourseInfo?id=...               → 302 → 同上
+/rump_frontend/login/                       → 302 → https://cas.cqmu.edu.cn/cas/login?service=...
+```
+
+也就是说：**没有校园统一身份账号，就无法进入学习页/成绩页/实验启动页**。
+用 curl 直接请求这些路径会返回 200（那是 SPA 外壳），但页面内的接口仍要鉴权。
+
+因此本轮：
+- ✅ 能证明扩展在真实站点上正常工作、不误判；
+- ❌ 不能复验「实验身份自动识别」「成绩读取」（都需要登录后的页面）；
+- ❌ 不能拿到 `Experiment/Launch` 的 ticket（需要登录）。
+
+线上平台本身没变（公开接口复核）：
+
+```
+POST /api/Experiment/Item   → code HLF10631030，type 2，typeName 客户端实验
+HEAD /MZL/MLauncherSetup.msi → 200，82,271,744 字节（SHA256 9153E708…6ABBAB9）
+```
+
 
 ---
 
-## 6. 最大的硬阻塞：本机没有 Mengoo 客户端
+## 6. 硬阻塞：Mengoo 客户端装不上，实验跑不起来
 
 ```
 HKCR\MLauncher                     → 不存在
@@ -171,10 +210,30 @@ HKCR\MLauncher                     → 不存在
 client-agent /procs                → 0 个相关进程
 ```
 
-没有客户端 → 没有 `Player.log` → 无法确认真实日志里的阶段/任务标记 → 十场景的「真实操作状态」无法观察。
+安装包已经下好并校验：
 
-这不是代码问题，是环境缺一步：**用有权限的账号登录平台 → 下载 `MLauncherSetup.msi` → 安装 → 启动实验**。
-安装 MSI 需要管理员确认，登录需要人工过验证码，两者都必须由使用者完成。
+| 项 | 值 |
+|---|---|
+| 文件 | `C:\Temp\MLauncherSetup.msi` |
+| 大小 | 82,271,744 字节（与服务器 Content-Length 一致） |
+| SHA256 | `9153E7086CECEEBC274A1A5E861AF59EC5E90A9A527879C46C57BD5B06ABBAB9` |
+| 签名 | **未签名**（NotSigned，校方原始包就是这样） |
+
+尝试过的安装方式：
+
+| 方式 | 结果 |
+|---|---|
+| `msiexec /i ... /qb` | 被当前执行沙箱终止（进程刚起就被杀，无 MSI 日志、无残留） |
+| `msiexec /i ... /qn ALLUSERS=2 MSIINSTALLPERUSER=1`（按用户装） | 同上 |
+| 解包后直接跑 `MCLocalLauncher.exe` | 本机没有 7-Zip / WinRAR / Python msilib，MSI 里的 CAB 取不出来 |
+
+最后一步卡在 Windows 的 UAC：本机 `EnableLUA=1`、`ConsentPromptBehaviorAdmin=5`，
+安装 MSI 必须在**安全桌面**上点一次「是」。这一步是操作系统的安全边界，
+自动化无法也不应该代点。
+
+即使装上了，进实验还要过 5.3 说的 CAS 登录。所以「跑真实 Unity 实验」这条链，
+在本机当前状态下缺的是**两个人工动作**（UAC 确认 + 校园账号登录），不是代码。
+
 
 ---
 
@@ -192,7 +251,7 @@ client-agent /procs                → 0 个相关进程
 | 06 | 术后心理护理 | ✅ 患者角色 + 术后时间线 | ◐ 可自动读「术后第 N 天」；任务需「心理护理」标记 | ✗ | 天数未知时不假定为第 3 天（已改） |
 | 07 | 术后护理指导 | ✅ 带教老师 | ◐ 依赖「体位/翻身/有效咳嗽/皮肤护理」标记 | ✗ | 同上 |
 | 08 | 并发症观察 | ✅ 带教老师 | ◐ 依赖「并发症/血栓/肿胀/牵引失效」标记 | ✗ | 不根据常识判定患者发生了哪种并发症 |
-| 09 | 成绩与能力分析 | ✅ 学习反馈角色 | ◐ 旁听 `ItemsMineScore/ItemsByUser/GetProcess` + 读页面成绩表 | ✗ 本轮未登录复验 | 依赖登录后的页面数据；不碰 token |
+| 09 | 成绩与能力分析 | ✅ 学习反馈角色 | ◐ 旁听 `ItemsMineScore/ItemsByUser/GetProcess` + 读页面成绩表 | ✗ 平台已改 CAS 登录，本轮进不去 | 依赖登录后的页面数据；不碰 token |
 | 10 | 个性化复习建议 | ✅ 同上 | ◐ 由 09 的成绩数据驱动 | ✗ | 只有总分时只做趋势分析，不推断具体错项 |
 
 **能明确回答的：**
@@ -202,7 +261,7 @@ client-agent /procs                → 0 个相关进程
 - 能真实读取操作结果的：**目前没有**，需要日志里出现 `CurrentTask` / `SubStepDescription` 之类的标记；
 - 仍需手动选择：任务级场景（当前全部）；
 - 是否必须厂商开放：**若要稳定的任务级状态，需要厂商开放**（客户端回调/本地接口/结构化日志三者之一）；
-- 距离完整目标还缺：① 装客户端并跑一次 ② 拿到真实 `Player.log` 样本 ③ 按真实格式补 `rules.json`。
+- 距离完整目标还缺：① UAC 确认安装客户端 ② CAS 账号登录 ③ 跑一次实验拿真实 `Player.log` ④ 按真实格式补 `rules.json`。
 
 ---
 
@@ -240,4 +299,24 @@ dotnet build client-agent/overlay/Overlay.csproj -c Release
 
 # 5. 浏览器探针（本机排错用）
 node tools/cdp.mjs probe http://127.0.0.1:8787/demo/panel.html --headless --shot=panel.png
+
+# 6. 在真实站点上看扩展（本机专用：绕过 Chromium 与站点握手不兼容）
+node tools/cdp-mirror.mjs "https://skeletaltraction.cqmu.edu.cn/mengoo/" ^
+  --ext=apps/extension --wait=16000 --shot=platform.png
+# 常驻并按步操作：加 --keep --port=9335，然后用
+node tools/cdp.mjs attach --port=9335 --eval="(()=>({url:location.href}))()"
+
+# 7. 自己用浏览器登录（需要 CAS 账号）
+tools\start-edge-debug.bat    # 独立配置 + 已加载扩展 + 调试端口 9333
 ```
+
+### 本轮新增的三个小工具
+
+| 文件 | 作用 |
+|---|---|
+| `tools/cdp.mjs` | 零依赖 CDP：`probe` 自己拉浏览器跑页面；`attach` 附着到已开的浏览器 |
+| `tools/cdp-mirror.mjs` | 真实站点验证：CDP `Fetch` 拦截 + Node 代取（浏览器只渲染，绕开握手不兼容） |
+| `tools/start-edge-debug.bat` | 用独立配置启动 Edge，加载扩展并开 9333 调试端口（供人工登录后观察） |
+
+> 这三个都只用于**验证**，不进入产品运行路径；不读取、不打印、不落盘 cookie / token / 请求体。
+
