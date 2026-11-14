@@ -1,0 +1,112 @@
+{
+ "capturedAt": "2026-11-13",
+ "tool": "craft-anything web-walkthrough-record (CDP) + Playwright",
+ "steps": [
+  "home",
+  "course",
+  "click card"
+ ],
+ "endpoints": [
+  {
+   "method": "POST",
+   "status": 200,
+   "url": "https://skeletaltraction.cqmu.edu.cn/api/OrgInfo/item",
+   "request": null,
+   "response": "{\"data\":{\"id\":\"8857602E-E973-44DF-B603-7234625FEC46\",\"code\":null,\"name\":\"重庆医科大学护理学院\",\"eName\":null,\"platformName\":\"虚拟仿真实验教学平台\",\"icpNo\":\"渝ICP备12000838号-1\",\"waNo\":\"渝公网安备 50010302001618号\",\"logoURL\":\"/upload/20231204/354b0bc2-ccf0-4b80-b294-354b7b27f981.png\",\"iconURL\":\"/upload/20231204/c826b3e8-c14d-4246-9a33-2defc9d8364d.ico\",\"footLogoURL\":null,\"bannerURLs\":\"/upload/20231204/973474fd-9376-40dc-b4b1-d16a5201c899.jpg,/upload/20231204/117b1e9d-1a47-45d2-a34d-782284c76778.jpg\",\"versionNo\":\"V1.0\",\"smsLogin\":0,\"qrCodeLogin\":0,\"showUserName\":0,\"theme\":0,\"customNavbar\":0,\"homePage\":null,\"customCats\":0,\"casLogin\":0,\"themeSet\":null,\"loginAccess\":0,\"hideTrialTag\":0,\"openWhiteList\":0,\"mobilePlatform\":1,\"hideExperimentSchool\":0},\"code\":0,\"msg\":\"成功\"}"
+  },
+  {
+   "method": "GET",
+   "status": 200,
+   "url": "https://skeletaltraction.cqmu.edu.cn/template/hostList.json",
+   "request": null,
+   "response": "{\n    \"HostList\": [{\n\t\t\"host\":\"localhost:5173\",\n\t\t\"path\":\"/zjxu\"\n    },{\n\t\t\"host\":\"127.0.0.2:8900\",\n\t\t\"path\":\"/zjxu\"\n    },{\n\t\t\"host\":\"jsdental.yxsypt.com\",\n\t\t\"path\":\"/njmu\"\n    },{\n\t\t\"host\":\"jczcmu.yxsypt.com\",\n\t\t\"path\":\"/jczcmu\"\n    },{\n\t\t\"host\":\"tjyzh.yxsypt.com\",\n\t\t\"path\":\"/tjyzh\"\n    },{\n\t\t\"host\":\"gmu.yxsypt.com\",\n\t\t\"path\":\"/gmu\"\n    },{\n\t\t\"host\":\"cqmu.yxsypt.com\",\n\t\t\"path\":\"/cqmu\"\n    },{\n\t\t\"host\":\"cnsnvc.yxsypt.com\",\n\t\t\"path\":\"/cnsnvc\"\n    },{\n\t\t\"host\":\"gzhmulcyx.yxsypt.com\",\n\t\t\"path\":\"/gzhmulcyx\"\n    }\n]}\n"
+  },
+  {
+   "method": "POST",
+   "status": 200,
+   "url": "https://skeletaltraction.cqmu.edu.cn/api/Navbar/Items",
+   "request": null,
+   "response": "{\"data\":[{\"id\":\"1BB319BF-571E-4588-9A2E-96FC91DF599F\",\"name\":\"首页\",\"parentId\":\"0\",\"type\":\"page\",\"href\":\"/\",\"url\":null,\"target\":\"_self\",\"toId\":null,\"sort\":0},{\"id\":\"9843AAC8-0236-4668-B7AC-CAEB565E644E\",\"name\":\"实验中心\",\"parentId\":\"0\",\"type\":\"page\",\"href\":\"course\",\"url\":null,\"target\":\"_self\",\"toId\":null,\"sort\":0},{\"id\":\"4876A89A-E80F-43A7-8860-190A95E8D087\",\"name\":\"课程中心\",\"parentId\":\"0\",\"type\":\"page\",\"href\":\"Curriculum\",\"url\":null,\"target\":\"_self\",\"toId\":null,\"sort\":3}],\"code\":0,\"msg\":\"成功\"}"
+  },
+  {
+   "method": "POST",
+   "status": 200,
+   "url": "https://skeletaltraction.cqmu.edu.cn/api/Home/Banners",
+   "request": null,
+   "response": "{\"data\":[\"/upload/20231204/973474fd-9376-40dc-b4b1-d16a5201c899.jpg\",\"/upload/20231204/117b1e9d-1a47-45d2-a34d-782284c76778.jpg\"],\"code\":0,\"msg\":\"成功\"}"
+  },
+  {
+   "method": "POST",
+   "status": 200,
+   "url": "https://skeletaltraction.cqmu.edu.cn/api/Stat/OrgStats",
+   "request": "{\"cols\":[\"pageview\",\"coursecount\",\"experiments\",\"experimentpageview\",\"studytimeused\",\"teachercount\",\"studentcount\"]}",
+   "response": "{\"data\":{\"pageview\":\"17347\",\"experiments\":\"2\",\"experimentPageview\":\"2424\",\"studyTimeUsed\":\"841\",\"comments\":null,\"teacherCount\":18,\"studentCount\":1251,\"courseCount\":0},\"code\":0,\"msg\":\"成功\"}"
+  },
+  {
+   "method": "POST",
+   "status": 200,
+   "url": "https://skeletaltraction.cqmu.edu.cn/api/home/news",
+   "request": null,
+   "response": "{\"data\":{\"totalCount\":0,\"data\":[]},\"code\":0,\"msg\":\"成功\"}"
+  },
+  {
+   "method": "POST",
+   "status": 200,
+   "url": "https://skeletaltraction.cqmu.edu.cn/api/Home/HotExperiments",
+   "request": "{\"take\":5}",
+   "response": "{\"data\":[{\"id\":\"84A5ABB7-6DE6-4382-8D8D-819270690E70\",\"name\":\"下肢骨折骨牵引护理技术虚拟仿真实验项目\",\"imgUrl\":\"/Upload/20220712/1657605227754/202207121657605227763.jpg\",\"pageView\":2393,\"cats\":[{\"id\":\"3919062499999997\",\"name\":\"护理学\"},{\"id\":\"39220712000055076\",\"name\":\"外科护理学\"}]},{\"id\":\"f04c56ab-90b1-44e3-ac08-2f592ecd5ffa\",\"name\":\"儿童糖尿病酮症酸中毒急救护理\",\"imgUrl\":\"/upload/20241129/b077098e-0875-4883-a334-130affcb864b.png\",\"pageView\":31,\"cats\":[{\"id\":\"3919062499999997\",\"name\":\"护理学\"},{\"id\":\"3922071200001076\",\"name\":\"急救护理学\"}]}],\"code\":0,\"msg\":\"成功\"}"
+  },
+  {
+   "method": "POST",
+   "status": 200,
+   "url": "https://skeletaltraction.cqmu.edu.cn/api/Experiment/cats",
+   "request": "{\"Recommend\":null}",
+   "response": "{\"data\":[{\"id\":\"3922071200001076\",\"name\":\"急救护理学\",\"parentId\":\"3919062499999997\",\"experimentCount\":null,\"hue\":null,\"imgURL\":null},{\"id\":\"39220712000055076\",\"name\":\"外科护理学\",\"parentId\":\"3919062499999997\",\"experimentCount\":null,\"hue\":null,\"imgURL\":null},{\"id\":\"3919062499999997\",\"name\":\"护理学\",\"parentId\":\"0\",\"experimentCount\":null,\"hue\":null,\"imgURL\":null}],\"code\":0,\"msg\":\"成功\"}"
+  },
+  {
+   "method": "POST",
+   "status": 200,
+   "url": "https://skeletaltraction.cqmu.edu.cn/api/Experiment/Items",
+   "request": "{\"page\":1,\"pageSize\":8,\"grade\":null,\"Recommend\":null,\"keyword\":\"\",\"sortFed\":\"pageView\",\"sortType\":\"\",\"catsId\":\"3919062499999997\"}",
+   "response": "{\"data\":{\"totalCount\":2,\"data\":[{\"id\":\"84A5ABB7-6DE6-4382-8D8D-819270690E70\",\"code\":\"HLF10631030\",\"name\":\"下肢骨折骨牵引护理技术虚拟仿真实验项目\",\"grade\":3,\"type\":2,\"pageView\":2393,\"imgUrl\":\"/Upload/20220712/1657605227754/202207121657605227763.jpg\",\"editSchool\":\"重庆医科大学\",\"editTeacher\":\"何姗\",\"recommend\":0,\"hue\":null,\"collegeLogo\":null,\"buyWay\":0,\"startDate\":null,\"endDate\":null,\"isPhone\":0,\"apkURL\":\"\",\"fakePageView\":0},{\"id\":\"f04c56ab-90b1-44e3-ac08-2f592ecd5ffa\",\"code\":\"HLE10631019\",\"name\":\"儿童糖尿病酮症酸中毒急救护理\",\"grade\":3,\"type\":2,\"pageView\":31,\"imgUrl\":\"/upload/20241129/b077098e-0875-4883-a334-130affcb864b.png\",\"editSchool\":\"重庆医科大学\",\"editTeacher\":\"陈利平\",\"recommend\":0,\"hue\":null,\"collegeLogo\":null,\"buyWay\":0,\"startDate\":null,\"endDate\":null,\"isPhone\":0,\"apkURL\":\"\",\"fakePageView\":0}]},\"code\":0,\"msg\":\"成功\"}"
+  },
+  {
+   "method": "POST",
+   "status": 200,
+   "url": "https://skeletaltraction.cqmu.edu.cn/api/HomeModule/Items",
+   "request": null,
+   "response": "{\"data\":[{\"id\":\"9d68ca60-4541-430d-bc81-497bcf0891b4\",\"name\":\"资源分类\",\"type\":\"catsexperiment\",\"showType\":0,\"items\":null}],\"code\":0,\"msg\":\"成功\"}"
+  },
+  {
+   "method": "POST",
+   "status": 200,
+   "url": "https://skeletaltraction.cqmu.edu.cn/api/Home/Cats",
+   "request": "{\"lookCount\":1}",
+   "response": "{\"data\":[{\"id\":\"3919062499999997\",\"name\":\"护理学\",\"parentId\":\"0\",\"experimentCount\":2,\"hue\":null,\"imgURL\":null}],\"code\":0,\"msg\":\"成功\"}"
+  },
+  {
+   "method": "POST",
+   "status": 200,
+   "url": "https://skeletaltraction.cqmu.edu.cn/api/Experiment/Item",
+   "request": "{\"id\": \"84A5ABB7-6DE6-4382-8D8D-819270690E70\"}",
+   "response": "{\"data\": {\"id\": \"08f2a12a-ebfe-4beb-8991-3ccc55640756\", \"orgExperimentId\": \"84A5ABB7-6DE6-4382-8D8D-819270690E70\", \"clicks\": 0, \"collects\": 0, \"code\": \"HLF10631030\", \"name\": \"下肢骨折骨牵引护理技术虚拟仿真实验项目\", \"imgURL\": \"/Upload/20220712/1657605227754/202207121657605227763.jpg\", \"type\": 2, \"typeName\": \"客户端实验\", \"url\": \"HLF10631030\", \"orgCatsId\": null, \"catsId\": \"39220712000055076\", \"catsNames\": [{\"id\": \"3919062499999997\", \"name\": \"护理学\", \"parentId\": \"0\", \"level\": 2}, {\"id\": \"39220712000055076\", \"name\": \"外科护理学\", \"parentId\": \"3919062499999997\", \"level\": 1}], \"projectUserId\": null, \"projectUserName\": null, \"deptUserId\": null, \"deptUserName\": null, \"sort\": 0, \"isScore\": 1, \"isUserCountLimit\": 0, \"isPhone\": 0, \"isVR\": 0, \"isProgress\": 0, \"isSubExperiment\": 0, \"grade\": 3, \"gradeName\": \"标准实验\", \"editSchool\": \"重庆",
+   "note": "在页面上下文内用 fetch 复现详情请求（同一业务请求，非越权）"
+  },
+  {
+   "method": "GET",
+   "status": 302,
+   "url": "https://skeletaltraction.cqmu.edu.cn/mengoo/MyScore -> /mengoo/login?redirect=/MyScore",
+   "request": null,
+   "response": null,
+   "note": "未登录访问需鉴权路由时的重定向行为（route guard）"
+  },
+  {
+   "method": "POST",
+   "status": 200,
+   "url": "https://skeletaltraction.cqmu.edu.cn/api/auth/UserNamePwd",
+   "request": "{\"userName\": \"00000000\", \"pwd\": \"<44字符 base64 密文>\", \"uuid\": \"A35D9131-BA12-A0BB-A15E-9896B6C6A6E2\", \"code\": \"\"}",
+   "response": "{\"code\": -1, \"msg\": \"账号或密码不正确\"}",
+   "note": "单次无效账号尝试，仅用于确认请求契约：pwd 为前端加密后的 base64，uuid 为前端生成的 GUID，code 可为空（无强制图形验证码）"
+  }
+ ]
+}
