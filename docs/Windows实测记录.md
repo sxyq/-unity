@@ -173,6 +173,38 @@ dotnet build client-agent/overlay/Overlay.csproj -c Release
 | 首页不误判阶段 | ✅ 显示「未识别，请手动选择」，而不是硬猜一个场景 |
 | 模型网关连接状态 | ✅ 「演示模式 · 未接入模型」与 `/api/health` 一致 |
 
+### 5.2.1 真实站点上的「客户端日志 → 面板」整条链路（用样例日志验证）
+
+在真实 https 页面上，扩展原本**拿不到** 8790：Chrome 的 Private Network Access 会拦掉
+「公网页面 → 127.0.0.1」，控制台报
+`blocked by CORS policy: Permission was denied for this request to access the loopback address space`。
+这是只在真实域名上才会暴露的问题（本地 demo 页同地址空间，看不出来）。
+
+修法两条一起上：
+
+1. `agent.mjs` 所有响应与 OPTIONS 预检都带 `Access-Control-Allow-Private-Network: true`；
+2. `panel.js` 不再在公网页面直连 8790，改由**后台 service worker** 拉取后推送（后台有 host_permissions，不受 PNA 限制）。
+
+用一份**明确标注为样例**的日志（`C:\Temp\gqy-fix`，`LOG_DIRS` 指向它）在真实站点上验证：
+
+```
+agent /state:  phase=postop  postopDay=2  taskId=postop-psych  confidence=high
+面板 debug:     phase=postop  task=postop-psych  day=2
+                src=client-log  thread=postop-psych@d2
+```
+
+即：真实站点 → 后台 → 本机代理 → 面板自动换角色（智能情境化护患交流｜术后心理护理 · 术后第 2 天），
+并且**会话 key 带上了术后天数**（`@d2`），换日期不会串台。
+
+随后停掉样例日志、恢复真实模式（本机没有客户端）：
+
+```
+36 秒后：phase=null  src=page  hint=未识别，请手动选择
+```
+
+说明新增的 **30 秒过期**生效：客户端不再上报时，面板不会被上一次的「术后第 2 天」长期占住。
+
+
 ### 5.3 卡住的地方：平台已改成 CAS 单点登录
 
 旧文档里的「用户名 + 密码表单」现在不适用了。实测：
@@ -275,6 +307,8 @@ client-agent /procs                → 0 个相关进程
 | 历史日志不压当前实验 | `lastSession()` 只取最后一根会话 |
 | 页面识别优先于客户端 | `PAGE_SOURCES` 判断，页面有证据时不接受客户端覆盖 |
 | 自动识别标注来源与可信度 | `contextSource` + `confidence` 直接显示在面板提示行（如「客户端日志 · 高可信 · 仅到阶段」） |
+| 客户端状态会过期 | 30 秒没有新状态就退回页面识别（`panel.js` 里的 `CLIENT_TTL`），不让旧状态长期挂着 |
+| 公网页面不能直连 127.0.0.1 | 代理补 `Access-Control-Allow-Private-Network`；面板改走后台推送（`panel.js` 的 `isLocalPage` 分支） |
 
 ---
 
@@ -314,7 +348,7 @@ tools\start-edge-debug.bat    # 独立配置 + 已加载扩展 + 调试端口 93
 
 | 文件 | 作用 |
 |---|---|
-| `tools/cdp.mjs` | 零依赖 CDP：`probe` 自己拉浏览器跑页面；`attach` 附着到已开的浏览器 |
+| `tools/cdp.mjs` | 零依赖 CDP：`probe` 自己拉浏览器跑页面；`attach` 附着到已开的浏览器；`--isolated` 在内容脚本的隔离世界里取值（页面 window 上拿不到 `BT_UI`） |
 | `tools/cdp-mirror.mjs` | 真实站点验证：CDP `Fetch` 拦截 + Node 代取（浏览器只渲染，绕开握手不兼容） |
 | `tools/start-edge-debug.bat` | 用独立配置启动 Edge，加载扩展并开 9333 调试端口（供人工登录后观察） |
 

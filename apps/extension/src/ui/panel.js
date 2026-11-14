@@ -1072,22 +1072,30 @@
       el.classList.remove('bt-hidden');
     };
 
-    // 直接轮询本机客户端代理（内容脚本跨域访问环回地址，代理已允许 CORS）
+    // 客户端状态的两种取法：
+    //   1) 本机页面（悬浮窗、demo）直接轮询 8790；
+    //   2) 真实 https 站点上，浏览器把「公网页面 → 127.0.0.1」当作 Private Network Access
+    //      直接拦掉（实测 "blocked by CORS policy ... loopback address space"），
+    //      所以改由后台 service worker 拉取再推给面板（后台有 host_permissions，不受此限）。
     let lastClient = '';
-    const pollClient = async () => {
-      try {
-        const r = await fetch('http://127.0.0.1:8790/state', { cache: 'no-store' });
-        if (!r.ok) return;
-        const cs = await r.json();
-        // key 必须包含任务：同一阶段内换任务（例如术中 03→04）也要触发更新
-        const key = [cs.phase, cs.postopDay, cs.taskId, cs.confidence, cs.mode].join('|');
-        if (key === lastClient) return;
-        lastClient = key;
-        onClientState(cs);
-      } catch (e) { /* 代理没开 */ }
+    const applyClient = (cs) => {
+      const key = [cs.phase, cs.postopDay, cs.taskId, cs.confidence, cs.mode].join('|');
+      if (key === lastClient) return;
+      lastClient = key;
+      onClientState(cs);
     };
-    pollClient();
-    setInterval(pollClient, 4000);
+    const isLocalPage = /^(127\.0\.0\.1|localhost|\[::1\])$/.test(location.hostname);
+    if (isLocalPage) {
+      const pollClient = async () => {
+        try {
+          const r = await fetch('http://127.0.0.1:8790/state', { cache: 'no-store' });
+          if (!r.ok) return;
+          applyClient(await r.json());
+        } catch (e) { /* 代理没开 */ }
+      };
+      pollClient();
+      setInterval(pollClient, 4000);
+    }
 
     stopScene = window.BT_SCENE.start((scene) => {
       if (state.override) { state.scene = scene; return; }
@@ -1113,6 +1121,22 @@
       if (snap.active) els.bridgeBadge.textContent = '已接入实验事件 ' + snap.stepCount;
     }, 4000);
 
+    // 客户端状态到期失效：实验结束/日志不再更新时，不能让上一次的"术后第2天"一直挂着。
+    // 30 秒没有新的客户端状态，就退回页面识别（识别不到即"未识别"）。
+    const CLIENT_TTL = 30000;
+    setInterval(() => {
+      if (state.override) return;
+      const s = state.scene;
+      if (!s || s.contextSource !== 'client-log') return;
+      if (Date.now() - state.clientTs < CLIENT_TTL) return;
+      state.clientScene = null;
+      T.log('scene', { from: 'client-stale', phase: s.phase, ageMs: Date.now() - state.clientTs });
+      let next = null;
+      try { next = window.BT_SCENE.detect(); } catch (e) { next = null; }
+      applyScene(next, true);
+      toast('客户端状态已超时，回到自动识别');
+    }, 5000);
+
     T.subscribe(() => {
       if (els.traceCount) els.traceCount.textContent = T.all().length + ' 事件';
       if (state.settingsOpen && state.settingsTab === 'trace') renderSettings();
@@ -1130,5 +1154,18 @@
     });
   }
 
-  window.BT_UI = { mount, setClientState: onClientState };
+  function debug() {
+    return {
+      scene: activeScene(),
+      override: !!state.override,
+      examLock: state.examLock,
+      clientTs: state.clientTs,
+      clientPhase: state.client ? state.client.phase : null,
+      clientSource: state.client ? state.client.contextSource : null,
+      thread: threadKey(),
+      threads: Object.keys(state.threads)
+    };
+  }
+
+  window.BT_UI = { mount, setClientState: onClientState, debug };
 })();

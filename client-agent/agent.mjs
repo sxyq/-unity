@@ -463,6 +463,9 @@ const server = http.createServer(async (req, res) => {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+    // Chrome 的 Private Network Access：https 公网页面访问 127.0.0.1 需要显式许可，
+    // 否则浏览器直接拦掉（实测在真实平台页面上报 "blocked by CORS policy ... loopback"）。
+    'Access-Control-Allow-Private-Network': 'true',
     'Cache-Control': 'no-store'
   };
   const json = (code, obj) => {
@@ -470,7 +473,13 @@ const server = http.createServer(async (req, res) => {
     res.end(JSON.stringify(obj));
   };
 
-  if (req.method === 'OPTIONS') { res.writeHead(204, cors); res.end(); return; }
+  if (req.method === 'OPTIONS') {
+    const h = { ...cors };
+    if (req.headers['access-control-request-private-network']) h['Access-Control-Allow-Private-Network'] = 'true';
+    res.writeHead(204, h);
+    res.end();
+    return;
+  }
 
   if (u.pathname === '/health') {
     json(200, { ok: true, platform: process.platform, logs: discoverLogs().length, ts: Date.now() });

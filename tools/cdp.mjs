@@ -235,10 +235,27 @@ async function runAttach() {
   if (opt.reload) { await cdp.send('Page.reload', { ignoreCache: false }); }
   await sleep(WAIT);
 
+  // 内容脚本跑在隔离世界：页面 window 上看不到 BT_UI，
+  // 需要拿到 isolated world 的 executionContextId 才能取到扩展内部状态。
+  let contextId = undefined;
+  if (opt.isolated) {
+    for (let i = 0; i < 20; i++) {
+      const ctxs = cdp.events
+        .filter((e) => e.method === 'Runtime.executionContextCreated')
+        .map((e) => e.params.context);
+      const iso = ctxs.filter((c) => c.auxData && c.auxData.isDefault === false);
+      const pick = iso.find((c) => String(c.origin || '').startsWith('chrome-extension://')) || iso[iso.length - 1];
+      if (pick) { contextId = pick.id; break; }
+      await sleep(250);
+    }
+    if (contextId === undefined) console.error('（没找到隔离世界上下文，回退到主世界）');
+  }
+
   const evalRes = await cdp.send('Runtime.evaluate', {
     expression: String(opt.eval || DEFAULT_EVAL),
     returnByValue: true,
-    awaitPromise: true
+    awaitPromise: true,
+    ...(contextId !== undefined ? { contextId } : {})
   });
   if (opt.shot) await shoot(cdp, opt.shot);
   console.log('附着页面: ' + target.url);

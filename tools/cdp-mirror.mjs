@@ -47,7 +47,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const profile = path.join(process.env.TEMP || '.', 'bt-mirror-' + Date.now());
 const args = [
-  '--headless=new', '--disable-gpu',
+  ...(opt.headed ? [] : ['--headless=new', '--disable-gpu']),
   `--remote-debugging-port=${PORT}`,
   `--user-data-dir=${profile}`,
   `--window-size=${W},${H}`,
