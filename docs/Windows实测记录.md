@@ -221,6 +221,10 @@ agent /state:  phase=postop  postopDay=2  taskId=postop-psych  confidence=high
 | 我的成绩（页面表格） | ✅ `2026-05-26 14:34:31 19′10″ 98` / `11:47:20 23′02″ 88` / `11:23:20 33′02″ 68` |
 | 面板自动带入成绩 | ✅ 切到 09 后成绩框自动填：`学习进度 0%；已完成 3 次` + 三次得分（来自接口旁听 `GetProcess` / `ItemsByUser`） |
 | 启动链路 | ✅ `POST /api/Experiment/Launch` → **200**；随后页面尝试 `ws://127.0.0.1:9090/` → `ERR_CONNECTION_REFUSED`；回退 `mlauncher://&HLF10631030…&<ticket>&3&…` → `scheme does not have a registered handler` |
+| 平台自身的兜底提示 | ✅ 弹窗「检测你的电脑没有安装 mengoo 下载器，点击确认下载该插件」 |
+
+截图 `real-learning.png` 里能同时看到：真实成绩表（98/88）、安装提示弹窗、右侧面板已把实验身份写成
+「客户端实验 · 下肢骨折骨牵引护理技术虚拟仿真项目」。
 
 最后一条正好把整条链路的**断点**钉在「本机没装启动器」上：
 接口通、票据下发了、协议也拼对了，只是系统里没有东西接管 `mlauncher://`。
