@@ -13,7 +13,7 @@
                                               │
                                        ③ 转发对话（SSE）
                                               ▼
-                                   proxy/server.mjs（模型网关）
+                                   apps/model-gateway/server.mjs（模型网关）
 ```
 
 ## 目录
@@ -21,7 +21,7 @@
 | 文件 | 作用 |
 |---|---|
 | `src/web-shim.js` | 用 fetch+SSE 顶替扩展的 `chrome.runtime`，前端代码零改动 |
-| `build.mjs` | 把 `extension/src/*` 打成一个 `public/hook.js`（约 94 KB） |
+| `build.mjs` | 把 `apps/apps/extension/src/*` 打成一个 `public/hook.js`（约 94 KB） |
 | `service.mjs` | 静态托管 + `/api/chat` 转发 + 限流 + 可选登录校验 |
 | `local-proxy.mjs` | 本地预演：给真实站点注入脚本，不动服务器 |
 | `conf/nginx-mengoo.conf` | nginx 版配置（sub_filter + 反代） |
@@ -31,14 +31,14 @@
 
 ```bash
 # 1. 模型网关（已有）
-node proxy/server.mjs                     # 127.0.0.1:8787
+node apps/model-gateway/server.mjs                     # 127.0.0.1:8787
 
 # 2. 构建 + 起服务
-node server-hook/build.mjs
-node server-hook/service.mjs              # 127.0.0.1:8788
+node apps/server-inject/build.mjs
+node apps/server-inject/service.mjs              # 127.0.0.1:8788
 
 # 3. 起预演代理（模拟 nginx 的 sub_filter）
-node server-hook/local-proxy.mjs          # 127.0.0.1:8899
+node apps/server-inject/local-proxy.mjs          # 127.0.0.1:8899
 
 # 4. 打开（走预演代理，看到的就是注入后的真实站点）
 open http://127.0.0.1:8899/mengoo/
@@ -82,7 +82,7 @@ open http://127.0.0.1:8899/mengoo/
 | `PLATFORM_BASE` | 空 | `AUTH_CHECK=1` 时必填 |
 | `RATE_PER_MIN` | 20 | 单 IP 每分钟对话次数 |
 
-模型 Key 只在 `proxy/config.json` 或 `LLM_API_KEY` 环境变量，前端永远拿不到。
+模型 Key 只在 `apps/model-gateway/config.json` 或 `LLM_API_KEY` 环境变量，前端永远拿不到。
 
 ## 必须注意的三个坑
 
