@@ -5,15 +5,25 @@
  * - 未配置 Key 时自动「演示模式」：按病例知识库做意图匹配
  * - /api/health  服务与模型状态
  * - /api/chat    SSE 流式（支持非流式合成）
- * - /api/config  GET 安全子集 / POST 修改模型配置（不接收 Key）
- * - 静态目录：/demo、/extension
+ * - /api/config  GET 安全子集 / POST 修改模型配置（不收 Key、不跨站）
+ * - 静态目录：/demo、/src
  *
- * 运行：node proxy/server.mjs
+ * 2026-11 修订（Windows 实测后）：
+ *   1) 客户端断开 → 立即中止上游请求（之前只有超时会断，学生点“停止”后
+ *      上游还在烧 token，且连接会被挂住）。
+ *   2) 非流式分支补上 HTTP 状态检查（之前 401/500 会被当成“返回为空”）。
+ *   3) /api/config 与 /api/chat 增加 Origin 校验：只接受本机页面与扩展。
+ *      否则任意网页都能把 baseUrl 改到自己的服务器，下一次请求就会把
+ *      Authorization: Bearer <真 Key> 发过去——这是真实存在的 Key 外泄路径。
+ *   4) 没有 Key 时不允许把 mode 置为 live，避免界面显示“已接入”实际是假的。
+ *
+ * 运行：node apps/model-gateway/server.mjs
  */
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { mockAnswer } from './lib/mock.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..', 'extension');
@@ -69,10 +79,42 @@ function serveStatic(req, res, pathname) {
   fs.createReadStream(abs).pipe(res);
 }
 
-import { mockAnswer } from './lib/mock.mjs';
+/* ---------------- 来源校验 ----------------
+ * 只有本机页面、浏览器扩展可以调用写接口。
+ * 注意：Origin 由浏览器强制写入，页面脚本改不了，所以可以作为判据；
+ * 不带 Origin 的是本机程序（curl / 悬浮窗的 WebView2 同源请求）也放行。 */
+function originAllowed(req) {
+  const o = req.headers.origin;
+  if (!o) return true;
+  try {
+    const u = new URL(o);
+    if (u.protocol === 'chrome-extension:' || u.protocol === 'moz-extension:') return true;
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return false;
+    return u.hostname === '127.0.0.1' || u.hostname === 'localhost' || u.hostname === '[::1]';
+  } catch (e) { return false; }
+}
 
 /* ---------------- 真实模型 ---------------- */
-async function callLive(system, messages, stream) {
+function composeSignal(outer, timeoutMs) {
+  const ac = new AbortController();
+  const state = { timedOut: false, clientGone: false };
+  const onOuter = () => { state.clientGone = true; ac.abort(); };
+  if (outer) {
+    if (outer.aborted) onOuter();
+    else outer.addEventListener('abort', onOuter, { once: true });
+  }
+  const timer = setTimeout(() => { state.timedOut = true; ac.abort(); }, timeoutMs || 60000);
+  return {
+    signal: ac.signal,
+    state,
+    done() {
+      clearTimeout(timer);
+      if (outer) outer.removeEventListener('abort', onOuter);
+    }
+  };
+}
+
+async function callLive(system, messages, stream, outer) {
   const body = {
     model: CFG.model,
     stream: !!stream,
@@ -81,32 +123,46 @@ async function callLive(system, messages, stream) {
     messages: [{ role: 'system', content: system }, ...messages]
   };
   const url = CFG.baseUrl.replace(/\/$/, '') + (CFG.chatCompletionsPath || '/chat/completions');
-  const ac = new AbortController();
-  const timer = setTimeout(() => ac.abort(), CFG.timeoutMs || 60000);
+  const ctl = composeSignal(outer, CFG.timeoutMs);
   try {
-    return await fetch(url, {
+    const resp = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + CFG.apiKey },
       body: JSON.stringify(body),
-      signal: ac.signal
+      signal: ctl.signal
     });
-  } finally {
-    clearTimeout(timer);
+    return { resp, ctl };
+  } catch (e) {
+    ctl.done();
+    e.btState = ctl.state;
+    throw e;
   }
 }
 
-async function streamLive(res, system, messages) {
-  let r;
+function errText(e) {
+  const st = e && e.btState;
+  if (st && st.clientGone) return null;             // 学生点了停止，不必再报错
+  if (st && st.timedOut) return '模型请求超时（' + Math.round((CFG.timeoutMs || 60000) / 1000) + 's）';
+  if (e && e.name === 'AbortError') return '模型请求已中止';
+  return '连接模型失败：' + (e && e.message ? e.message : e);
+}
+
+async function streamLive(res, system, messages, outer) {
+  let r, ctl;
   try {
-    r = await callLive(system, messages, true);
+    ({ resp: r, ctl } = await callLive(system, messages, true, outer));
   } catch (e) {
-    sse(res, { error: e.name === 'AbortError' ? '模型请求超时' : ('连接模型失败：' + e.message) });
-    sse(res, '[DONE]'); res.end(); return;
+    const msg = errText(e);
+    if (msg) sse(res, { error: msg });
+    sse(res, { t: '', done: true });
+    return;
   }
   if (!r.ok || !r.body) {
     const txt = await r.text().catch(() => '');
+    ctl.done();
     sse(res, { error: `模型接口返回 ${r.status} ${txt.slice(0, 160)}` });
-    sse(res, '[DONE]'); res.end(); return;
+    sse(res, '[DONE]');
+    return;
   }
 
   const reader = r.body.getReader();
@@ -132,20 +188,34 @@ async function streamLive(res, system, messages) {
       }
     }
   } catch (e) {
-    sse(res, { error: '流读取中断：' + (e.message || '') });
+    const msg = errText(e);
+    if (msg) sse(res, { error: '流读取中断：' + msg });
+  } finally {
+    ctl.done();
   }
   sse(res, '[DONE]');
   res.end();
 }
 
-async function nonStreamLive(res, system, messages) {
-  let r;
+async function nonStreamLive(res, system, messages, outer) {
+  let r, ctl;
   try {
-    r = await callLive(system, messages, false);
+    ({ resp: r, ctl } = await callLive(system, messages, false, outer));
   } catch (e) {
-    sse(res, { error: e.name === 'AbortError' ? '模型请求超时' : ('连接模型失败：' + e.message) });
-    sse(res, '[DONE]'); res.end(); return;
+    const msg = errText(e);
+    if (msg) sse(res, { error: msg });
+    sse(res, '[DONE]');
+    return;
   }
+  ctl.done();
+
+  if (!r.ok) {
+    const txt = await r.text().catch(() => '');
+    sse(res, { error: `模型接口返回 ${r.status} ${txt.slice(0, 160)}` });
+    sse(res, '[DONE]');
+    return;
+  }
+
   const j = await r.json().catch(() => null);
   const txt = j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
   if (!txt) sse(res, { error: '模型返回为空或格式不符' });
@@ -156,15 +226,24 @@ async function nonStreamLive(res, system, messages) {
 
 /* ---------------- 工具 ---------------- */
 function sse(res, obj) {
+  if (res.writableEnded || res.destroyed) return;
   const payload = typeof obj === 'string' ? obj : JSON.stringify(obj);
-  res.write('data: ' + payload + '\n\n');
+  try { res.write('data: ' + payload + '\n\n'); } catch (e) { /* 客户端已断开 */ }
 }
 
-function readBody(req) {
+function readBody(req, limit = 256 * 1024) {
   return new Promise((resolve) => {
     let data = '';
-    req.on('data', c => { data += c; if (data.length > 2e6) req.destroy(); });
-    req.on('end', () => { try { resolve(JSON.parse(data || '{}')); } catch (e) { resolve({}); } });
+    let over = false;
+    req.on('data', c => {
+      if (over) return;
+      data += c;
+      if (data.length > limit) { over = true; req.destroy(); }
+    });
+    req.on('end', () => {
+      if (over) return resolve({});
+      try { resolve(JSON.parse(data || '{}')); } catch (e) { resolve({}); }
+    });
     req.on('error', () => resolve({}));
   });
 }
@@ -182,6 +261,16 @@ function safeConfig() {
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://127.0.0.1');
   const p = url.pathname;
+  const t0 = Date.now();
+
+  // 极简访问日志：本机排错用（谁在请求面板、模型是否真的被调）
+  // BT_VERBOSE=1 时连静态资源也记，用于确认悬浮窗真的把面板加载全了
+  const VERBOSE = process.env.BT_VERBOSE === '1';
+  res.on('finish', () => {
+    if (p === '/api/health') return;
+    if (!VERBOSE && (p.startsWith('/src/') || p.startsWith('/assets/'))) return;
+    console.log(`[${res.statusCode}] ${req.method} ${p} ${Date.now() - t0}ms`);
+  });
 
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -193,7 +282,8 @@ const server = http.createServer(async (req, res) => {
     res.end(JSON.stringify({
       ok: true, mode: CFG.mode,
       model: CFG.mode === 'live' ? CFG.model : '演示知识库',
-      provider: CFG.mode === 'live' ? CFG.baseUrl : 'mock'
+      provider: CFG.mode === 'live' ? CFG.baseUrl : 'mock',
+      hasKey: !!CFG.apiKey
     }));
     return;
   }
@@ -205,15 +295,36 @@ const server = http.createServer(async (req, res) => {
       return;
     }
     if (req.method === 'POST') {
-      const patch = await readBody(req);
+      if (!originAllowed(req)) {
+        res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ error: '只接受本机页面或浏览器扩展的配置请求' }));
+        return;
+      }
+      const patch = await readBody(req, 16 * 1024);
       const allow = ['baseUrl', 'model', 'chatCompletionsPath', 'stream', 'timeoutMs', 'temperature', 'maxTokens', 'mode'];
+
+      if (typeof patch.baseUrl === 'string' && patch.baseUrl) {
+        try {
+          const u = new URL(patch.baseUrl);
+          if (u.protocol !== 'http:' && u.protocol !== 'https:') throw new Error('bad');
+        } catch (e) {
+          res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ error: 'baseUrl 必须是 http(s) 地址' }));
+          return;
+        }
+      }
+      if (patch.mode === 'live' && !CFG.apiKey) patch.mode = 'mock';   // 没 Key 不许假装接通
+
       for (const k of allow) {
         if (patch[k] === undefined) continue;
-        if (k === 'timeoutMs' || k === 'maxTokens') CFG[k] = Number(patch[k]) || CFG[k];
-        else if (k === 'temperature') CFG[k] = Number(patch[k]);
+        if (k === 'timeoutMs' || k === 'maxTokens') CFG[k] = Math.max(1000, Number(patch[k]) || CFG[k]);
+        else if (k === 'temperature') CFG[k] = Math.min(2, Math.max(0, Number(patch[k]) || 0));
+        else if (k === 'stream') CFG[k] = !!patch[k];
         else CFG[k] = patch[k];
       }
       if (CFG.mode === 'auto') CFG.mode = CFG.apiKey ? 'live' : 'mock';
+      if (CFG.mode === 'live' && !CFG.apiKey) CFG.mode = 'mock';
+
       const out = { ...raw, ...CFG, apiKey: raw.apiKey || '' };
       try { fs.writeFileSync(CONFIG_PATH, JSON.stringify(out, null, 2)); } catch (e) { /* ignore */ }
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
@@ -223,8 +334,19 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (p === '/api/chat' && req.method === 'POST') {
+    if (!originAllowed(req)) {
+      res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ error: '只接受本机页面或浏览器扩展的对话请求' }));
+      return;
+    }
+
     const { system, messages, stream } = await readBody(req);
-    const safeMessages = Array.isArray(messages) ? messages.slice(-12) : [];
+    const safeMessages = Array.isArray(messages)
+      ? messages
+        .filter(m => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
+        .slice(-12)
+        .map(m => ({ role: m.role, content: String(m.content).slice(0, 4000) }))
+      : [];
 
     res.writeHead(200, {
       'Content-Type': 'text/event-stream; charset=utf-8',
@@ -233,18 +355,23 @@ const server = http.createServer(async (req, res) => {
       'X-Accel-Buffering': 'no'
     });
 
+    // 学生点“停止”/关页面 → 立刻中止上游
+    const clientAbort = new AbortController();
+    res.on('close', () => { if (!res.writableEnded) clientAbort.abort(); });
+
     sse(res, { mode: CFG.mode, model: CFG.mode === 'live' ? CFG.model : '演示知识库' });
 
     if (CFG.mode === 'live') {
-      if (stream === false || CFG.stream === false) await nonStreamLive(res, system || '', safeMessages);
-      else await streamLive(res, system || '', safeMessages);
+      if (stream === false || CFG.stream === false) await nonStreamLive(res, String(system || ''), safeMessages, clientAbort.signal);
+      else await streamLive(res, String(system || ''), safeMessages, clientAbort.signal);
       return;
     }
 
-    const answer = mockAnswer(system || '', safeMessages);
+    const answer = mockAnswer(String(system || ''), safeMessages);
     const parts = answer.match(/[\s\S]{1,18}/g) || [answer];
     let i = 0;
     const timer = setInterval(() => {
+      if (clientAbort.signal.aborted) { clearInterval(timer); return; }
       if (i >= parts.length) {
         clearInterval(timer);
         sse(res, '[DONE]');
@@ -253,7 +380,6 @@ const server = http.createServer(async (req, res) => {
       }
       sse(res, { t: parts[i++] });
     }, 24);
-    req.on('close', () => clearInterval(timer));
     return;
   }
 

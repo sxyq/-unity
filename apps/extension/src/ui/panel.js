@@ -24,6 +24,8 @@
   const state = {
     open: false, mini: false,
     scene: null, override: null,
+    examLock: false,            // 一旦确认为考核，任何手动选择都不能解除
+    client: null, clientScene: null, clientTs: 0,
     health: { mode: 'unknown', model: '' },
     threads: {}, busy: false, scoreText: '', scoreOpen: false,
     prefs: { ...DEFAULT_PREFS },
@@ -79,7 +81,14 @@
 
   function threadKey() {
     const s = activeScene();
-    return s && s.scenarioId ? s.scenarioId : (s && s.phase ? s.phase : 'unknown');
+    if (!s) return 'unknown';
+    if (s.scenarioId) {
+      // 术后不同日期是不同病程，对话上下文必须分开，不能串台
+      const day = s.phase === 'postop' ? ('@d' + (s.postopDay || '?')) : '';
+      return s.scenarioId + day;
+    }
+    // 只识别到阶段、还没选任务时，用阶段占位，不伪造任务
+    return s.phase ? ('phase:' + s.phase) : 'unknown';
   }
 
   function currentThread() {
@@ -95,8 +104,13 @@
   }
 
   function greetingFor(s) {
-    if (!s || !s.scenarioId) {
+    if (!s || !s.phase) {
       return '我还没识别出当前实验阶段。请在下方选择“阶段 · 任务”，我会按对应角色和你交流。';
+    }
+    if (!s.scenarioId) {
+      const ph = PFX[s.phase] || s.phase;
+      return `我已经识别到当前是「${ph}阶段」，但还不能确定具体任务（日志/页面只给到阶段）。`
+        + '请在下方选一个具体任务，我再按对应角色开始；选之前我不会替你猜。';
     }
     const sc = C.byId[s.scenarioId];
 
@@ -131,24 +145,42 @@
     return out.join('');
   }
 
+  const SOURCE_LABEL = {
+    page: '页面识别', 'client-log': '客户端日志', 'window-title': '窗口标题',
+    bridge: '实验事件', api: '平台接口', manual: '手动指定'
+  };
+  const CONF_LABEL = { high: '高可信', medium: '中可信', low: '低可信', none: '无证据' };
+
   function renderScene() {
     const s = activeScene();
     const conf = state.override ? 'medium' : (s && s.phase ? s.confidence : 'none');
     els.dot.className = 'bt-dot ' + (s && s.phase ? conf : 'none');
 
-    els.hint.textContent = !s || !s.phase ? '未识别，请手动选择'
-      : state.override ? '手动指定'
-        : s.confidence === 'high' ? '自动 · 高可信'
-          : s.confidence === 'medium' ? '自动 · 中可信' : '自动 · 低可信';
+    if (!s || !s.phase) {
+      els.hint.textContent = '未识别，请手动选择';
+    } else if (state.override) {
+      els.hint.textContent = '手动指定' + (state.examLock ? ' · 考核保护中' : '');
+    } else {
+      const src = SOURCE_LABEL[s.contextSource] || '自动识别';
+      els.hint.textContent = src + ' · ' + (CONF_LABEL[s.confidence] || '已识别')
+        + (s.scenarioId ? '' : ' · 仅到阶段');
+    }
 
     els.select.innerHTML = sceneOptions();
     if (!state.override && !s) els.select.value = 'auto';
+    if (state.override && s && s.scenarioId) els.select.value = s.scenarioId;
 
     const sc = s && s.scenarioId ? C.byId[s.scenarioId] : null;
     els.title.textContent = sc ? sc.functionName : '智能护理助教';
-    els.subtitle.textContent = sc
-      ? `${sc.taskName}${s.postopDay ? ' · 术后第 ' + s.postopDay + ' 天' : ''}${s.mode === 'exam' && s.phase !== 'report' ? ' · 考核中' : ''}`
-      : (s && s.experiment ? `${s.experiment.typeName} · ${s.experiment.name}` : '请选择当前实验任务');
+    if (sc) {
+      els.subtitle.textContent = `${sc.taskName}${s.postopDay ? ' · 术后第 ' + s.postopDay + ' 天' : ''}${s.mode === 'exam' && s.phase !== 'report' ? ' · 考核中' : ''}`;
+    } else if (s && s.phase) {
+      els.subtitle.textContent = `已识别到${PFX[s.phase] || ''}阶段`
+        + (s.postopDay ? ' · 术后第 ' + s.postopDay + ' 天' : '')
+        + ' · 请选择具体任务';
+    } else {
+      els.subtitle.textContent = (s && s.experiment) ? `${s.experiment.typeName} · ${s.experiment.name}` : '请选择当前实验任务';
+    }
 
     const rs = window.BT_PROMPT.ROLE_SPEC[roleOfScene()] || {};
     els.headAvatar.src = AV[rs.avatar] || AV.nurse;
@@ -245,13 +277,13 @@
     return map[roleKey] || '责任护士';
   }
 
-  function renderPicker() {
+  function renderPicker(onlyPhase) {
     const groups = [
       ['preop', '术前'],
       ['intraop', '术中'],
       ['postop', '术后'],
       ['report', '个性化报告']
-    ];
+    ].filter(([ph]) => !onlyPhase || ph === onlyPhase);
     const html = groups.map(([ph, label]) => {
       const items = C.scenarios.filter(x => x.phase === ph).map(sc => `
         <button class="bt-pick-item" data-sid="${sc.id}">
@@ -264,8 +296,12 @@
       return `<div class="bt-pick-group"><div class="bt-pick-title">${label}</div>${items}</div>`;
     }).join('');
 
+    const hint = onlyPhase
+      ? `已识别到「${PFX[onlyPhase] || onlyPhase}阶段」，但日志只给到阶段。选一个具体任务，我按对应角色开始：`
+      : '没识别到当前场景。选一个，我按对应角色开始：';
+
     els.body.innerHTML = `<div class="bt-picker">
-      <div class="bt-picker-hint">没识别到当前场景。选一个，我按对应角色开始：</div>
+      <div class="bt-picker-hint">${hint}</div>
       ${html}
     </div>`;
     els.body.querySelectorAll('.bt-pick-item').forEach(btn => {
@@ -276,7 +312,8 @@
         state.override = {
           ...(state.scene || {}),
           phase: sc.phase,
-          postopDay: sc.phase === 'postop' ? (cur && cur.postopDay) || 3 : null,
+          // 术后日期不默认填 3：不知道就是不知道，由学生自己选
+          postopDay: sc.phase === 'postop' ? ((cur && cur.phase === 'postop' && cur.postopDay) || null) : null,
           taskId: sc.id, taskName: sc.taskName, scenarioId: sc.id,
           functionName: sc.functionName, mode: sc.mode,
           patientId: C.patient.id, contextSource: 'manual', confidence: 'high', evidence: ['面板选择']
@@ -328,7 +365,7 @@
     }
 
     if (!activeScene() || !activeScene().scenarioId) {
-      renderPicker();
+      renderPicker(activeScene() && activeScene().phase);
       return;
     }
 
@@ -355,32 +392,55 @@
     return port;
   }
 
-  /* 客户端状态（来自本机代理读 Unity 日志）：页面识别不到时的第二来源 */
+  /* 客户端状态（本机代理读 Unity 日志）：页面识别不到时的第二来源
+     ---------------------------------------------------------------
+     原则：
+       1) 只有日志明确给出“当前任务”才设 taskId；只给到阶段就只到阶段。
+       2) 页面识别优先于客户端；客户端之间按新到旧覆盖。
+       3) 一旦出现考核信号，锁存 examLock，手动选择也不解除。 */
+  const PAGE_SOURCES = { page: 1, bridge: 1, api: 1 };
+
   function onClientState(cs) {
     state.client = cs;
-    if (!cs || !cs.phase) return;
-    if (state.override) return;                       // 手动选择优先
+    if (!cs || !cs.ok || !cs.phase) return;
+    if (cs.ts) {
+      if (cs.ts === state.clientTs) return;   // 后台推送与面板轮询会重复，去重
+      state.clientTs = cs.ts;
+    }
+    if (cs.mode === 'exam') {
+      state.examLock = true;
+      // 页面已经先给出了场景时，也要把考核状态立刻贴到当前场景上
+      if (state.scene && state.scene.mode !== 'exam') {
+        state.scene.mode = 'exam';
+        if (state.override) state.override.mode = 'exam';
+        if (els.panel) renderScene();
+      }
+    }
+    if (state.override) return;
     const cur = state.scene;
-    if (cur && cur.phase && cur.confidence !== 'none') return;  // 页面已识别
+    if (cur && cur.phase && PAGE_SOURCES[cur.contextSource]) return;  // 页面证据更权威
 
-    const map = { preop: 'preop-history', intraop: 'intraop-communicate', postop: 'postop-psych', report: 'report-score' };
-    const sc = C.byId[map[cs.phase]];
-    if (!sc) return;
+    const sc = cs.taskId ? C.byId[cs.taskId] : null;
+    const taskKnown = !!(sc && cs.taskName);
 
-    const ev = (cs.evidence && cs.evidence[0]) ? String(cs.evidence[0]).slice(0, 60) : cs.phase;
     state.clientScene = {
       phase: cs.phase,
       postopDay: cs.postopDay || null,
-      taskId: sc.id, taskName: sc.taskName, scenarioId: sc.id,
-      functionName: sc.functionName, mode: cs.mode || 'study',
+      taskId: taskKnown ? cs.taskId : null,
+      taskName: taskKnown ? cs.taskName : null,
+      scenarioId: taskKnown ? cs.taskId : null,
+      functionName: taskKnown ? sc.functionName : null,
+      mode: state.examLock ? 'exam' : (cs.mode || 'study'),
       patientId: C.patient.id,
       contextSource: cs.contextSource || 'client-log',
       confidence: cs.confidence || 'medium',
-      evidence: ['客户端：' + ev]
+      evidence: (cs.evidence || []).map(e => '客户端：' + String(e).slice(0, 60))
     };
     applyScene(state.clientScene, true);
-    toast('已从客户端识别：' + sc.functionName);
-    T.log('scene', { from: 'client', phase: cs.phase, conf: cs.confidence });
+    toast(taskKnown
+      ? ('已从客户端识别：' + cs.taskName)
+      : ('已从客户端识别：' + (PFX[cs.phase] || cs.phase) + '阶段（任务请手动选）'));
+    T.log('scene', { from: 'client', phase: cs.phase, task: cs.taskId || null, conf: cs.confidence, live: cs.live });
   }
 
   function onBg(msg) {
@@ -478,6 +538,11 @@
 
   /* ---------------- 场景切换 ---------------- */
   function applyScene(scene, fromAuto) {
+    // 考核保护：一旦确认过考核，后续任何来源（含手动选择）都不能把它改回普通问答
+    if (scene && (scene.mode === 'exam' || scene.phase === 'report')) state.examLock = true;
+    // 就地改，保证 state.override 与 state.scene 两个引用看到同一个 mode
+    if (scene && state.examLock && scene.phase) scene.mode = 'exam';
+
     const prev = renderedKey;
     const prevDay = state.scene ? state.scene.postopDay : null;
     state.scene = scene;
@@ -901,9 +966,9 @@
       state.override = {
         ...(state.scene || {}),
         phase: sc.phase,
-        postopDay: sc.phase === 'postop' ? (cur && cur.postopDay) || 3 : null,
+        postopDay: sc.phase === 'postop' ? ((cur && cur.phase === 'postop' && cur.postopDay) || null) : null,
         taskId: sc.id, taskName: sc.taskName, scenarioId: sc.id,
-        functionName: sc.functionName, mode: sc.mode,
+        functionName: sc.functionName, mode: state.examLock ? 'exam' : sc.mode,
         patientId: C.patient.id, contextSource: 'manual', confidence: 'high', evidence: ['手动选择']
       };
       applyScene(state.override, false);
@@ -916,12 +981,8 @@
       const next = { ...s, postopDay: v };
       if (state.override) state.override = next; else state.scene = next;
       T.log('postop-day', { day: v });
-      renderScene();
-      const th = currentThread();
-      if (v && C.postopDays[v]) {
-        th.push({ type: 'divider', text: `时间线切换为 ${C.postopDays[v].label}` });
-        renderThread();
-      }
+      // 术后不同日期是不同病程：切日期 = 切会话上下文
+      applyScene(next, false);
     });
 
     els.chips.addEventListener('click', (e) => {
@@ -1018,7 +1079,8 @@
         const r = await fetch('http://127.0.0.1:8790/state', { cache: 'no-store' });
         if (!r.ok) return;
         const cs = await r.json();
-        const key = String(cs.phase) + '|' + String(cs.postopDay) + '|' + String(cs.confidence);
+        // key 必须包含任务：同一阶段内换任务（例如术中 03→04）也要触发更新
+        const key = [cs.phase, cs.postopDay, cs.taskId, cs.confidence, cs.mode].join('|');
         if (key === lastClient) return;
         lastClient = key;
         onClientState(cs);

@@ -1,0 +1,24 @@
+{
+  "_说明": [
+    "把这个文件复制为 client-agent/rules.json 即可覆盖内置规则（不需要改代码）。",
+    "phase: 用来判定阶段的正则，按顺序匹配，命中即止。",
+    "task:  只在这些“明确宣告当前任务”的行上生效，避免拿阶段或任务列表猜任务。",
+    "本文件是格式示例，正则取自公开文档里出现过的写法；真实规则需要用 calibrate.mjs 跑过真实 Player.log 后再补。"
+  ],
+  "phase": [
+    { "re": "术前阶段|术前访视|PreOp\\b", "phase": "preop" },
+    { "re": "术中阶段|术中操作|IntraOp\\b", "phase": "intraop" },
+    { "re": "术后阶段|PostOp\\b", "phase": "postop" },
+    { "re": "考核评价|考核成绩|成绩单", "phase": "report" }
+  ],
+  "task": [
+    { "re": "病史采集|病史回顾|护理评估", "phase": "preop", "taskId": "preop-history", "taskName": "病史采集与症状问诊" },
+    { "re": "术前谈话|术前沟通|知情同意", "phase": "preop", "taskId": "preop-talk", "taskName": "术前沟通与疑问交流" },
+    { "re": "身份核对|术前宣教|术中沟通", "phase": "intraop", "taskId": "intraop-communicate", "taskName": "术中沟通与宣教" },
+    { "re": "牵引原理|砝码|滑轮|反牵引", "phase": "intraop", "taskId": "intraop-principle", "taskName": "牵引原理" },
+    { "re": "末梢血运|患肢感觉|牵引效果", "phase": "intraop", "taskId": "intraop-observe", "taskName": "操作观察与效果判断" },
+    { "re": "心理护理|情绪安抚|焦虑", "phase": "postop", "taskId": "postop-psych", "taskName": "术后心理护理" },
+    { "re": "体位护理|翻身|有效咳嗽|皮肤护理", "phase": "postop", "taskId": "postop-care", "taskName": "术后护理指导" },
+    { "re": "并发症|深静脉血栓|患肢肿胀|牵引失效", "phase": "postop", "taskId": "postop-complication", "taskName": "并发症观察" }
+  ]
+}

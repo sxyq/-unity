@@ -5,7 +5,8 @@
 (function () {
   if (window.chrome && window.chrome.runtime && window.chrome.runtime.id) return; // 已装扩展，不覆盖
 
-  const BASE = '../extension/';
+  // demo 页面位于 /demo/ 下，扩展源码在上一层；以前写成 '../extension/' 会 404
+  const BASE = '../';
 
   function emit(listeners, msg) {
     for (const fn of listeners) {
