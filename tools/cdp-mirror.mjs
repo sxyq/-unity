@@ -82,6 +82,8 @@ function b64(buf) { return Buffer.from(buf).toString('base64'); }
 const KEEP_HEADERS = new Set([
   'accept', 'accept-language', 'user-agent', 'referer', 'origin',
   'cookie', 'content-type', 'authorization', 'x-requested-with',
+  // 平台自己用自定义头传登录票据（不是标准 Authorization），漏了会一直 400 token 不能为空
+  'token', 'x-token', 'access-token',
   'if-none-match', 'if-modified-since', 'range'
 ]);
 
@@ -102,12 +104,14 @@ function headerObj(h) {
 function nodeRequest(url, { method = 'GET', headers = {}, body = null } = {}) {
   return new Promise((resolve, reject) => {
     const u = new URL(url);
+    const h = { ...headers };
+    if (body && body.length) h['content-length'] = String(body.length);
     const req = https.request({
       hostname: u.hostname,
       port: u.port || 443,
       path: u.pathname + u.search,
       method,
-      headers,
+      headers: h,
       rejectUnauthorized: false,
       timeout: 20000
     }, (res) => {
@@ -126,13 +130,22 @@ async function handlePaused(p) {
   const req = p.request;
   try {
     const headers = headerObj(req.headers);
+    // Fetch 域的 postData 是**字符串**，只有 postDataEntries 里才是 base64。
+    // 之前统一按 base64 解，导致所有 POST（含登录）请求体变成垃圾字节，
+    // 平台返回非 JSON，页面报 "'0xBA' is an invalid start of a value"。
+    let body = null;
+    if (Array.isArray(req.postDataEntries) && req.postDataEntries.length) {
+      body = Buffer.from(req.postDataEntries.map((e) => e.bytes || '').join(''), 'base64');
+    } else if (typeof req.postData === 'string' && req.postData) {
+      body = Buffer.from(req.postData, 'utf8');
+    }
     // 站点对 HeadlessChrome 的 UA 会直接断连（实测 socket hang up），这里换成普通桌面 UA
     for (const k of Object.keys(headers)) {
       if (k.toLowerCase() === 'user-agent' && /Headless/i.test(headers[k])) {
         headers[k] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0';
       }
     }
-    const init = { method: req.method, headers, body: req.postData ? Buffer.from(req.postData, 'base64') : null };
+    const init = { method: req.method, headers, body };
     const r = await nodeRequest(req.url, init);
     const respHeaders = [];
     for (const [k, v] of Object.entries(r.headers)) {
