@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>创伤骨科虚拟仿真实验教学系统（本地演示沙盘）</title>
+<link rel="stylesheet" href="shell.css">
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="logo">🏥</div>
+    <div class="sys-name">创伤骨科虚拟仿真实验教学系统</div>
+    <div class="spacer"></div>
+    <div class="step-badge"><b id="stepNow">1</b> / 10</div>
+    <div class="phase-label" id="phaseLabel">术前阶段 ｜ 病史回顾</div>
+    <div class="divider"></div>
+    <div class="tool">⚙</div>
+    <div class="tool">?</div>
+    <div class="tool">⛶</div>
+  </div>
+
+  <div class="stage">
+    <svg class="scene" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <radialGradient id="bgGlow" cx="42%" cy="34%" r="78%">
+          <stop offset="0" stop-color="#f7fbff"/>
+          <stop offset="0.55" stop-color="#e7eff8"/>
+          <stop offset="1" stop-color="#d3dfec"/>
+        </radialGradient>
+        <linearGradient id="line" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#7f9ec4"/>
+          <stop offset="1" stop-color="#5d7fa8"/>
+        </linearGradient>
+        <linearGradient id="skinFill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#f6e2d1"/>
+          <stop offset="1" stop-color="#eccfb8"/>
+        </linearGradient>
+      </defs>
+
+      <rect width="1200" height="700" fill="url(#bgGlow)"/>
+
+      <!-- 地面透视网格 -->
+      <g stroke="#b9c9db" stroke-width="1" opacity=".55">
+        <path d="M0 470h1200M0 512h1200M0 566h1200M0 632h1200"/>
+        <path d="M120 700 L300 470M300 700 L420 470M520 700 L560 470M760 700 L700 470M980 700 L840 470M1180 700 L960 470"/>
+      </g>
+
+      <!-- 墙线 -->
+      <path d="M0 470h1200" stroke="#a8bacd" stroke-width="2.5"/>
+      <rect x="0" y="0" width="1200" height="470" fill="#ffffff" opacity=".22"/>
+
+      <!-- 窗（线稿） -->
+      <g stroke="#9cb4cd" stroke-width="2.4" fill="#ffffff" opacity=".7">
+        <rect x="316" y="86" width="230" height="264" rx="8"/>
+      </g>
+      <g stroke="#c2d4e6" stroke-width="1.6">
+        <path d="M316 152h230M316 218h230M316 284h230M431 86v264"/>
+      </g>
+
+      <!-- 病床：侧视线稿 -->
+      <g stroke="url(#line)" stroke-width="3" fill="none" stroke-linecap="round">
+        <rect x="112" y="392" width="716" height="40" rx="12" fill="#ffffff" fill-opacity=".92"/>
+        <path d="M146 432v36M794 432v36"/>
+        <path d="M112 392v-18h14v58"/>
+        <rect x="806" y="356" width="24" height="76" rx="10" fill="#eef4fa"/>
+        <path d="M126 396h688"/>
+      </g>
+
+      <!-- 枕头 -->
+      <rect x="138" y="348" width="120" height="42" rx="16" fill="#ffffff" stroke="#c3d5e7" stroke-width="2.4"/>
+
+      <!-- 患者区（原系统三维模型位置） -->
+      <g opacity=".95">
+        <rect x="262" y="330" width="300" height="96" rx="14" fill="#ffffff" fill-opacity=".45"
+              stroke="#9fb7d1" stroke-width="2" stroke-dasharray="8 7"/>
+        <text x="412" y="382" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif"
+              font-size="15" fill="#7c94b0">患者 / 患肢三维模型区</text>
+        <text x="412" y="404" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif"
+              font-size="12.5" fill="#9aadc2">（演示沙盘不加载真实模型）</text>
+      </g>
+
+      <!-- 牵引架 -->
+      <g stroke="#7c93ae" stroke-width="6" stroke-linecap="round" fill="none">
+        <path d="M806 206v246"/>
+        <path d="M540 206h266"/>
+        <path d="M806 452h-54M806 452h54"/>
+      </g>
+      <circle cx="792" cy="206" r="12" fill="#f6fafd" stroke="#7c93ae" stroke-width="3"/>
+      <circle cx="792" cy="206" r="3.6" fill="#7c93ae"/>
+
+      <!-- 牵引绳 / 砝码（虚线示意） -->
+      <path d="M700 352 L792 208" stroke="#8aa0b8" stroke-width="2.4" stroke-dasharray="7 6" fill="none"/>
+      <path d="M792 208v170" stroke="#8aa0b8" stroke-width="2.4" stroke-dasharray="7 6" fill="none"/>
+      <g stroke="#7c93ae" stroke-width="2.2" fill="#e8eff7">
+        <rect x="758" y="378" width="66" height="15" rx="5"/>
+        <rect x="764" y="393" width="54" height="15" rx="5"/>
+        <rect x="770" y="408" width="42" height="15" rx="5"/>
+      </g>
+
+      <!-- 图注 -->
+      <g font-family="system-ui, -apple-system, sans-serif" fill="#6b83a1" font-size="15">
+        <text x="792" y="450" text-anchor="middle">牵引砝码</text>
+        <text x="676" y="188" text-anchor="middle" font-size="13">牵引绳 / 滑轮</text>
+      </g>
+    </svg>
+
+    <div class="hint-tag">演示沙盘：此处为原系统 Unity 三维场景（本地复刻，仅用于验证外部组件）</div>
+
+    <div class="control">
+      <h4>牵引参数</h4>
+      <div class="row">
+        <label>牵引重量 (kg)</label>
+        <input type="range" min="0" max="15" value="7" id="weight">
+        <span class="val" id="weightVal">7 kg</span>
+      </div>
+      <div class="row">
+        <label>皮肤透明度</label>
+        <input type="range" min="0" max="100" value="45" id="skin">
+      </div>
+      <div class="row" id="dayRow" style="display:none">
+        <label>观察日期</label>
+        <select id="daySel" style="flex:1;height:26px;border:1px solid #d7e2ee;border-radius:6px;font-family:inherit"></select>
+      </div>
+      <button id="confirmBtn">确认</button>
+    </div>
+  </div>
+
+  <div class="taskbar">
+    <div class="hd">本阶段学习任务 <span id="taskCount">（1/7）</span></div>
+    <div class="tasks" id="tasks"></div>
+  </div>
+</div>
+
+<div class="demo-bar">
+  <b>演示沙盘</b>
+  <span>模拟原系统阶段：</span>
+  <button data-phase="preop">术前</button>
+  <button data-phase="intraop" class="on">术中</button>
+  <button data-phase="postop">术后</button>
+  <button data-phase="report">考核评价</button>
+  <span>（此条不属于原系统）</span>
+</div>
+
+<script>
+const PHASES = {
+  preop: {
+    step: 1,
+    label: '术前阶段 ｜ 病史回顾',
+    tasks: ['病史回顾', '护理评估', '术前准备', '心理护理', '知情同意'],
+    active: 0
+  },
+  intraop: {
+    step: 3,
+    label: '术中阶段 ｜ 术中沟通',
+    tasks: ['术中沟通与宣教', '确认牵引部位及体位', '安装牵引装置及连接砝码', '设置牵引重量', '复测患肢感觉及末梢血运', '观察并处理并发症', '记录术中情况'],
+    active: 0
+  },
+  postop: {
+    step: 7,
+    label: '术后阶段 ｜ 心理护理',
+    tasks: ['疼痛护理', '心理护理', '日常护理', '并发症观察'],
+    active: 1,
+    days: [1, 2, 3, 7],
+    day: 3
+  }
+};
+
+function render(phase) {
+  const p = PHASES[phase];
+  if (!p) return;
+  document.getElementById('stepNow').textContent = p.step;
+  const dayText = phase === 'postop' ? ` · 术后第 ${p.day} 天` : '';
+  document.getElementById('phaseLabel').textContent = p.label + dayText;
+  const dayRow = document.getElementById('dayRow');
+  if (dayRow) {
+    dayRow.style.display = phase === 'postop' ? 'flex' : 'none';
+    const sel = document.getElementById('daySel');
+    if (sel && phase === 'postop') {
+      sel.innerHTML = p.days.map(d => `<option value="${d}"${d === p.day ? ' selected' : ''}>术后第 ${d} 天</option>`).join('');
+    }
+  }
+  document.getElementById('taskCount').textContent = `（${p.active + 1}/${p.tasks.length}）`;
+  document.getElementById('tasks').innerHTML = p.tasks.map((t, i) =>
+    `<div class="task${i === p.active ? ' active' : ''}"><span class="idx">${i + 1}</span>${t}</div>`
+  ).join('');
+  document.querySelectorAll('.demo-bar button').forEach(b => {
+    b.classList.toggle('on', b.dataset.phase === phase);
+  });
+  const ctrl = document.querySelector('.control');
+  const label = ctrl.querySelector('h4');
+  if (label) label.textContent = phase === 'preop' ? '护理评估' : phase === 'postop' ? '术后观察' : '牵引参数';
+}
+
+document.querySelectorAll('.demo-bar button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const phase = btn.dataset.phase;
+    if (phase === 'report') { location.href = 'report.html'; return; }
+    document.querySelectorAll('.demo-bar button').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    render(phase);
+  });
+});
+
+const daySelEl = document.getElementById('daySel');
+if (daySelEl) {
+  daySelEl.addEventListener('change', () => {
+    PHASES.postop.day = Number(daySelEl.value);
+    render('postop');
+  });
+}
+
+const w = document.getElementById('weight');
+w.addEventListener('input', () => {
+  document.getElementById('weightVal').textContent = w.value + ' kg';
+});
+
+render('intraop');
+</script>
+</body>
+</html>

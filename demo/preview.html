@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>外部智能组件 · 本地预览（无需安装扩展）</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #eef2f7; }
+  iframe#origin { width: 100%; height: 100%; border: 0; display: block; }
+</style>
+</head>
+<body>
+<iframe id="origin" src="run.html" title="原实验系统（演示沙盘）"></iframe>
+
+<!-- 预览垫片：模拟 chrome.runtime，让 content script 在普通网页里也能跑 -->
+<script src="shim.js"></script>
+<script src="../extension/src/case-data.js"></script>
+<script src="../extension/src/prompt.js"></script>
+<script src="../extension/src/instrument.js"></script>
+<script src="../extension/src/bridge.js"></script>
+<script src="../extension/src/score-parse.js"></script>
+<script src="../extension/src/scene-detect.js"></script>
+<script src="../extension/src/ui.js"></script>
+<script src="../extension/src/main.js"></script>
+</body>
+</html>

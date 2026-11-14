@@ -1,0 +1,384 @@
+/*
+ * 本地大模型代理（零依赖，Node 18+）
+ * ---------------------------------------------------------------
+ * - API Key 只在 config.json / 环境变量，浏览器永远拿不到
+ * - 未配置 Key 时自动「演示模式」：按病例知识库做意图匹配
+ * - /api/health  服务与模型状态
+ * - /api/chat    SSE 流式（支持非流式合成）
+ * - /api/config  GET 安全子集 / POST 修改模型配置（不接收 Key）
+ * - 静态目录：/demo、/extension
+ *
+ * 运行：node proxy/server.mjs
+ */
+import http from 'node:http';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.resolve(__dirname, '..');
+const CONFIG_PATH = path.join(__dirname, 'config.json');
+
+const DEFAULTS = {
+  port: 8787,
+  mode: 'auto',
+  baseUrl: 'https://api.deepseek.com/v1',
+  chatCompletionsPath: '/chat/completions',
+  apiKey: '',
+  model: 'deepseek-chat',
+  stream: true,
+  timeoutMs: 60000,
+  temperature: 0.6,
+  maxTokens: 900
+};
+
+let raw = {};
+if (fs.existsSync(CONFIG_PATH)) {
+  try { raw = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8')); } catch (e) { console.warn('[config] 解析失败，用默认值'); }
+}
+const base = { ...DEFAULTS, ...raw };
+if (process.env.LLM_API_KEY) base.apiKey = process.env.LLM_API_KEY;
+if (process.env.LLM_BASE_URL) base.baseUrl = process.env.LLM_BASE_URL;
+if (process.env.LLM_MODEL) base.model = process.env.LLM_MODEL;
+if (base.mode === 'auto') base.mode = base.apiKey ? 'live' : 'mock';
+
+let CFG = base;
+
+/* ---------------- 静态 ---------------- */
+const MIME = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.json': 'application/json; charset=utf-8',
+  '.ico': 'image/x-icon',
+  '.woff2': 'font/woff2'
+};
+
+function serveStatic(req, res, pathname) {
+  const rel = pathname === '/' ? '/demo/run.html' : pathname;
+  const abs = path.join(ROOT, path.normalize(rel).replace(/^(\.\.[/\\])+/, ''));
+  if (!abs.startsWith(ROOT) || !fs.existsSync(abs) || fs.statSync(abs).isDirectory()) {
+    res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end('404');
+    return;
+  }
+  const ext = path.extname(abs).toLowerCase();
+  res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream', 'Cache-Control': 'no-store' });
+  fs.createReadStream(abs).pipe(res);
+}
+
+/* ---------------- 演示模式知识 ---------------- */
+const has = (t, ...ws) => ws.some(w => t.includes(w));
+
+function roleOf(system) {
+  if (!system) return 'nurse';
+  if (system.includes('扮演本病例中的患者')) return 'patient';
+  if (system.includes('护理带教老师')) return 'tutor';
+  if (system.includes('学习反馈老师')) return 'coach';
+  return 'nurse';
+}
+
+function postopDayOf(system) {
+  const m = String(system).match(/当前术后时间线：术后第\s*(\d)\s*天/);
+  return m ? Number(m[1]) : null;
+}
+
+const PATIENT = [
+  { k: ['怎么受伤', '怎么伤', '受伤', '怎么回事', '摔倒'], a: '我骑电动车的时候摔了一下，右大腿外侧先着的地，当时就疼得站不起来了，家里人把我送过来的。' },
+  { k: ['疼', '痛', '几分', '厉害吗'], a: '现在还是胀着疼，动一下更疼。护士说给我评的是 6 分，说属于中度疼痛。' },
+  { k: ['过敏', '药物'], a: '我对磺胺类的药过敏，以前吃过出过疹子，别的药倒没什么。' },
+  { k: ['以前', '既往', '高血压', '糖尿病', '心脏病', '手术史'], a: '平时身体还行，没有糖尿病、心脏病，也没做过手术。' },
+  { k: ['昏迷', '恶心', '胸闷', '别的', '其他'], a: '没有昏迷，也没觉得胸闷气短，腿上没有破口，没怎么出血。' },
+  { k: ['术前', '准备', '禁食', '空腹'], a: '护士交代我早上就没吃东西也没喝水，还做了皮试、打了针，腿上也备皮了。' },
+  { k: ['害怕', '担心', '紧张', '以后', '能不能走'], a: '说实话有点怕，第一次做牵引，不知道疼不疼，也担心以后还能不能正常走路。' },
+  { k: ['多久', '几天', '什么时候好'], a: '这个我不太清楚，医生没跟我细说，您可以帮我问问吗？' },
+  { k: ['手术', '开刀'], a: '具体怎么治、要不要开刀，医生还没跟我讲清楚，我也不太懂。' },
+  { k: ['费用', '花多少', '出院'], a: '这个我真不知道，得问护士站或者我家里人。' }
+];
+
+const PATIENT_POSTOP = {
+  1: [
+    { k: ['疼', '痛'], a: '麻药过了以后挺疼的，动一下就扯着疼，护士给评了 5 分。' },
+    { k: ['睡不着', '睡', '烦躁', '担心', '怕', '心情'], a: '刚做完手术，心里不踏实，一闭眼就想着这条腿以后能不能好。' },
+    { k: ['腿', '麻', '凉'], a: '脚有点发凉，但还能动，护士刚来看过说血运还行。' }
+  ],
+  2: [
+    { k: ['疼', '痛'], a: '比昨天好多了，就是酸胀，现在大概 3 分。' },
+    { k: ['坐', '起来', '活动'], a: '我想坐起来一会儿，可以吗？躺着实在难受。' },
+    { k: ['针眼', '打针的地方'], a: '针眼那儿有点发紧，不碰不疼。' }
+  ],
+  3: [
+    { k: ['疼', '痛'], a: '就是酸胀，针眼偶尔扯一下，2 分吧。' },
+    { k: ['烦', '心情', '睡', '拖累', '担心', '怕'], a: '躺了三天了，晚上老醒，还怕拖累家里人，他们都上班呢。' },
+    { k: ['康复', '什么时候能好'], a: '我就想知道还得躺多久，什么时候能下地。' }
+  ],
+  7: [
+    { k: ['疼', '痛'], a: '基本不疼了，就是动的时候有点不舒服，1 分。' },
+    { k: ['出院', '回家', '康复'], a: '好多了，就是想知道什么时候能出院、回家要注意什么。' }
+  ]
+};
+
+const NURSE = [
+  { k: ['重量', '砝码', '多少公斤', '几公斤', '多重'], a: '下肢骨牵引的重量一般取体重的 1/7～1/10。这位患者 70kg，对应大约 7～10kg。\n\n要点：\n1. 具体数值按医嘱和复位情况定，不能自己估。\n2. 砝码要悬空，不能触地、不能靠床。\n3. 一经设定不随意增减，也不能用手提拉牵引绳。' },
+  { k: ['原理', '为什么', '作用'], a: '骨牵引是沿肢体纵轴持续加力，对抗肌肉痉挛和收缩，让骨折断端复位并维持在功能位。\n\n和皮肤牵引比，牵引针直接作用于骨骼，力量更大、维持更久，适合股骨干这类需要较大牵引力的骨折。' },
+  { k: ['血运', '末梢', '麻木', '足背动脉', '发凉', '颜色'], a: '牵引后要复测患肢感觉和末梢血运，看四项：\n\n· 颜色：是否苍白或发绀\n· 温度：是否发凉\n· 毛细血管充盈：是否超过 2 秒\n· 足背动脉搏动：是否减弱或摸不到\n\n再问患者有没有麻木、剧痛。任何一项异常，立即报告医生。' },
+  { k: ['针眼', '进针', '感染'], a: '针眼处每日用 75% 乙醇滴注消毒，保持清洁干燥，不要随意擦拭或用不洁敷料覆盖。\n\n观察红肿、渗液、疼痛加剧和体温升高——这四项是针道感染的早期信号。' },
+  { k: ['并发症', '警惕', '风险'], a: '重点盯五个：\n\n1. 针道感染\n2. 足下垂（腓总神经受压）\n3. 关节僵硬、肌肉萎缩\n4. 深静脉血栓\n5. 过牵：疼痛突然加剧、肢体麻木' },
+  { k: ['疼痛', 'nrs', '评分', '评估'], a: '用 NRS 数字评分法，0～10 分：1～3 轻度，4～6 中度，7～10 重度。这位患者 6 分，属于中度疼痛。\n\n评估要问“现在疼到什么程度”，而不是“疼不疼”。' },
+  { k: ['用药', '凯纷', '镇痛', '氟比洛芬'], a: '本例是 0.9% 氯化钠 100ml + 凯纷 50mg 静滴。\n\n给药前核对过敏史（他对磺胺类过敏），给药后一般 15～30 分钟复评疼痛并记录；效果不满意要报告医生调整。' },
+  { k: ['沟通', '怎么跟', '宣教', '示范', '怎么说'], a: '可以这样说：\n\n“王大哥，接下来我们要给您做骨牵引。它能把骨折的两头拉开、对正，让骨头长得好。操作时会打麻药，您不会觉得很痛。牵引期间腿要保持现在的姿势，不要自己挪动，砝码也不能碰。如果觉得腿麻、发凉或者特别疼，马上按铃叫我们。”\n\n三个要点：先说目的，再说配合，最后说“什么情况下叫我”。' },
+  { k: ['配合', '注意什么', '体位', '姿势'], a: '患者需要配合三件事：\n\n1. 保持患肢外展中立位，不随意屈伸、不抬臀\n2. 不碰砝码、不提拉牵引绳\n3. 有麻木、发凉、剧痛立刻按铃' }
+];
+
+const TUTOR = [
+  { k: ['原理', '为什么需要', '持续牵引'], a: '持续牵引的意义在于“对抗”：肌肉会反射性收缩，把骨折断端拉歪，只有持续、稳定的拉力才能让断端保持对位。\n\n间断加力等于反复复位，反而刺激痉挛。' },
+  { k: ['反牵引', '对抗'], a: '反牵引是给拉力一个“支点”。抬起床头或用对抗牵引带，让身体有一个反向的力，牵引才作用在骨折端，而不是把患者往床尾拖。' },
+  { k: ['悬空', '触地', '靠床'], a: '砝码悬空才能保证实际牵引力等于标定重量。一旦触地或靠床，摩擦力会抵消一部分重量，牵引力就“名存实亡”，断端可能重新移位。' },
+  { k: ['方向', '长轴'], a: '牵引绳必须与患肢长轴在同一直线上，否则力被分解，真正沿骨轴方向的只剩一个分量，还额外产生剪切力，容易造成成角畸形。' },
+  { k: ['滑轮', '装置'], a: '滑轮改变力的方向并减少摩擦，让重量垂直下落产生的拉力沿肢体方向作用。滑轮不灵活会带来额外阻力。' },
+  { k: ['有效', '判断', '效果'], a: '判断牵引是否有效，看四条：\n\n1. 牵引绳与长轴一致、砝码悬空\n2. 患肢长度与对侧对比无明显短缩\n3. 疼痛没有进行性加重\n4. 末梢血运、感觉正常\n\n注意：这些是判断标准，具体结果要看你在系统里观察到的数据，我不能替你认定。' },
+  { k: ['血运', '麻木', '发凉', '足背动脉'], a: '复测血运按“看、摸、压、问”四步：看颜色、摸皮温、压甲床看充盈时间、问有无麻木。\n\n任何一项异常，先解除可能压迫，立即报告医生。' },
+  { k: ['并发症', '警惕'], a: '牵引期间重点防五类：针道感染、足下垂、关节僵硬、深静脉血栓、过牵。\n\n预防关键：每日针眼消毒、足部保持功能位、早期床上活动、踝泵运动、重量按医嘱不随意加。' },
+  { k: ['血栓', 'dvt', '肿胀'], a: '怀疑下肢深静脉血栓：患肢突发肿胀、疼痛、皮温升高、浅静脉扩张。\n\n处理原则：制动、禁止按摩和热敷、测量双下肢周径、立即报告医生。' },
+  { k: ['翻身', '体位', '压疮', '皮肤'], a: '翻身两人配合，一人托住患肢保持牵引轴线，另一人协助躯干，避免牵引绳脱槽或患肢扭转。每 2 小时一次，骨突处减压。' }
+];
+
+const COACH = [
+  { k: ['掌握', '比较好', '优势', '擅长'], a: '从你贴的成绩看，术后病情观察这一组准确率最高，尤其是疼痛评估与用药禁忌判断。\n\n如果还没贴成绩，我给的是判断方法：能连续答对“观察什么”和“为什么观察”，说明知识成体系。' },
+  { k: ['加强', '不足', '薄弱', '错'], a: '常见薄弱点集中在两类：\n\n1. 牵引重量的计算依据——知道“1/7～1/10”，换算到具体患者会犹豫\n2. 用药后的复评时间点——知道要复评，说不清 15～30 分钟这个窗口' },
+  { k: ['为什么', '容易错', '易错'], a: '这类判断容易错，通常不是不会，而是顺序错了：\n\n先想药名，再想评估——正确顺序是先看过敏史和医嘱，再定给药，最后定复评时间。' },
+  { k: ['复习', '下一次', '怎么练', '计划'], a: '下一次重点复习三块：\n\n1. 骨牵引重量与体重的换算\n2. 血运观察四项的顺序与判定\n3. 镇痛给药后的复评时间与记录\n\n练法：只做“设置牵引重量 + 复测血运”两个环节，连做三遍。' }
+];
+
+function pick(list, text, fallback) {
+  const t = text.toLowerCase();
+  let best = null, bestScore = 0;
+  for (const it of list) {
+    let s = 0;
+    for (const k of it.k) if (t.includes(k)) s += k.length;
+    if (s > bestScore) { bestScore = s; best = it; }
+  }
+  return best ? best.a : fallback;
+}
+
+function mockAnswer(system, messages) {
+  const role = roleOf(system);
+  const lastUser = [...messages].reverse().find(m => m.role === 'user');
+  const q = (lastUser && lastUser.content) || '';
+  const exam = typeof system === 'string' && system.includes('考核保护');
+
+  if (exam && has(q, '答案', '选哪个', '选什么', '对不对', '正确选项', '第几题')) {
+    return '现在还在考核环节，我不能直接告诉你答案。\n\n给你一个方向：先回到“这个操作要达到什么目的”，再看选项里的做法能不能达到这个目的。考核结束后把题目发我，我们逐题复盘。';
+  }
+
+  if (role === 'patient') {
+    const day = postopDayOf(system);
+    if (day && PATIENT_POSTOP[day]) return pick(PATIENT_POSTOP[day], q, '这个我说不太清楚，您可以问医生，或者看一下我的病历。');
+    return pick(PATIENT, q, '这个我说不太清楚，您可以问医生，或者看一下我的病历。');
+  }
+  if (role === 'tutor') return pick(TUTOR, q, '这个问题从三步想：先明确这一步要达到什么，再确认操作要点，最后说清观察什么、异常怎么处理。你想展开哪一步？');
+  if (role === 'coach') return pick(COACH, q, '你可以先告诉我这次考核的得分或错项，我按真实情况分析；没有成绩的话，先复习骨牵引重量换算和术后血运观察这两块。');
+  return pick(NURSE, q, '这个问题可以从“目的—操作—观察”三步来想。你想让我展开哪一步？');
+}
+
+/* ---------------- 真实模型 ---------------- */
+async function callLive(system, messages, stream) {
+  const body = {
+    model: CFG.model,
+    stream: !!stream,
+    temperature: CFG.temperature,
+    max_tokens: CFG.maxTokens,
+    messages: [{ role: 'system', content: system }, ...messages]
+  };
+  const url = CFG.baseUrl.replace(/\/$/, '') + (CFG.chatCompletionsPath || '/chat/completions');
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), CFG.timeoutMs || 60000);
+  try {
+    return await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + CFG.apiKey },
+      body: JSON.stringify(body),
+      signal: ac.signal
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function streamLive(res, system, messages) {
+  let r;
+  try {
+    r = await callLive(system, messages, true);
+  } catch (e) {
+    sse(res, { error: e.name === 'AbortError' ? '模型请求超时' : ('连接模型失败：' + e.message) });
+    sse(res, '[DONE]'); res.end(); return;
+  }
+  if (!r.ok || !r.body) {
+    const txt = await r.text().catch(() => '');
+    sse(res, { error: `模型接口返回 ${r.status} ${txt.slice(0, 160)}` });
+    sse(res, '[DONE]'); res.end(); return;
+  }
+
+  const reader = r.body.getReader();
+  const dec = new TextDecoder('utf-8');
+  let buf = '';
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      let idx;
+      while ((idx = buf.indexOf('\n')) >= 0) {
+        const line = buf.slice(0, idx).trim();
+        buf = buf.slice(idx + 1);
+        if (!line.startsWith('data:')) continue;
+        const p = line.slice(5).trim();
+        if (!p || p === '[DONE]') continue;
+        try {
+          const o = JSON.parse(p);
+          const t = o.choices && o.choices[0] && o.choices[0].delta && o.choices[0].delta.content;
+          if (t) sse(res, { t });
+        } catch (e) { /* ignore */ }
+      }
+    }
+  } catch (e) {
+    sse(res, { error: '流读取中断：' + (e.message || '') });
+  }
+  sse(res, '[DONE]');
+  res.end();
+}
+
+async function nonStreamLive(res, system, messages) {
+  let r;
+  try {
+    r = await callLive(system, messages, false);
+  } catch (e) {
+    sse(res, { error: e.name === 'AbortError' ? '模型请求超时' : ('连接模型失败：' + e.message) });
+    sse(res, '[DONE]'); res.end(); return;
+  }
+  const j = await r.json().catch(() => null);
+  const txt = j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+  if (!txt) sse(res, { error: '模型返回为空或格式不符' });
+  else sse(res, { t: txt });
+  sse(res, '[DONE]');
+  res.end();
+}
+
+/* ---------------- 工具 ---------------- */
+function sse(res, obj) {
+  const payload = typeof obj === 'string' ? obj : JSON.stringify(obj);
+  res.write('data: ' + payload + '\n\n');
+}
+
+function readBody(req) {
+  return new Promise((resolve) => {
+    let data = '';
+    req.on('data', c => { data += c; if (data.length > 2e6) req.destroy(); });
+    req.on('end', () => { try { resolve(JSON.parse(data || '{}')); } catch (e) { resolve({}); } });
+    req.on('error', () => resolve({}));
+  });
+}
+
+function safeConfig() {
+  return {
+    mode: CFG.mode, baseUrl: CFG.baseUrl, model: CFG.model,
+    chatCompletionsPath: CFG.chatCompletionsPath, stream: CFG.stream,
+    timeoutMs: CFG.timeoutMs, temperature: CFG.temperature, maxTokens: CFG.maxTokens,
+    hasKey: !!CFG.apiKey
+  };
+}
+
+/* ---------------- 路由 ---------------- */
+const server = http.createServer(async (req, res) => {
+  const url = new URL(req.url, 'http://127.0.0.1');
+  const p = url.pathname;
+
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
+
+  if (p === '/api/health') {
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({
+      ok: true, mode: CFG.mode,
+      model: CFG.mode === 'live' ? CFG.model : '演示知识库',
+      provider: CFG.mode === 'live' ? CFG.baseUrl : 'mock'
+    }));
+    return;
+  }
+
+  if (p === '/api/config') {
+    if (req.method === 'GET') {
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify(safeConfig()));
+      return;
+    }
+    if (req.method === 'POST') {
+      const patch = await readBody(req);
+      const allow = ['baseUrl', 'model', 'chatCompletionsPath', 'stream', 'timeoutMs', 'temperature', 'maxTokens', 'mode'];
+      for (const k of allow) {
+        if (patch[k] === undefined) continue;
+        if (k === 'timeoutMs' || k === 'maxTokens') CFG[k] = Number(patch[k]) || CFG[k];
+        else if (k === 'temperature') CFG[k] = Number(patch[k]);
+        else CFG[k] = patch[k];
+      }
+      if (CFG.mode === 'auto') CFG.mode = CFG.apiKey ? 'live' : 'mock';
+      const out = { ...raw, ...CFG, apiKey: raw.apiKey || '' };
+      try { fs.writeFileSync(CONFIG_PATH, JSON.stringify(out, null, 2)); } catch (e) { /* ignore */ }
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify(safeConfig()));
+      return;
+    }
+  }
+
+  if (p === '/api/chat' && req.method === 'POST') {
+    const { system, messages, stream } = await readBody(req);
+    const safeMessages = Array.isArray(messages) ? messages.slice(-12) : [];
+
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+      'X-Accel-Buffering': 'no'
+    });
+
+    sse(res, { mode: CFG.mode, model: CFG.mode === 'live' ? CFG.model : '演示知识库' });
+
+    if (CFG.mode === 'live') {
+      if (stream === false || CFG.stream === false) await nonStreamLive(res, system || '', safeMessages);
+      else await streamLive(res, system || '', safeMessages);
+      return;
+    }
+
+    const answer = mockAnswer(system || '', safeMessages);
+    const parts = answer.match(/[\s\S]{1,18}/g) || [answer];
+    let i = 0;
+    const timer = setInterval(() => {
+      if (i >= parts.length) {
+        clearInterval(timer);
+        sse(res, '[DONE]');
+        res.end();
+        return;
+      }
+      sse(res, { t: parts[i++] });
+    }, 24);
+    req.on('close', () => clearInterval(timer));
+    return;
+  }
+
+  serveStatic(req, res, p);
+});
+
+server.listen(CFG.port, '127.0.0.1', () => {
+  const modeText = CFG.mode === 'live' ? `真实模型（${CFG.model}）` : '演示模式（未配置 API Key）';
+  console.log('');
+  console.log('  骨牵引智能交互组件 · 本地服务已启动');
+  console.log('  ---------------------------------------------');
+  console.log('  地址：http://127.0.0.1:' + CFG.port);
+  console.log('  模式：' + modeText);
+  console.log('  演示：http://127.0.0.1:' + CFG.port + '/demo/preview.html');
+  console.log('');
+});
