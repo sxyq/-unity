@@ -1,0 +1,79 @@
+{
+  "manifest_version": 3,
+  "name": "骨牵引智能护理助教（外部叠加）",
+  "version": "1.0.0",
+  "description": "在骨牵引虚拟仿真实验页面叠加智能问诊、护患沟通、护理导学与学习反馈，不修改原系统、不改变评分。",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1:8787/*",
+    "http://localhost:8787/*",
+    "http://127.0.0.1:8790/*",
+    "http://localhost:8790/*"
+  ],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://skeletaltraction.cqmu.edu.cn/*",
+        "http://127.0.0.1/*",
+        "http://localhost/*"
+      ],
+      "js": [
+        "src/case-data.js",
+        "src/prompt.js",
+        "src/instrument.js",
+        "src/bridge.js",
+        "src/score-parse.js",
+        "src/scene-detect.js",
+        "src/ui.js",
+        "src/main.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
+    },
+    {
+      "matches": [
+        "https://skeletaltraction.cqmu.edu.cn/*",
+        "http://127.0.0.1/*",
+        "http://localhost/*"
+      ],
+      "js": [
+        "src/api-capture.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN",
+      "all_frames": false
+    },
+    {
+      "matches": [
+        "https://skeletaltraction.cqmu.edu.cn/*"
+      ],
+      "js": [
+        "src/api-poll.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN",
+      "all_frames": false
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "assets/*",
+        "src/panel.css"
+      ],
+      "matches": [
+        "https://skeletaltraction.cqmu.edu.cn/*",
+        "http://127.0.0.1/*",
+        "http://localhost/*"
+      ]
+    }
+  ],
+  "action": {
+    "default_title": "骨牵引智能护理助教"
+  }
+}
