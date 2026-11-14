@@ -12,3 +12,6 @@ obj/
 
 # 运行日志
 *.log
+
+# Unity observer 的本机引用 DLL（厂商专有，不入仓库）
+tools/unity-observer/ref/

@@ -54,6 +54,10 @@ node apps/model-gateway/server.mjs        # 127.0.0.1:8787（默认演示模式�
 - **实机更正（2026-11-15）**：真实骨牵引客户端不打印阶段/任务标记，只打印 UI 面板生命周期
   与 `progress requestBody` 里的**逐步骤分项成绩**（39 项、含错项原文）。因此 `phase`/`taskId`
   保持 `null` 要求学生手动选任务，而 09/10 场景会自动带入真实分项。详见 `docs/Windows实测记录.md` §7。
+- **本地测试副本（2026-11-15 续）**：`tools/unity-observer` 在独立副本里只读反射原程序运行时状态
+  （`SenceState` / `DayTime` / `isStudyModel` / `WeightValue` / `ScoreDatas`），输出 `GQY_STATE:`；
+  `client-agent` 解析为 `unity-event` 驱动面板自动切换。使用 REA 与 Craft Anything CLI 完成程序集取证。
+  见 `docs/Unity本地状态输出.md`。**未嵌入 Unity 原生 UI**，仍用外部悬浮窗。
 
 Windows 实机接管过程、误报修复与十场景核对见 `docs/Windows实测记录.md`。
 

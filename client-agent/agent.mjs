@@ -242,6 +242,103 @@ function parseLifecycle(lines) {
   return events;
 }
 
+/* ---------------- Unity 测试副本：结构化状态事件 ----------------
+ * tools/unity-observer 在**独立测试副本**里输出 GQY_STATE:{...}，
+ * 字段全部来自原程序运行时反射（SenceState / DayTime / isStudyModel / WeightValue ...）。
+ * 这里只做「可证实的映射」，不把任务列表里出现过的词当成当前任务。
+ */
+const UNITY_PANEL_RULES = [
+  { re: /UIHistoryTakingPanel/i, phase: 'preop', taskId: 'preop-history', taskName: '病史采集与症状问诊', why: '原程序 UIHistoryTakingPanel（病史采集面板）' },
+  { re: /UISkeletaTractionOptPanel/i, phase: 'intraop', taskId: 'intraop-principle', taskName: '牵引原理', why: '原程序 UISkeletaTractionOptPanel（牵引重量操作面板）' },
+  { re: /UITaskOptPanel/i, phase: 'postop', taskId: null, why: '原程序 UITaskOptPanel（术后每日任务面板）' }
+];
+const UNITY_TASK_RULES = [
+  { re: /病史采集|病史回顾|主诉|现病史|问诊/, phase: 'preop', taskId: 'preop-history', taskName: '病史采集与症状问诊' },
+  { re: /术前谈话|术前沟通|知情同意/, phase: 'preop', taskId: 'preop-talk', taskName: '术前沟通与疑问交流' },
+  { re: /身份核对|部位确认|宣教/, phase: 'intraop', taskId: 'intraop-communicate', taskName: '术中沟通与宣教' },
+  { re: /牵引原理|砝码|滑轮|牵引方向|反牵引/, phase: 'intraop', taskId: 'intraop-principle', taskName: '牵引原理' },
+  { re: /牵引有效性|患肢感觉|血液循环|末梢血运|牵引效果/, phase: 'intraop', taskId: 'intraop-observe', taskName: '操作观察与效果判断' },
+  { re: /心理护理|情绪安抚|焦虑/, phase: 'postop', taskId: 'postop-psych', taskName: '术后心理护理' },
+  { re: /体位护理|翻身|有效咳嗽|皮肤护理|日常生活指导|排便/, phase: 'postop', taskId: 'postop-care', taskName: '术后护理指导' },
+  { re: /深静脉血栓|牵引失效|患肢肿胀|创口出血|牵引针道|压力性损伤|肺部感染|并发症/, phase: 'postop', taskId: 'postop-complication', taskName: '并发症观察' }
+];
+const UNITY_FUNCTIONS = {
+  'preop-history': '智能病史问诊', 'preop-talk': '智能护患交流',
+  'intraop-communicate': '智能护理宣教', 'intraop-principle': '智能护理导学',
+  'intraop-observe': '智能操作观察', 'postop-psych': '智能心理护理',
+  'postop-care': '智能护理导学', 'postop-complication': '智能并发症辨析'
+};
+
+function parseUnityEvent(text) {
+  const marker = 'GQY_STATE:';
+  let from = 0, last = null;
+  for (;;) {
+    const i = text.indexOf(marker, from);
+    if (i < 0) break;
+    const s = i + marker.length;
+    let e = text.indexOf('\n', s);
+    if (e < 0) e = text.length;
+    const raw = text.slice(s, e).trim();
+    try { const v = JSON.parse(raw); if (v && typeof v === 'object') last = v; } catch (e2) { /* 半行忽略 */ }
+    from = e + 1;
+  }
+  return last;
+}
+
+function strArray(v) { return Array.isArray(v) ? v.map(String) : (v ? [String(v)] : []); }
+
+function mapUnityEvent(ev) {
+  const panels = strArray(ev.panels).join(' ');
+  const selected = strArray(ev.selectedTasks);
+  let phase = null, taskId = null, taskName = null, why = '';
+
+  for (const r of UNITY_PANEL_RULES) {
+    if (!r.re.test(panels)) continue;
+    phase = r.phase; taskId = r.taskId; taskName = r.taskName || null; why = r.why;
+  }
+  // 只有「当前选中」的任务才允许推出 taskId；uiTexts 里列着的任务不算
+  for (const s of selected) {
+    for (const r of UNITY_TASK_RULES) {
+      if (!r.re.test(s)) continue;
+      phase = r.phase; taskId = r.taskId; taskName = r.taskName; why = '当前选中任务：' + s;
+      break;
+    }
+    if (taskId) break;
+  }
+
+  let postopDay = null;
+  const dt = Number(ev.dayTime);
+  if (Number.isFinite(dt) && dt >= 1 && dt <= 7) postopDay = dt;
+  else if (String(ev.isFirstDay) === 'true') postopDay = 1;
+
+  const mode = String(ev.isStudyModel) === 'false' ? 'exam' : 'study';
+  return {
+    phase,
+    postopDay: phase === 'postop' ? postopDay : null,
+    taskId, taskName,
+    functionName: taskId ? (UNITY_FUNCTIONS[taskId] || taskName) : null,
+    mode,
+    contextSource: 'unity-event',
+    confidence: taskId ? 'high' : (phase ? 'medium' : 'low'),
+    evidence: [why || ('Unity 事件：senceState=' + (ev.senceState || '?') + ' scene=' + (ev.scene || '?'))],
+    unity: {
+      scene: ev.scene || null,
+      senceState: ev.senceState || null,
+      panels: strArray(ev.panels),
+      uiTexts: strArray(ev.uiTexts).slice(0, 20),
+      selectedTasks: selected,
+      dayTime: Number.isFinite(dt) ? dt : null,
+      isFirstDay: String(ev.isFirstDay) === 'true',
+      isStudyModel: mode === 'study',
+      isGetProgressSuccess: String(ev.isGetProgressSuccess) === 'true',
+      tractionWeight: ev.tractionWeight != null ? Number(ev.tractionWeight) : null,
+      totalScore: ev.totalScore != null ? Number(ev.totalScore) : null,
+      scoreDatas: ev.scoreDatas || null,
+      typeScores: ev.typeScores || null
+    }
+  };
+}
+
 /* ---------------- 真实客户端：逐步骤成绩 ----------------
  * 切换任务/进入病例界面时，客户端把整份进度以
  *   progress requestBody: { "maxPV":…, "pv":…, "data": "{\"currentExpProgress\":…,\"ScoreDatas\":[…]}" }
@@ -501,6 +598,7 @@ async function buildState() {
   let best = null;
   let progressBest = null;
   let lifecycleBest = null;
+  let unityBest = null;
   const detail = [];
 
   for (const meta of logs) {
@@ -516,6 +614,7 @@ async function buildState() {
     const text = readText(meta.file);
     const lc = parseLifecycle(lines);
     const pd = parseProgress(text);
+    const ue = parseUnityEvent(text);
     const lastLc = lc.length ? lc[lc.length - 1] : null;
 
     detail.push({
@@ -541,6 +640,10 @@ async function buildState() {
     if (pd) {
       const pdRank = (live ? 10000 : 0) + Math.min(pd.totalItems, 999) + pd.currentExpProgress;
       if (!progressBest || pdRank > progressBest.rank) progressBest = { rank: pdRank, value: pd, live };
+    }
+    if (ue) {
+      const ueRank = (live ? 20000 : 0) + text.length % 1000;
+      if (!unityBest || ueRank > unityBest.rank) unityBest = { rank: ueRank, value: ue, live };
     }
 
     if (!p.phase) continue;
@@ -587,11 +690,31 @@ async function buildState() {
   // 日志和标题都给不出任务时，taskId 必须为 null —— 不拿阶段猜任务
   if (source !== 'client-log') { taskId = null; taskName = null; }
 
-  const examMode = (best && best.exam) || /考核|考试|exam/i.test(title || '');
+  let examMode = (best && best.exam) || /考核|考试|exam/i.test(title || '');
+
+  // Unity 测试副本的结构化事件优先级最高：它直接来自原程序运行时状态，
+  // 比日志正则、窗口标题都可靠。没有事件时退回上面的只读证据。
+  const uni = unityBest ? mapUnityEvent(unityBest.value) : null;
+  if (uni) {
+    source = uni.contextSource;                 // 即使没映射到任务，也如实标注事件来源
+    evidence = uni.evidence.slice();
+    if (uni.phase) {
+      phase = uni.phase;
+      postopDay = uni.postopDay;
+      taskId = uni.taskId;
+      taskName = uni.taskName;
+      confidence = unityBest.live ? uni.confidence : 'low';
+    } else {
+      confidence = 'low';                       // 只有运行事件，不能证明业务阶段
+    }
+    if (uni.mode === 'exam') examMode = true;
+  }
 
   return {
     ok: true,
     phase,
+    functionName: uni && uni.taskId ? uni.functionName : null,
+    unity: uni ? uni.unity : null,
     postopDay: phase === 'postop' ? postopDay : null,
     taskId,
     taskName,
@@ -610,7 +733,8 @@ async function buildState() {
       live: lifecycleBest.live
     } : null,
     scoreDetails: progressBest ? progressBest.value : null,
-    live: (best ? best.live : false) || !!(lifecycleBest && lifecycleBest.live) || !!(progressBest && progressBest.live),
+    live: (best ? best.live : false) || !!(lifecycleBest && lifecycleBest.live) ||
+          !!(progressBest && progressBest.live) || !!(unityBest && unityBest.live),
     ageSec: best ? Math.round(best.ageMs / 1000) : null,
     logs: detail,
     windowTitle: title,

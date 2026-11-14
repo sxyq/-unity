@@ -359,6 +359,12 @@ client-agent /procs                → 0 个相关进程
 
 ## 7. 十场景：本轮到底做到了哪一步
 
+> 后续进展（同一天 04:xx）：已在**独立测试副本**里通过新增只读 observer 程序集，
+> 让原 Unity 运行时主动输出 `GQY_STATE:` 结构化状态（`SenceState` / `DayTime` / `isStudyModel` /
+> `WeightValue` / `ScoreDatas`），并接入 `client-agent` 的 `unity-event` 来源。
+> 本节关于「原始 Player.log 不打印任务」的结论仍然成立，但**不再代表当前上限**，
+> 详见 `docs/Unity本地状态输出.md`。
+
 ### 7.1 最后一次实测：真实实验终于跑进 3D 场景（2026-11-15）
 
 前面几节写「装不上、进不去」的结论在最后一轮被推翻，过程留作排错记录，结果以本节为准。

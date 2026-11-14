@@ -149,7 +149,8 @@
 
   const SOURCE_LABEL = {
     page: '页面识别', 'client-log': '客户端日志', 'window-title': '窗口标题',
-    bridge: '实验事件', api: '平台接口', manual: '手动指定'
+    bridge: '实验事件', api: '平台接口', manual: '手动指定',
+    'unity-event': 'Unity 原生事件'
   };
   const CONF_LABEL = { high: '高可信', medium: '中可信', low: '低可信', none: '无证据' };
 
@@ -478,7 +479,9 @@
     }
     if (state.override) return;
     const cur = state.scene;
-    if (cur && cur.phase && PAGE_SOURCES[cur.contextSource]) return;  // 页面证据更权威
+    // Unity 测试副本的结构化事件来自原程序运行时状态，优先于页面 DOM 推断。
+    const unityAuthoritative = cs.contextSource === 'unity-event' && cs.confidence !== 'low';
+    if (!unityAuthoritative && cur && cur.phase && PAGE_SOURCES[cur.contextSource]) return;
 
     const sc = cs.taskId ? C.byId[cs.taskId] : null;
     const taskKnown = !!(sc && cs.taskName);
