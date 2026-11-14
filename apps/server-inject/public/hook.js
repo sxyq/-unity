@@ -1,8 +1,8 @@
 /*!
  * 骨牵引护理情境化智能交互系统 · 服务端注入版
  * 由 server-hook/build.mjs 自动生成，请勿手改。
- * 生成时间: 2026-11-13T17:07:01.507Z
- * 来源: extension/src/{web-shim.js,case-data.js,prompt.js,instrument.js,bridge.js,score-parse.js,scene-detect.js,ui.js,main.js}
+ * 生成时间: 2026-11-14T11:49:43.804Z
+ * 来源: extension/src/{web-shim.js,data/case-data.js,data/prompt.js,core/instrument.js,platform/bridge.js,platform/score-parse.js,scene/rules.js,scene/detect.js,ui/template.js,ui/panel.js,boot/main.js}
  */
 
 /* ===== web-shim.js ===== */
@@ -167,7 +167,7 @@
 
 })();
 
-/* ===== case-data.js ===== */
+/* ===== data/case-data.js ===== */
 (function(){
 /*
  * 病例 · 场景 · 知识库（唯一事实来源）
@@ -368,7 +368,7 @@
 
 })();
 
-/* ===== prompt.js ===== */
+/* ===== data/prompt.js ===== */
 (function(){
 /*
  * 提示词构造：把「四个统一功能名 + 十场景 + 病例时间线」拼成 system prompt
@@ -500,7 +500,7 @@
 
 })();
 
-/* ===== instrument.js ===== */
+/* ===== core/instrument.js ===== */
 (function(){
 /*
  * 埋点模块（本地闭环，不上传）
@@ -627,7 +627,7 @@
 
 })();
 
-/* ===== bridge.js ===== */
+/* ===== platform/bridge.js ===== */
 (function(){
 /*
  * 平台桥接（postMessage 协议解析）
@@ -794,6 +794,12 @@
 
   window.addEventListener('message', (e) => {
     const d = e.data;
+    if (d && d.__bt_poll__ === true && d.process) {
+      api.process = d.process;
+      api.updatedAt = Date.now();
+      if (typeof window.__btOnProgress === 'function') window.__btOnProgress(d.process);
+      return;
+    }
     if (!d || d.__bt_api__ !== true) return;
     const url = String(d.url || '');
     const body = d.body;
@@ -833,7 +839,7 @@
 
 })();
 
-/* ===== score-parse.js ===== */
+/* ===== platform/score-parse.js ===== */
 (function(){
 /*
  * 成绩页解析（只读 DOM，不碰 token）
@@ -1003,28 +1009,16 @@
 
 })();
 
-/* ===== scene-detect.js ===== */
+/* ===== scene/rules.js ===== */
 (function(){
 /*
- * 场景适配器（与 UI 完全解耦，只读）
+ * 场景识别规则表（纯数据，便于单独调整）
  * ---------------------------------------------------------------
- * 输出统一结构：
- * {
- *   phase, postopDay, taskId, taskName, scenarioId,
- *   functionName, mode, patientId, contextSource, confidence, evidence
- * }
- *
- * 证据分级（强 → 弱）：
- *   1. 页面明确阶段标注（术前阶段 / 术中阶段 / 术后阶段 / 考核评价）
- *   2. URL 中的场景参数与路由
- *   3. 页面任务条文字
- *   4. 页面已发生的业务请求（performance entries，只读取，不重放）
- * 找不到就返回 phase: null，绝不猜。
+ * 强证据：页面明确阶段标注；弱证据：场景词、URL、任务条。
+ * 改这里不需要动识别逻辑。
  */
 (function () {
   'use strict';
-
-  const C = window.BT_CASE;
 
   const PHASE_RULES = [
     { phase: 'report', primary: ['考核评价', '实验报告', '实验结果与结论', '成绩上传'], secondary: ['考核', '题目', '提交试卷'] },
@@ -1054,6 +1048,36 @@
     '[class*="task"]', '[class*="Task"]', '[class*="panel"]', '[class*="Panel"]',
     '[class*="nav"]', '[class*="menu"]', '[class*="content"]', '[class*="list"]'
   ];
+
+  window.BT_SCENE_RULES = { PHASE_RULES, URL_HINTS, HEAD_SELECTORS, BODY_SELECTORS };
+})();
+
+})();
+
+/* ===== scene/detect.js ===== */
+(function(){
+/*
+ * 场景适配器（与 UI 完全解耦，只读）
+ * ---------------------------------------------------------------
+ * 输出统一结构：
+ * {
+ *   phase, postopDay, taskId, taskName, scenarioId,
+ *   functionName, mode, patientId, contextSource, confidence, evidence
+ * }
+ *
+ * 证据分级（强 → 弱）：
+ *   1. 页面明确阶段标注（术前阶段 / 术中阶段 / 术后阶段 / 考核评价）
+ *   2. URL 中的场景参数与路由
+ *   3. 页面任务条文字
+ *   4. 页面已发生的业务请求（performance entries，只读取，不重放）
+ * 找不到就返回 phase: null，绝不猜。
+ */
+(function () {
+  'use strict';
+
+  const C = window.BT_CASE;
+
+  const { PHASE_RULES, URL_HINTS, HEAD_SELECTORS, BODY_SELECTORS } = window.BT_SCENE_RULES;
 
   function readRegion(doc, selector, budget) {
     let out = '';
@@ -1238,7 +1262,15 @@
     const explicit = { preop: false, intraop: false, postop: false, report: false };
     const evidence = [];
 
-    for (const rule of PHASE_RULES) {
+    // 实验介绍页（CourseInfo / 详情页）不是"实验进行中"：
+    // 描述文字里出现"考核/并发症/术中"会造成高可信误判，这里只认强步骤标记。
+    const isIntroPage = /\/CourseInfo(\?|$)|\/Experiment\/Detail(\?|$)/i.test(location.pathname);
+    const hasStepMark = /第\s*\d+\s*步|术中阶段|术前阶段|术后第\s*\d+\s*天|\d+\s*\/\s*10/.test(text);
+    if (isIntroPage && !hasStepMark) {
+      evidence.push('实验介绍页，不做阶段推断');
+    }
+
+    for (const rule of (isIntroPage && !hasStepMark ? [] : PHASE_RULES)) {
       for (const w of rule.primary) {
         if (text.includes(w)) { score[rule.phase] += 5; explicit[rule.phase] = true; evidence.push('阶段标注「' + w + '」'); }
       }
@@ -1294,7 +1326,8 @@
 
     // 模式：考核字样出现即视为考核，报告阶段默认考核
     let mode = null;
-    if (phase === 'report') mode = 'exam';
+    if (isIntroPage && !hasStepMark) mode = null;
+    else if (phase === 'report') mode = 'exam';
     else if (/考核模式|考试模式|提交试卷|答题/.test(text)) { mode = 'exam'; evidence.push('考核模式词'); }
     else if (phase) mode = 'study';
 
@@ -1357,7 +1390,105 @@
 
 })();
 
-/* ===== ui.js ===== */
+/* ===== ui/template.js ===== */
+(function(){
+/*
+ * 面板 DOM 模板（纯字符串，不含逻辑）
+ * ---------------------------------------------------------------
+ * 由 ui/panel.js 调用：root.innerHTML = BT_TEMPLATE(cssUrl)
+ * 拆出来只为让 panel.js 专注状态与交互。
+ */
+(function () {
+  'use strict';
+
+  window.BT_TEMPLATE = function (cssUrl) {
+    return `
+      <link rel="stylesheet" href="${cssUrl}">
+      <div class="bt-root" data-theme="light" data-dock="right">
+        <div class="bt-launcher"><span class="bt-launcher-dot"></span><span>智能助教</span></div>
+        <div class="bt-mini bt-hidden" title="打开智能助教">AI</div>
+
+        <section class="bt-panel bt-hidden" role="dialog" aria-label="智能护理助教">
+          <div class="bt-head">
+            <div class="bt-head-avatar"><img alt=""></div>
+            <div class="bt-head-text">
+              <div class="bt-title">智能护理助教</div>
+              <div class="bt-subtitle">正在识别当前场景…</div>
+            </div>
+            <div class="bt-head-actions">
+              <button class="bt-icon-btn" data-act="settings" title="设置">⚙</button>
+              <button class="bt-icon-btn" data-act="min" title="收起">—</button>
+              <button class="bt-icon-btn" data-act="close" title="关闭">✕</button>
+            </div>
+          </div>
+
+          <div class="bt-scene">
+            <span class="bt-dot none"></span>
+            <select class="bt-scene-select" title="手动切换当前实验任务"></select>
+            <span class="bt-scene-hint">识别中…</span>
+          </div>
+
+          <div class="bt-day">
+            <span>时间线：</span>
+            <select class="bt-day-select"></select>
+            <span class="bt-scene-hint">（未识别时手动指定）</span>
+          </div>
+
+          <div class="bt-progress bt-hidden"><span class="bt-progress-text"></span></div>
+
+          <div class="bt-body"></div>
+          <div class="bt-chips"></div>
+
+          <div class="bt-score-box">
+            <label>粘贴本次考核成绩或错项，我按真实数据帮你分析（不填则只给一般性建议）</label>
+            <textarea placeholder="例：术前准备 8/10，牵引重量选择错误，术后观察 6/8……"></textarea>
+            <div class="bt-score-actions">
+              <button class="bt-mini-btn" data-act="clear-score">清空</button>
+              <button class="bt-mini-btn primary" data-act="use-score">用这份成绩分析</button>
+            </div>
+          </div>
+
+          <div class="bt-foot">
+            <div class="bt-input-row">
+              <textarea class="bt-input" placeholder="请输入您的问题…"></textarea>
+              <button class="bt-send" title="发送">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M3.4 11.2 20 4.2c.9-.4 1.8.5 1.4 1.4l-7 16.6c-.4.9-1.7.9-2.1 0l-2.4-6.1-6.5-2.6c-.9-.4-.9-1.8 0-2.2Z" fill="currentColor"/>
+                </svg>
+                <span>发送</span>
+              </button>
+            </div>
+            <div class="bt-foot-note">
+              <span class="bt-badge mock">未连接本地服务</span>
+              <span class="bt-exam-badge bt-badge exam bt-hidden">考核中 · 不提供答案</span>
+              <span class="bt-bridge-badge bt-badge live bt-hidden">已接入实验事件</span>
+              <span class="bt-trace-count"></span>
+            </div>
+          </div>
+
+          <div class="bt-settings">
+            <div class="bt-set-head">
+              <span>设置</span><span class="sp"></span>
+              <button class="bt-icon-btn" data-act="set-close">✕</button>
+            </div>
+            <div class="bt-tabs">
+              <button class="bt-tab on" data-tab="ui">界面</button>
+              <button class="bt-tab" data-tab="model">模型</button>
+              <button class="bt-tab" data-tab="trace">埋点</button>
+            </div>
+            <div class="bt-set-body"></div>
+          </div>
+
+          <div class="bt-toast"></div>
+        </section>
+      </div>
+    `;
+  };
+})();
+
+})();
+
+/* ===== ui/panel.js ===== */
 (function(){
 /*
  * 面板 UI（Shadow DOM 隔离）
@@ -1729,7 +1860,7 @@
     if (!sc) return;
 
     const ev = (cs.evidence && cs.evidence[0]) ? String(cs.evidence[0]).slice(0, 60) : cs.phase;
-    applyScene({
+    state.clientScene = {
       phase: cs.phase,
       postopDay: cs.postopDay || null,
       taskId: sc.id, taskName: sc.taskName, scenarioId: sc.id,
@@ -1738,7 +1869,8 @@
       contextSource: cs.contextSource || 'client-log',
       confidence: cs.confidence || 'medium',
       evidence: ['客户端：' + ev]
-    }, true);
+    };
+    applyScene(state.clientScene, true);
     toast('已从客户端识别：' + sc.functionName);
     T.log('scene', { from: 'client', phase: cs.phase, conf: cs.confidence });
   }
@@ -2194,87 +2326,10 @@
     root = host.attachShadow({ mode: 'open' });
 
     const cssUrl = (function () {
-      try { return chrome.runtime.getURL('src/panel.css'); } catch (e) { return 'panel.css'; }
+      try { return chrome.runtime.getURL('src/ui/panel.css'); } catch (e) { return 'panel.css'; }
     })();
 
-    root.innerHTML = `
-      <link rel="stylesheet" href="${cssUrl}">
-      <div class="bt-root" data-theme="light" data-dock="right">
-        <div class="bt-launcher"><span class="bt-launcher-dot"></span><span>智能助教</span></div>
-        <div class="bt-mini bt-hidden" title="打开智能助教">AI</div>
-
-        <section class="bt-panel bt-hidden" role="dialog" aria-label="智能护理助教">
-          <div class="bt-head">
-            <div class="bt-head-avatar"><img alt=""></div>
-            <div class="bt-head-text">
-              <div class="bt-title">智能护理助教</div>
-              <div class="bt-subtitle">正在识别当前场景…</div>
-            </div>
-            <div class="bt-head-actions">
-              <button class="bt-icon-btn" data-act="settings" title="设置">⚙</button>
-              <button class="bt-icon-btn" data-act="min" title="收起">—</button>
-              <button class="bt-icon-btn" data-act="close" title="关闭">✕</button>
-            </div>
-          </div>
-
-          <div class="bt-scene">
-            <span class="bt-dot none"></span>
-            <select class="bt-scene-select" title="手动切换当前实验任务"></select>
-            <span class="bt-scene-hint">识别中…</span>
-          </div>
-
-          <div class="bt-day">
-            <span>时间线：</span>
-            <select class="bt-day-select"></select>
-            <span class="bt-scene-hint">（未识别时手动指定）</span>
-          </div>
-
-          <div class="bt-body"></div>
-          <div class="bt-chips"></div>
-
-          <div class="bt-score-box">
-            <label>粘贴本次考核成绩或错项，我按真实数据帮你分析（不填则只给一般性建议）</label>
-            <textarea placeholder="例：术前准备 8/10，牵引重量选择错误，术后观察 6/8……"></textarea>
-            <div class="bt-score-actions">
-              <button class="bt-mini-btn" data-act="clear-score">清空</button>
-              <button class="bt-mini-btn primary" data-act="use-score">用这份成绩分析</button>
-            </div>
-          </div>
-
-          <div class="bt-foot">
-            <div class="bt-input-row">
-              <textarea class="bt-input" placeholder="请输入您的问题…"></textarea>
-              <button class="bt-send" title="发送">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M3.4 11.2 20 4.2c.9-.4 1.8.5 1.4 1.4l-7 16.6c-.4.9-1.7.9-2.1 0l-2.4-6.1-6.5-2.6c-.9-.4-.9-1.8 0-2.2Z" fill="currentColor"/>
-                </svg>
-                <span>发送</span>
-              </button>
-            </div>
-            <div class="bt-foot-note">
-              <span class="bt-badge mock">未连接本地服务</span>
-              <span class="bt-exam-badge bt-badge exam bt-hidden">考核中 · 不提供答案</span>
-              <span class="bt-bridge-badge bt-badge live bt-hidden">已接入实验事件</span>
-              <span class="bt-trace-count"></span>
-            </div>
-          </div>
-
-          <div class="bt-settings">
-            <div class="bt-set-head">
-              <span>设置</span><span class="sp"></span>
-              <button class="bt-icon-btn" data-act="set-close">✕</button>
-            </div>
-            <div class="bt-tabs">
-              <button class="bt-tab on" data-tab="ui">界面</button>
-              <button class="bt-tab" data-tab="model">模型</button>
-              <button class="bt-tab" data-tab="trace">埋点</button>
-            </div>
-            <div class="bt-set-body"></div>
-          </div>
-
-          <div class="bt-toast"></div>
-        </section>
-      </div>`;
+    root.innerHTML = window.BT_TEMPLATE(cssUrl);
 
     document.documentElement.appendChild(host);
 
@@ -2435,8 +2490,49 @@
     const p = ensurePort();
     if (p) p.postMessage({ type: 'health' });
 
+    // 平台实时进度（来自 api-poll.js 的 GetProcess 轮询）
+    window.__btOnProgress = (proc) => {
+      const el = els.progress || root.querySelector('.bt-progress');
+      const tx = root.querySelector('.bt-progress-text');
+      if (!el || !tx || !proc) return;
+      const pct = proc.ppv != null ? proc.ppv : null;
+      const mins = proc.timeUsed != null ? Math.round(Number(proc.timeUsed) / 60) : null;
+      tx.textContent = '平台实时进度 ' + (pct != null ? pct + '%' : '—')
+        + ' · 已完成 ' + (proc.studyeds != null ? proc.studyeds : '—') + ' 次'
+        + (mins != null ? ' · 累计 ' + mins + ' 分钟' : '');
+      el.classList.remove('bt-hidden');
+    };
+
+    // 直接轮询本机客户端代理（内容脚本跨域访问环回地址，代理已允许 CORS）
+    let lastClient = '';
+    const pollClient = async () => {
+      try {
+        const r = await fetch('http://127.0.0.1:8790/state', { cache: 'no-store' });
+        if (!r.ok) return;
+        const cs = await r.json();
+        const key = String(cs.phase) + '|' + String(cs.postopDay) + '|' + String(cs.confidence);
+        if (key === lastClient) return;
+        lastClient = key;
+        onClientState(cs);
+      } catch (e) { /* 代理没开 */ }
+    };
+    pollClient();
+    setInterval(pollClient, 4000);
+
     stopScene = window.BT_SCENE.start((scene) => {
       if (state.override) { state.scene = scene; return; }
+      const pageOk = !!(scene && scene.phase);
+      if (pageOk) {
+        state.clientScene = null;      // 页面识别优先
+        applyScene(scene, true);
+        return;
+      }
+      // 页面识别不到：如果客户端日志给出了阶段，就用它撑住，别被空结果冲掉
+      if (state.clientScene) {
+        const cur = state.scene;
+        if (!cur || cur.phase !== state.clientScene.phase) applyScene(state.clientScene, true);
+        return;
+      }
       applyScene(scene, true);
     }, 1500);
 
@@ -2469,7 +2565,7 @@
 
 })();
 
-/* ===== main.js ===== */
+/* ===== boot/main.js ===== */
 (function(){
 /*
  * 入口：延迟挂载，避免与原系统首屏渲染争抢

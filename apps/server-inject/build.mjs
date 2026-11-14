@@ -17,15 +17,17 @@ const SRC = path.join(ROOT, 'extension', 'src');
 const PUB = path.join(__dirname, 'public');
 
 const ORDER = [
-  'web-shim.js',      // 必须在最前：定义 chrome.runtime
-  'case-data.js',
-  'prompt.js',
-  'instrument.js',
-  'bridge.js',
-  'score-parse.js',
-  'scene-detect.js',
-  'ui.js',
-  'main.js'
+  'web-shim.js',            // 必须在最前：定义 chrome.runtime
+  'data/case-data.js',
+  'data/prompt.js',
+  'core/instrument.js',
+  'platform/bridge.js',
+  'platform/score-parse.js',
+  'scene/rules.js',
+  'scene/detect.js',
+  'ui/template.js',
+  'ui/panel.js',
+  'boot/main.js'
 ];
 
 function read(name) {
@@ -54,7 +56,7 @@ fs.mkdirSync(path.join(PUB, 'assets'), { recursive: true });
 // 每个模块用 IIFE 包一层会破坏它们之间的全局挂载？不会：它们都挂在 window.BT_* 上。
 fs.writeFileSync(path.join(PUB, 'hook.js'), banner + '\n' + body, 'utf8');
 
-fs.copyFileSync(path.join(SRC, 'panel.css'), path.join(PUB, 'src', 'panel.css'));
+fs.copyFileSync(path.join(SRC, 'ui', 'panel.css'), path.join(PUB, 'src', 'panel.css'));
 
 const assets = path.join(ROOT, 'extension', 'assets');
 for (const f of fs.readdirSync(assets)) {
