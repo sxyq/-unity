@@ -5,9 +5,5 @@ node_modules/
 # 本地密钥（只保留 example）
 proxy/config.json
 
-# 含真实学生姓名/学号的截图，仅本机保留（公开仓库不推）
-docs/flow/*.png
-docs/*.png
-
 # 运行日志
 *.log

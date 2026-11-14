@@ -1,0 +1,51 @@
+# 骨牵引虚拟仿真 · 外部智能化升级
+
+在**不改原 Unity 实验**（27 个计分步骤、动画、成绩上传均不动）的前提下，
+给已部署的《下肢骨折骨牵引护理技术虚拟仿真实验》加一层"看得懂场景、能对话、会讲评"的智能外壳。
+
+## 目录（按业务拆分）
+
+```
+apps/
+  extension/          浏览器扩展：平台网页里的智能面板（主力形态）
+    src/
+      boot/           入口与后台服务（挂载、模型转发、状态推送）
+      data/           病例与话术（case-data）、角色提示词（prompt）
+      platform/       与平台对接：接口旁听、进度轮询、实验事件桥、成绩解析
+      scene/          场景识别：规则表（rules）+ 识别逻辑（detect）
+      ui/             面板：DOM 模板（template）+ 状态与交互（panel）
+      core/           埋点与本地追踪
+    demo/             本地预览页（不需要扩展也能看效果）
+  model-gateway/      OpenAI 兼容网关（Key 只在这里）
+    lib/mock.mjs      未配置 Key 时的演示知识库
+  server-inject/      服务端注入：学生免装扩展
+    conf/             nginx / IIS 两套反代配置
+  client-agent/       客户端侧：读 Player.log 与窗口标题，提供状态；含悬浮窗源码
+docs/                 调研、实测流程、状态核对（截图在 docs/flow/）
+```
+
+## 三条运行形态
+
+| 形态 | 学生要装什么 | 能力 | 状态 |
+|---|---|---|---|
+| 浏览器扩展 | 装一次扩展 | 平台页内全功能 + 实时进度 + 成绩 | 实测可用 |
+| 服务端注入 | 什么都不用装 | 同上（学校反代注入） | 本地预演通过 |
+| 客户端悬浮窗 | 装一个小程序 | 实验客户端旁边贴一个面板 | 源码在，未在 Windows 验证 |
+
+## 快速跑起来
+
+```bash
+node apps/model-gateway/server.mjs        # 127.0.0.1:8787（默认演示模式）
+# 浏览器加载 apps/extension 作为「已解压的扩展程序」
+# 打开 https://skeletaltraction.cqmu.edu.cn/mengoo/ 即可看到右侧「智能助教」
+```
+
+接入真实模型：把 `apps/model-gateway/config.example.json` 复制为 `config.json`，
+填 `apiKey`，`mode` 改 `auto`，重启网关。
+
+## 关键设计
+
+- **不碰成绩**：只读页面与旁听平台自己的响应，不发写请求、不伪造成绩。
+- **不猜场景**：证据不足就显示"未识别，请手动选择"。
+- **密钥不出服务端**：`/api/config` 只返回 `hasKey`。
+- **实时状态两条腿**：平台 `GetProcess` 轮询（进度/次数/用时）+ 客户端 `Player.log`（阶段）。
