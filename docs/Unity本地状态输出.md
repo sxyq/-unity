@@ -58,6 +58,22 @@
 | `Nurse.QUIManager` / `QUIPanelStack` | `mAllUI` / `mAllStack` | 当前打开的 UI 面板 |
 | 业务面板 | `UIHistoryTakingPanel`（病史采集）、`UICasePanel`、`UISkeletaTractionOptPanel`、`UITaskOptPanel` | 任务级识别依据 |
 
+### 4.1 厂商平台层的数据模型（Craft Anything + ILSpy 反编译实证）
+
+`managed-ilspy-decompile` 反编译 `MengooPlatform.dll`（需 `dotnet tool install -g ilspycmd --version 9.1.0.7988`，新版包要求更高 SDK）：
+
+- `MengooCx` 暴露**原程序自己的步骤事件钩子**：`StartStepHook` / `EndStepHook`（`Action<int>`）、
+  `AddTaskQuestionHook`、`DataUploadHook` —— 证明内部存在清晰的步骤事件模型（Invoke 在加密的
+  Assembly-CSharp 内，因此 observer 选择轮询状态而不是订阅钩子，避免干扰原流程）。
+- **`ExperimentTask { No, Name }` 就是 27 个计分步骤的真实名称与序号**，挂在
+  `MengooCx.uploadData.ExperimentTaskList`；`iLabStep { seq, title, done, score, timeUsed }`
+  是步骤执行状态（`MengooCx.iLabSteps`）。
+- 其余：`pass`（模式）、`progressData { maxPv, pv, data }` + `hasProgress`、`tokenid/ProgressId/ExperimentId`
+  由 `MLauncher://` 参数第 13/14/15/18 段填充（`ConvertEnvironmentParam` 实证）。
+- observer 据此新增输出 `taskList`（`[No:Name,…]`）、`iLabSteps`（`[seq|title|done|score|timeUsed,…]`）、
+  `mengooPass`、`uploadScore`、`hasProgress` —— **原任务 ID → 智能场景 ID 的映射从此有了真实主数据**，
+  不再依赖文字匹配猜测。此输出的真实验证待下一次实验会话。
+
 **主界面实测事件**（测试副本真实运行，`scene=NurseMain`）：
 
 ```json

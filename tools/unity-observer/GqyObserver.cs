@@ -205,6 +205,22 @@ namespace Gqy
                     {
                         Add(d, "uiStack", Field(t, b, "mAllStack"));
                     }
+                    else if (tn == "MengooCx")
+                    {
+                        // 厂商平台层自己的进度/任务模型（反编译实证：ExperimentTask{No,Name}）
+                        Add(d, "mengooPass", Field(t, b, "pass"));
+                        Add(d, "hasProgress", Field(t, b, "hasProgress"));
+                        Add(d, "mengooTotalScore", Field(t, b, "totalScore"));
+                        var uploadData = Field(t, b, "uploadData");
+                        if (uploadData != null)
+                        {
+                            var et = uploadData.GetType();
+                            Add(d, "taskList", Field(et, uploadData, "ExperimentTaskList"));
+                            Add(d, "uploadScore", Field(et, uploadData, "Score"));
+                        }
+                        Add(d, "iLabSteps", Field(t, b, "iLabSteps"));
+                        Add(d, "stepTimes", Field(t, b, "stepTimes"));
+                    }
                 }
                 catch { }
             }
@@ -293,6 +309,17 @@ namespace Gqy
             try { return f.GetValue(instance); } catch { return null; }
         }
 
+        private static object GetMember(object item, string name)
+        {
+            if (item == null || name == null) return null;
+            var t = item.GetType();
+            var f = t.GetField(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            if (f != null) return f.GetValue(item);
+            var p = t.GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            return p != null ? p.GetValue(item, null) : null;
+        }
+
+        /* ExperimentTask{No,Name}：原程序 27 个计分步骤的真实名称与序号 */
         private static string Describe(object v)
         {
             if (v == null) return null;
@@ -302,16 +329,29 @@ namespace Gqy
             if (t.IsEnum) return v.ToString();
             if (t.IsPrimitive) return Convert.ToString(v, System.Globalization.CultureInfo.InvariantCulture);
             if (v is UnityEngine.Object u) return u != null ? u.name : null;
+
+            if (t.Name == "ExperimentTask")
+            {
+                var no = GetMember(v, "No");
+                var nm = GetMember(v, "Name");
+                return Convert.ToString(no) + ":" + Convert.ToString(nm);
+            }
+            if (t.Name == "iLabStep")
+            {
+                var parts = new[] { "seq", "title", "done", "score", "timeUsed" };
+                var vals = parts.Select(p2 => { var x = GetMember(v, p2); return x == null ? "-" : Convert.ToString(x); });
+                return string.Join("|", vals);
+            }
             if (v is IDictionary dict)
             {
                 var keys = new List<string>();
-                foreach (var k in dict.Keys) { if (keys.Count >= 12) break; keys.Add(Convert.ToString(k)); }
+                foreach (var k in dict.Keys) { if (keys.Count >= 16) break; keys.Add(Convert.ToString(k)); }
                 return "count=" + dict.Count + " keys=[" + string.Join(",", keys) + "]";
             }
             if (v is IEnumerable en)
             {
                 var vals = new List<string>();
-                foreach (var x in en) { if (vals.Count >= 12) break; vals.Add(x == null ? "null" : x.ToString()); }
+                foreach (var x in en) { if (vals.Count >= 40) break; vals.Add(x == null ? "null" : (Describe(x) ?? Convert.ToString(x))); }
                 return "count=" + vals.Count + " [" + string.Join(",", vals).Replace("\"", "'") + "]";
             }
             return null;
