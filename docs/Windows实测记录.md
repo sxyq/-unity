@@ -275,17 +275,33 @@ client-agent /procs                → 0 个相关进程
 | SHA256 | `9153E7086CECEEBC274A1A5E861AF59EC5E90A9A527879C46C57BD5B06ABBAB9` |
 | 签名 | **未签名**（NotSigned，校方原始包就是这样） |
 
-尝试过的安装方式：
+尝试过的安装方式与结果（全部实测）：
 
 | 方式 | 结果 |
 |---|---|
-| `msiexec /i ... /qb` | 被当前执行沙箱终止（进程刚起就被杀，无 MSI 日志、无残留） |
-| `msiexec /i ... /qn ALLUSERS=2 MSIINSTALLPERUSER=1`（按用户装） | 同上 |
-| 解包后直接跑 `MCLocalLauncher.exe` | 本机没有 7-Zip / WinRAR / Python msilib，MSI 里的 CAB 取不出来 |
+| `msiexec /i ... /qb`（普通权限） | 退出码 **1619**：安装引擎打不开包 |
+| `msiexec /i ... /qn ALLUSERS=2 MSIINSTALLPERUSER=1` | 同上 |
+| `msiexec /a`（管理安装，仅解包） | **1619** |
+| `ShellExecuteW("runas")` 提权安装 | 立即返回 **2**，无 UAC 窗口、无安装进程 |
+| 换路径（C:\Temp、C:\Users\Public） | 仍 1619 |
+| 换另一份构建 `MCLocalLauncherSetup.msi`（82,270,720 字节，哈希不同） | 仍 1619 |
 
-最后一步卡在 Windows 的 UAC：本机 `EnableLUA=1`、`ConsentPromptBehaviorAdmin=5`，
-安装 MSI 必须在**安全桌面**上点一次「是」。这一步是操作系统的安全边界，
-自动化无法也不应该代点。
+排除项：
+- 安装包损坏 → **两次独立下载字节完全一致**（SHA256 `9153E708…6ABBAB9`），OLE 头正常、内嵌 CAB 完整（MSCF @2,932,736，128 个文件，MSZIP）；
+- MSI 被组策略禁用 → `HKLM\...\Policies\Microsoft\Windows\Installer` 下 `DisableMSI` 等键**都不存在**；
+- 第三方杀软 → 只有 Microsoft Defender，无 360/火绒；
+- 磁盘/路径 → 换目录、换短名均无效。
+
+**决定性证据**：把包里的 128 个文件按 Unity 约定解出来（`C:\Temp\mengoo-portable`），
+直接运行 `MCLocalLauncher.exe` 报 **WinError 740：请求的操作需要提升**。
+也就是说这个客户端**自身清单要求管理员权限**，安装与运行都必须过 UAC。
+
+本机 UAC 是开启的（`EnableLUA=1`、`ConsentPromptBehaviorAdmin=5`），但 Agent 所在的执行环境
+无法把 UAC 安全桌面弹到用户面前（`consent.exe` 从未出现，提权调用立即失败）——这是环境边界，
+不是代码或权限配置能绕过的。
+
+所以最后一步只能由使用者在自己的桌面上完成：双击安装包 → 点「是」。
+
 
 即使装上了，进实验还要过一次平台登录（见 5.3，密码登录可用）。所以「跑真实 Unity 实验」这条链，
 在本机当前状态下只差**一个 UAC 确认**；代码、接口、票据下发都已经验证通了。
