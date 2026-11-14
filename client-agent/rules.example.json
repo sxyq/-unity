@@ -3,7 +3,17 @@
     "把这个文件复制为 client-agent/rules.json 即可覆盖内置规则（不需要改代码）。",
     "phase: 用来判定阶段的正则，按顺序匹配，命中即止。",
     "task:  只在这些“明确宣告当前任务”的行上生效，避免拿阶段或任务列表猜任务。",
-    "本文件是格式示例，正则取自公开文档里出现过的写法；真实规则需要用 calibrate.mjs 跑过真实 Player.log 后再补。"
+    "本文件是格式示例，正则取自公开文档里出现过的写法；真实规则需要用 calibrate.mjs 跑过真实 Player.log 后再补。",
+    "2026-11-15 Windows 实机结论：骨牵引实验本体（Unity 2021.3.6f1）不打印「术前/术中/术后」，",
+    "也不打印 CurrentTask / SubStepDescription。上面的 phase/task 规则在真实日志里一条都不会命中，",
+    "所以 /state 的 phase 与 taskId 保持 null 是正确行为，不要为了「看起来能用」放宽规则。",
+    "真实日志里能可靠拿到的三类证据由 agent.mjs 直接解析，不经过 rules.json：",
+    "  1) UI 生命周期：userInfovalue MLauncher://、获取进度成功、UILoadPanel、UIVideoPlayPanel、",
+    "     打开UICasePanel、UISampleBingLiPanel、上传进度成功（输出 lifecycle）",
+    "  2) progress requestBody 里的整份逐步骤成绩：currentExpProgress / ScoreDatas(SN,section,score,isRight,feedbackInfo)",
+    "     （输出 scoreDetails，供成绩分析与复习建议）",
+    "  3) 进程：HLF10631030.exe 存在即认为会话还在，日志静默时状态不过期",
+    "章节名（骨牵引的操作前准备 / 操作方法及原理 / 术后的病情观察）是题目归属章节，不是当前阶段。"
   ],
   "phase": [
     { "re": "术前阶段|术前访视|PreOp\\b", "phase": "preop" },

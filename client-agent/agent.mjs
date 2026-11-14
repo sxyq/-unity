@@ -199,7 +199,7 @@ const TASK_NAMES = {
 const DAY_RE = /术后\s*第?\s*([1-7])\s*天|postop[_\s-]?day[_\s-]?([1-7])/i;
 const SESSION_MARK = /Initialize engine version/i;
 
-function readTail(file, maxBytes = 256 * 1024) {
+function readText(file, maxBytes = 512 * 1024) {
   try {
     const st = fs.statSync(file);
     const start = Math.max(0, st.size - maxBytes);
@@ -207,8 +207,115 @@ function readTail(file, maxBytes = 256 * 1024) {
     const buf = Buffer.alloc(Math.min(maxBytes, st.size - start));
     fs.readSync(fd, buf, 0, buf.length, start);
     fs.closeSync(fd);
-    return buf.toString('utf8').split(/\r?\n/);
-  } catch (e) { return []; }
+    return buf.toString('utf8');
+  } catch (e) { return ''; }
+}
+
+function readTail(file, maxBytes = 256 * 1024) {
+  const s = readText(file, maxBytes);
+  return s ? s.split(/\r?\n/) : [];
+}
+
+/* ---------------- 真实客户端：UI 生命周期 ----------------
+ * 骨牵引实验本体（Unity 2021.3）不打印「术前/术中/术后」这类阶段词，
+ * 只打印自己加载/隐藏的 UI 面板路径。这些是可以证实的运行事件，
+ * 但**不等于**业务阶段，所以只作为 lifecycle 输出，不拿来推 phase/taskId。 */
+const LIFECYCLE_RULES = [
+  { re: /userInfovalue\s*MLauncher:\/\//i, stage: 'launched', label: '实验已启动' },
+  { re: /获取进度成功/i, stage: 'progress-loaded', label: '已读取上次进度' },
+  { re: /Resources\/Prefabs\/UI\/Load\/UILoadPanel/i, stage: 'loading', label: '资源加载中' },
+  { re: /Resources\/Prefabs\/UI\/Share\/UIVideoPlayPanel/i, stage: 'intro-video', label: '实验介绍视频' },
+  { re: /打开UICasePanel/i, stage: 'case-panel', label: '病例/任务主界面' },
+  { re: /UISampleBingLiPanel/i, stage: 'case-history', label: '示例病历面板' },
+  { re: /上传进度成功/i, stage: 'progress-saved', label: '客户端已上报进度' },
+  { re: /上传成绩成功|提交成绩成功|实验完成|isDone\\?":true/i, stage: 'finished', label: '实验完成' }
+];
+
+function parseLifecycle(lines) {
+  const events = [];
+  lines.forEach((raw, idx) => {
+    const t = String(raw).trim();
+    for (const r of LIFECYCLE_RULES) {
+      if (r.re.test(t)) { events.push({ stage: r.stage, label: r.label, line: t.slice(0, 160), idx }); break; }
+    }
+  });
+  return events;
+}
+
+/* ---------------- 真实客户端：逐步骤成绩 ----------------
+ * 切换任务/进入病例界面时，客户端把整份进度以
+ *   progress requestBody: { "maxPV":…, "pv":…, "data": "{\"currentExpProgress\":…,\"ScoreDatas\":[…]}" }
+ * 打进 Player.log。这是原程序自己写的**只读证据**，不是我们上报或伪造的。
+ * 一条日志里可能有多份（断点续做），取最后一次解析成功的。 */
+function parseProgress(text) {
+  if (!text) return null;
+  const marker = 'progress requestBody:';
+  let from = 0, found = null;
+  for (;;) {
+    const i = text.indexOf(marker, from);
+    if (i < 0) break;
+    const start = text.indexOf('{', i + marker.length);
+    if (start < 0) break;
+    // 外层 JSON 的 data 是字符串，内层的 } 不会提前终止；用括号配平 + 引号状态扫描
+    let depth = 0, inStr = false, esc = false, end = -1;
+    for (let k = start; k < text.length && k < start + 2 * 1024 * 1024; k++) {
+      const c = text[k];
+      if (inStr) {
+        if (esc) esc = false;
+        else if (c === '\\') esc = true;
+        else if (c === '"') inStr = false;
+        continue;
+      }
+      if (c === '"') inStr = true;
+      else if (c === '{') depth++;
+      else if (c === '}') { depth--; if (depth === 0) { end = k + 1; break; } }
+    }
+    if (end > 0) {
+      try {
+        const outer = JSON.parse(text.slice(start, end));
+        let inner = typeof outer.data === 'string' ? JSON.parse(outer.data) : outer.data;
+        if (inner && Array.isArray(inner.ScoreDatas)) found = { outer, inner };
+      } catch (e) { /* 半截块，忽略 */ }
+      from = end;
+    } else break;
+  }
+  if (!found) return null;
+
+  const { inner, outer } = found;
+  const items = inner.ScoreDatas.map((s) => ({
+    sn: String(s.SN || ''),
+    section: String(s.section || ''),
+    score: Number(s.score) || 0,
+    right: s.isRight === true,
+    feedback: String(s.feedbackInfo || '').slice(0, 160),
+    time: Number(s.time) || 0
+  })).filter((x) => x.sn);
+
+  const bySection = {};
+  for (const it of items) {
+    const k = it.section || '未分章节';
+    if (!bySection[k]) bySection[k] = { total: 0, right: 0, score: 0 };
+    bySection[k].total++;
+    if (it.right) bySection[k].right++;
+    bySection[k].score += it.score;
+  }
+  const wrong = items.filter((x) => !x.right).map((x) => ({ sn: x.sn, section: x.section, feedback: x.feedback }));
+
+  return {
+    source: 'client-log',
+    currentExpProgress: Number(inner.currentExpProgress) || 0,
+    isDone: inner.isDone === true,
+    isStudyModel: inner.isStudyModel === true,
+    pv: Number(outer.pv) || 0,
+    maxPV: Number(outer.maxPV) || 0,
+    totalItems: items.length,
+    rightItems: items.filter((x) => x.right).length,
+    totalScore: Math.round(items.reduce((a, b) => a + b.score, 0) * 10) / 10,
+    bySection,
+    wrongItems: wrong,
+    // 只给结构化明细，不生成任何结论性文字（由上层 prompt 决定怎么解读）
+    items
+  };
 }
 
 /** 只保留最后一根会话：Unity 每次启动都会写 Initialize engine version */
@@ -334,22 +441,29 @@ async function listProcs() {
   if (Date.now() - procCache.at < 5000 && procCache.value) return procCache.value;
 
   // 用 tasklist 而不是 PowerShell：后者在受限环境里经常起不来，且更慢。
-  const raw = await new Promise((resolve) => {
-    execFile('tasklist', ['/v', '/fo', 'csv'], { timeout: 8000, windowsHide: true, maxBuffer: 4 * 1024 * 1024 },
+  // /v（带窗口标题）在部分受限会话里会直接失败，所以先试 /v，失败退回普通 /fo csv。
+  const run = (args) => new Promise((resolve) => {
+    execFile('tasklist', args, { timeout: 8000, windowsHide: true, maxBuffer: 4 * 1024 * 1024 },
       (err, stdout) => resolve(err ? '' : String(stdout || '')));
   });
+  let raw = await run(['/v', '/fo', 'csv']);
+  let verbose = raw.includes('窗口标题') || /"CPU/.test(raw) || raw.split(/\r?\n/).length > 3 && /窗口|Window Title|CPU 时间/.test(raw);
+  if (!verbose) {
+    const simple = await run(['/fo', 'csv']);
+    if (simple) { raw = simple; verbose = false; }
+  }
 
   const out = [];
   for (const line of raw.split(/\r?\n/)) {
     if (!line.startsWith('"')) continue;
     const cols = line.slice(1, -1).split('","');
-    if (cols.length < 9) continue;
+    if (cols.length < 5) continue;
     const name = cols[0];
     if (!/MCLocal|Mengoo|MLauncher|HLF|骨牵引|VirtualSim/i.test(name)) continue;
     out.push({
       pid: Number(cols[1]),
       name,
-      title: cols[8] || '',
+      title: verbose && cols.length >= 9 ? (cols[8] || '') : '',
       path: '',
       started: '',
       mem: cols[4]
@@ -380,7 +494,13 @@ ConvertTo-Json -Compress -InputObject $b.ToString()
 async function buildState() {
   const logs = discoverLogs();
   const now = Date.now();
+  const procs = await listProcs();
+  // 实验本体进程还在 = 会话仍在继续；Unity 静默时日志可能几分钟不更新，
+  // 不能因此把真实状态判成「历史」，否则面板 30 秒后就过期了。
+  const gameRunning = procs.some((p) => /HLF10631030|MCLocalLauncher/i.test(p.name));
   let best = null;
+  let progressBest = null;
+  let lifecycleBest = null;
   const detail = [];
 
   for (const meta of logs) {
@@ -388,7 +508,15 @@ async function buildState() {
     if (!lines.length) continue;
     const p = parseLines(lines);
     const ageMs = now - meta.mtime;
-    const live = ageMs <= RECENT_MS;
+    // 只把「本实验的两份日志」视为可延续的会话，别的游戏日志不因进程同名被带活
+    const isOurLog = /Mengoo|MCLocalLauncher|HLF10631030/i.test([meta.company, meta.product].join('/'));
+    const live = ageMs <= RECENT_MS || (isOurLog && gameRunning);
+
+    // 真实实验本体日志里的两种额外证据：UI 生命周期、逐步骤成绩
+    const text = readText(meta.file);
+    const lc = parseLifecycle(lines);
+    const pd = parseProgress(text);
+    const lastLc = lc.length ? lc[lc.length - 1] : null;
 
     detail.push({
       file: meta.file,
@@ -399,8 +527,21 @@ async function buildState() {
       phase: p.phase,
       taskId: p.task ? p.task.taskId : null,
       events: p.phaseCount,
+      lifecycle: lastLc ? lastLc.stage : null,
+      scoreItems: pd ? pd.totalItems : 0,
       stepCode: p.stepCode
     });
+
+    if (lastLc) {
+      const lcRank = (live ? 1000 : 0) + lastLc.idx;
+      if (!lifecycleBest || lcRank > lifecycleBest.rank) {
+        lifecycleBest = { rank: lcRank, stage: lastLc.stage, label: lastLc.label, evidence: [lastLc.line], live };
+      }
+    }
+    if (pd) {
+      const pdRank = (live ? 10000 : 0) + Math.min(pd.totalItems, 999) + pd.currentExpProgress;
+      if (!progressBest || pdRank > progressBest.rank) progressBest = { rank: pdRank, value: pd, live };
+    }
 
     if (!p.phase) continue;
     // 活着的日志优先，其次看证据条数
@@ -409,7 +550,6 @@ async function buildState() {
     if (rank > bestRank) best = { ...p, meta, rank, live, ageMs };
   }
 
-  const procs = await listProcs();
   const title = await getWindowTitle();
 
   let phase = best ? best.phase : null;
@@ -461,7 +601,16 @@ async function buildState() {
     confidence,
     evidence: evidence.filter(Boolean).slice(0, 4),
     stepCode: best ? best.stepCode : null,
-    live: best ? best.live : false,
+    // 真实客户端证据：只描述「运行到哪一步 UI」与「原程序自己打印的分项成绩」，
+    // 不据此推断业务阶段/任务（phase、taskId 仍只由明确标记产生）。
+    lifecycle: lifecycleBest ? {
+      stage: lifecycleBest.stage,
+      label: lifecycleBest.label,
+      evidence: lifecycleBest.evidence,
+      live: lifecycleBest.live
+    } : null,
+    scoreDetails: progressBest ? progressBest.value : null,
+    live: (best ? best.live : false) || !!(lifecycleBest && lifecycleBest.live) || !!(progressBest && progressBest.live),
     ageSec: best ? Math.round(best.ageMs / 1000) : null,
     logs: detail,
     windowTitle: title,

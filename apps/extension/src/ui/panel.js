@@ -26,6 +26,8 @@
     scene: null, override: null,
     examLock: false,            // 一旦确认为考核，任何手动选择都不能解除
     client: null, clientScene: null, clientTs: 0,
+    clientEvidence: null,       // 客户端日志里的真实 UI 生命周期 / 逐步骤成绩
+    scoreSource: '', scoreCleared: false,
     health: { mode: 'unknown', model: '' },
     threads: {}, busy: false, scoreText: '', scoreOpen: false,
     prefs: { ...DEFAULT_PREFS },
@@ -157,7 +159,12 @@
     els.dot.className = 'bt-dot ' + (s && s.phase ? conf : 'none');
 
     if (!s || !s.phase) {
-      els.hint.textContent = '未识别，请手动选择';
+      // 客户端日志能证明「实验正在跑、当前是哪个 UI」，但证明不了业务阶段。
+      // 如实显示运行证据，仍然要求手动选任务，不拿界面名猜场景。
+      const lc = state.clientEvidence && state.clientEvidence.lifecycle;
+      els.hint.textContent = lc
+        ? `客户端已运行 · ${lc.label} · 任务请手动选`
+        : '未识别，请手动选择';
     } else if (state.override) {
       els.hint.textContent = '手动指定' + (state.examLock ? ' · 考核保护中' : '');
     } else {
@@ -202,7 +209,12 @@
       if (on) els.bridgeBadge.textContent = '已接入实验事件 ' + snap.stepCount;
     }
 
-    // 报告阶段最高优先级：旁听平台自己接口拿到的结构化成绩（不碰 token）
+    // 报告阶段最高优先级：客户端日志里原程序打印的逐步骤成绩（含错项）
+    if (sc && sc.phase === 'report' && state.clientEvidence && state.clientEvidence.score) {
+      fillClientScore(state.clientEvidence.score, state.clientEvidence.lifecycle);
+    }
+
+    // 其次：旁听平台自己接口拿到的结构化成绩（不碰 token）
     if (sc && sc.phase === 'report' && !state.scoreText && window.BT_BRIDGE && window.BT_BRIDGE.apiSnapshot) {
       const snap = window.BT_BRIDGE.apiSnapshot();
       if (snap && snap.scores.length) {
@@ -400,8 +412,56 @@
        3) 一旦出现考核信号，锁存 examLock，手动选择也不解除。 */
   const PAGE_SOURCES = { page: 1, bridge: 1, api: 1 };
 
+  /* 客户端 Player.log 里原程序自己打印的逐步骤成绩。
+   * 平台 ItemsByUser 只有总分；分项只在客户端进度回包里，所以这里优先级最高。
+   * 只陈述日志里有的字段，不推断「哪一步做错了」以外的结论。 */
+  function formatClientScore(sd, lc) {
+    const L = [];
+    L.push('【来源：客户端 Player.log · 原程序打印的逐步骤进度记录】');
+    L.push(`分项 ${sd.totalItems} 项，正确 ${sd.rightItems} 项，累计 ${sd.totalScore} 分；进度标记 ${sd.currentExpProgress}${sd.isDone ? '（已完成）' : '（未完成）'}`);
+    const secs = Object.entries(sd.bySection || {});
+    if (secs.length) {
+      L.push('分章节：' + secs.map(([k, v]) =>
+        `${k} ${v.right}/${v.total}，${Math.round(v.score * 10) / 10} 分`).join('；'));
+    }
+    const wrong = sd.wrongItems || [];
+    if (wrong.length) {
+      L.push('未得分／未完成项：');
+      for (const w of wrong.slice(0, 10)) L.push(`- ${w.sn}（${w.section}）：${w.feedback || '未完成'}`);
+    } else {
+      L.push('未得分／未完成项：日志里没有记录到。');
+    }
+    if (lc && lc.label) L.push(`客户端界面：${lc.label}`);
+    L.push('说明：以上是原实验写入日志的分项记录，不代表本次实时作答；日志未记录的步骤无法推断。');
+    return L.join('\n');
+  }
+
+  function fillClientScore(sd, lc) {
+    if (state.scoreCleared || !sd || !sd.totalItems) return;
+    const sig = [sd.totalItems, sd.rightItems, sd.totalScore, sd.currentExpProgress, (sd.wrongItems || []).length].join('|');
+    if (state.scoreSource === 'client-log' && state.scoreSignature === sig) return;  // 去重
+    const txt = formatClientScore(sd, lc);
+    state.scoreText = txt;
+    state.scoreSource = 'client-log';
+    state.scoreSignature = sig;
+    state.scoreOpen = true;
+    if (els.scoreInput) els.scoreInput.value = txt.slice(0, 2000);
+    if (els.scoreBox) els.scoreBox.classList.add('show');
+    T.log('score-source', {
+      from: 'client-log', items: sd.totalItems,
+      wrong: (sd.wrongItems || []).length
+    });
+  }
+
   function onClientState(cs) {
     state.client = cs;
+    // 真实实验本体日志里没有「术前/术中/术后」阶段词，但会打印 UI 生命周期
+    // 和整份逐步骤成绩。这些证据与 phase 无关，必须单独收下。
+    if (cs && cs.ok && (cs.scoreDetails || cs.lifecycle)) {
+      state.clientEvidence = { score: cs.scoreDetails || null, lifecycle: cs.lifecycle || null };
+      const sc0 = activeScene();
+      if (sc0 && sc0.phase === 'report' && cs.scoreDetails) fillClientScore(cs.scoreDetails, cs.lifecycle);
+    }
     if (!cs || !cs.ok || !cs.phase) return;
     if (cs.ts) {
       if (cs.ts === state.clientTs) return;   // 后台推送与面板轮询会重复，去重
@@ -1029,11 +1089,14 @@
       const v = els.scoreInput.value.trim();
       if (!v) { toast('请先粘贴成绩或错项'); return; }
       state.scoreText = v;
+      state.scoreCleared = true;      // 学生自己粘贴/改过，不再被自动数据覆盖
       T.log('score', { chars: v.length });
       send('这是我的考核成绩/错项，请基于它帮我分析：\n' + v);
     });
     root.querySelector('[data-act="clear-score"]').addEventListener('click', () => {
       state.scoreText = '';
+      state.scoreCleared = true;
+      state.scoreSource = '';
       els.scoreInput.value = '';
       toast('已清空成绩信息');
     });
@@ -1162,6 +1225,11 @@
       clientTs: state.clientTs,
       clientPhase: state.client ? state.client.phase : null,
       clientSource: state.client ? state.client.contextSource : null,
+      clientEvidence: state.clientEvidence
+        ? { hasScore: !!state.clientEvidence.score, lifecycle: state.clientEvidence.lifecycle && state.clientEvidence.lifecycle.label }
+        : null,
+      scoreSource: state.scoreSource,
+      scoreCleared: state.scoreCleared,
       thread: threadKey(),
       threads: Object.keys(state.threads)
     };
