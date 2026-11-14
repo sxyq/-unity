@@ -17,6 +17,7 @@
 
   let token = '';
   let expId = '';
+  const dbg = window.__btPollDbg = { token: false, expId: '', calls: 0, last: null };
 
   function currentExpId() {
     try {
@@ -56,6 +57,7 @@
   /* ---------- 轮询 ---------- */
   async function poll() {
     expId = expId || currentExpId();
+    dbg.token = !!token; dbg.expId = expId;
     if (!token || !expId) return;
     try {
       const r = await fetch('/api/Experiment/GetProcess', {
@@ -66,6 +68,7 @@
       if (!r.ok) return;
       const j = await r.json();
       if (!j || !j.data) return;
+      dbg.calls++; dbg.last = j.data;
       window.postMessage({
         __bt_poll__: true,
         id: expId,

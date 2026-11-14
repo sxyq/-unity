@@ -13,7 +13,7 @@
     "http://localhost:8790/*"
   ],
   "background": {
-    "service_worker": "src/background.js"
+    "service_worker": "src/boot/background.js"
   },
   "content_scripts": [
     {
@@ -23,14 +23,16 @@
         "http://localhost/*"
       ],
       "js": [
-        "src/case-data.js",
-        "src/prompt.js",
-        "src/instrument.js",
-        "src/bridge.js",
-        "src/score-parse.js",
-        "src/scene-detect.js",
-        "src/ui.js",
-        "src/main.js"
+        "src/data/case-data.js",
+        "src/data/prompt.js",
+        "src/core/instrument.js",
+        "src/platform/bridge.js",
+        "src/platform/score-parse.js",
+        "src/scene/rules.js",
+        "src/scene/detect.js",
+        "src/ui/template.js",
+        "src/ui/panel.js",
+        "src/boot/main.js"
       ],
       "run_at": "document_idle",
       "all_frames": false
@@ -42,7 +44,7 @@
         "http://localhost/*"
       ],
       "js": [
-        "src/api-capture.js"
+        "src/platform/api-capture.js"
       ],
       "run_at": "document_start",
       "world": "MAIN",
@@ -53,7 +55,7 @@
         "https://skeletaltraction.cqmu.edu.cn/*"
       ],
       "js": [
-        "src/api-poll.js"
+        "src/platform/api-poll.js"
       ],
       "run_at": "document_start",
       "world": "MAIN",
@@ -64,7 +66,7 @@
     {
       "resources": [
         "assets/*",
-        "src/panel.css"
+        "src/ui/panel.css"
       ],
       "matches": [
         "https://skeletaltraction.cqmu.edu.cn/*",
