@@ -138,9 +138,27 @@ namespace Gqy
             // 当前活动 UI 面板（真实 GameObject 名）
             try
             {
+                /* 只报「真的看得见」的面板：
+                   实测发现关闭后的面板 GameObject 仍 activeInHierarchy，
+                   残留名字会把已结束的任务一直报成当前任务。
+                   用 CanvasGroup.alpha 过滤 alpha=0（淡出隐藏）的面板。 */
+                var cgType = Type.GetType("UnityEngine.CanvasGroup, UnityEngine.CoreModule");
+                var alphaProp = cgType != null ? cgType.GetProperty("alpha") : null;
                 var panels = UnityEngine.Object.FindObjectsOfType<Transform>()
                     .Where(t => t != null && t.gameObject.activeInHierarchy &&
                                 t.name.IndexOf("Panel", StringComparison.OrdinalIgnoreCase) >= 0)
+                    .Where(t =>
+                    {
+                        if (cgType == null || alphaProp == null) return true;
+                        try
+                        {
+                            var cg = t.GetComponent(cgType);
+                            if (cg == null) return true;
+                            var a = Convert.ToSingle(alphaProp.GetValue(cg, null));
+                            return a > 0.01f;
+                        }
+                        catch { return true; }
+                    })
                     .Select(t => t.name).Distinct().Take(16).ToArray();
                 d["panels"] = panels;
             }

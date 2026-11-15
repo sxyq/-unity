@@ -313,12 +313,22 @@ function strArray(v) { return Array.isArray(v) ? v.map(String) : (v ? [String(v)
 
 function mapUnityEvent(ev) {
   const panels = strArray(ev.panels).join(' ');
+  const uTexts = strArray(ev.uiTexts);
+  const uiJoined = uTexts.join(' ');   // 面板文字带序号前缀（如「7.穿刺」），必须用包含匹配
   const selected = strArray(ev.selectedTasks);
   let phase = null, taskId = null, taskName = null, why = '';
 
   for (const r of UNITY_PANEL_RULES) {
     if (!r.re.test(panels)) continue;
     phase = r.phase; taskId = r.taskId; taskName = r.taskName || null; why = r.why;
+  }
+
+  /* 实测坑：`panels` 是「已加载」的面板，关闭后仍留在列表里（UIDialoogConentPanel 就是如此）。
+     用面板自身的特征文字判断它是否真的开着，避免把旧面板当成当前任务：
+       - 电子病历开着 → uiTexts 有「退出病历」
+       - 护患对白开着 → uiTexts 有「跳过」 */
+  if (taskId === 'preop-history' && !uiJoined.includes('退出病历')) {
+    taskId = null; taskName = null; why = '';
   }
   // 只有「当前选中」的任务才允许推出 taskId；uiTexts 里列着的任务不算
   const sence = String(ev.senceState || '');
@@ -341,13 +351,21 @@ function mapUnityEvent(ev) {
      - 手术治疗 → UISkeletaTractionOptPanel（牵引重量操作）
      这两个面板在别的场景不出现，因此按面板识别即可，但要限定在 ChildSence02。 */
   if (/ChildSence02/i.test(sence)) {
-    if (/UISecondSenceOptPanel/i.test(panels)) {
-      phase = 'intraop'; taskId = 'intraop-observe'; taskName = '操作观察与效果判断';
-      why = '模块2·体格检查（UISecondSenceOptPanel：视诊/触诊/动诊/量诊）';
+    /* 实测：体格检查与手术治疗都用 UISecondSenceOptPanel 作为底部动作条，
+       只能靠动作条里的项目文字区分：
+         体格检查 = 视诊/触诊/动诊/量诊
+         手术治疗 = 确认穿刺部位/打开穿刺包/戴无菌手套/消毒/铺巾/麻醉/穿刺/调节肢体高度/牵引 */
+    const opSteps = ['穿刺', '铺巾', '消毒', '戴无菌手套', '调节肢体高度'].filter(t => uiJoined.includes(t)).length;
+    if (opSteps >= 2) {
+      phase = 'intraop'; taskId = 'intraop-principle'; taskName = '牵引原理';
+      why = '模块2·手术治疗（骨牵引操作步骤条：确认穿刺部位→穿刺→牵引）';
     } else if (/UISkeletaTractionOptPanel/i.test(panels)) {
       phase = 'intraop'; taskId = 'intraop-principle'; taskName = '牵引原理';
       why = '模块2·手术治疗（UISkeletaTractionOptPanel 牵引重量操作）';
-    } else if (/UIDialoogConentPanel/i.test(panels)) {
+    } else if (/UISecondSenceOptPanel/i.test(panels) && uiJoined.includes('量诊')) {
+      phase = 'intraop'; taskId = 'intraop-observe'; taskName = '操作观察与效果判断';
+      why = '模块2·体格检查（UISecondSenceOptPanel：视诊/触诊/动诊/量诊）';
+    } else if (/UIDialoogConentPanel/i.test(panels) && uiJoined.includes('跳过')) {
       phase = 'intraop'; taskId = 'intraop-communicate'; taskName = '术中沟通与宣教';
       why = '模块2·医患沟通（护患对白）';
     }
@@ -379,7 +397,6 @@ function mapUnityEvent(ev) {
   /* 术前谈话（2026-11-15 实测）：点「3.术前谈话」热点不写 selectedTasks，
      但会打开 UIDialoogConentPanel 对白，且动作栏出现「同意书」。
      用「对白面板 + 同意书」作为证据，避免把普通对白误判成术前谈话。 */
-  const uTexts = strArray(ev.uiTexts);
   if (uTexts.some(t => /同意书/.test(t)) && /ChildSence01/i.test(String(ev.senceState || ''))) {
     phase = 'preop'; taskId = 'preop-talk'; taskName = '术前沟通与疑问交流';
     why = '术前谈话：对白面板 + 知情同意书';
