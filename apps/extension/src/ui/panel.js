@@ -728,6 +728,20 @@
 
   /* ---------------- 场景切换 ---------------- */
   function applyScene(scene, fromAuto) {
+    /* 切换前先中断在跑的请求：否则旧请求的 chunk 会写进新场景的会话。
+       activeReqId 递增使迟到的消息被 onBg 的 id 校验丢弃。 */
+    if (state.busy) {
+      try { cancel(); } catch (e) { }
+      state.activeReqId = ++state.reqId;
+      state.busy = false;
+      state.streaming = false;
+      if (els.send) {
+        els.send.classList.remove('stop');
+        const sp = els.send.querySelector('span');
+        if (sp) sp.textContent = '发送';
+        els.send.disabled = false;
+      }
+    }
     // 考核保护：一旦确认过考核，后续任何来源（含手动选择）都不能把它改回普通问答
     if (scene && (scene.mode === 'exam' || scene.phase === 'report')) state.examLock = true;
     // 就地改，保证 state.override 与 state.scene 两个引用看到同一个 mode
