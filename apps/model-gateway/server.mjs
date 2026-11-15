@@ -33,7 +33,9 @@ const DEFAULTS = {
   port: 8787,
   mode: 'auto',
   baseUrl: 'https://api.deepseek.com/v1',
+  protocol: 'chat',                 // 'chat' = /chat/completions；'responses' = /responses（GPT-5/6 系）
   chatCompletionsPath: '/chat/completions',
+  responsesPath: '/responses',
   apiKey: '',
   model: 'deepseek-chat',
   stream: true,
@@ -115,14 +117,29 @@ function composeSignal(outer, timeoutMs) {
 }
 
 async function callLive(system, messages, stream, outer) {
-  const body = {
-    model: CFG.model,
-    stream: !!stream,
-    temperature: CFG.temperature,
-    max_tokens: CFG.maxTokens,
-    messages: [{ role: 'system', content: system }, ...messages]
-  };
-  const url = CFG.baseUrl.replace(/\/$/, '') + (CFG.chatCompletionsPath || '/chat/completions');
+  const isResponses = (CFG.protocol || 'chat') === 'responses';
+  /* Responses 协议（GPT-5/6 系必用）：system → instructions，messages → input。
+     实测该网关的 /v1/responses 会回默认 instructions（Codex 提示词），
+     必须显式传 instructions 覆盖，否则模型会以为自己是写代码的。 */
+  const body = isResponses
+    ? {
+        model: CFG.model,
+        instructions: system,
+        input: messages.map(m => ({ role: m.role, content: String(m.content || '') })),
+        stream: !!stream,
+        max_output_tokens: CFG.maxTokens
+      }
+    : {
+        model: CFG.model,
+        stream: !!stream,
+        temperature: CFG.temperature,
+        max_tokens: CFG.maxTokens,
+        messages: [{ role: 'system', content: system }, ...messages]
+      };
+  const path = isResponses
+    ? (CFG.responsesPath || '/responses')
+    : (CFG.chatCompletionsPath || '/chat/completions');
+  const url = CFG.baseUrl.replace(/\/$/, '') + path;
   const ctl = composeSignal(outer, CFG.timeoutMs);
   try {
     const resp = await fetch(url, {
@@ -137,6 +154,19 @@ async function callLive(system, messages, stream, outer) {
     e.btState = ctl.state;
     throw e;
   }
+}
+
+/* Responses 协议的非流式结果：output[].content[].text 依次拼接 */
+function responsesText(j) {
+  if (!j) return '';
+  if (typeof j.output_text === 'string' && j.output_text) return j.output_text;
+  const out = [];
+  for (const item of (j.output || [])) {
+    for (const c of (item.content || [])) {
+      if (c && typeof c.text === 'string') out.push(c.text);
+    }
+  }
+  return out.join('');
 }
 
 function errText(e) {
@@ -182,7 +212,10 @@ async function streamLive(res, system, messages, outer) {
         if (!p || p === '[DONE]') continue;
         try {
           const o = JSON.parse(p);
-          const t = o.choices && o.choices[0] && o.choices[0].delta && o.choices[0].delta.content;
+          /* chat 协议：choices[0].delta.content
+             responses 协议：{type:'response.output_text.delta', delta:'…'} */
+          const t = (o.choices && o.choices[0] && o.choices[0].delta && o.choices[0].delta.content)
+            || (o.type === 'response.output_text.delta' ? o.delta : null);
           if (t) sse(res, { t });
         } catch (e) { /* ignore */ }
       }
@@ -217,7 +250,9 @@ async function nonStreamLive(res, system, messages, outer) {
   }
 
   const j = await r.json().catch(() => null);
-  const txt = j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+  const txt = (CFG.protocol === 'responses')
+    ? responsesText(j)
+    : (j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content);
   if (!txt) sse(res, { error: '模型返回为空或格式不符' });
   else sse(res, { t: txt });
   sse(res, '[DONE]');
@@ -250,8 +285,8 @@ function readBody(req, limit = 256 * 1024) {
 
 function safeConfig() {
   return {
-    mode: CFG.mode, baseUrl: CFG.baseUrl, model: CFG.model,
-    chatCompletionsPath: CFG.chatCompletionsPath, stream: CFG.stream,
+    mode: CFG.mode, baseUrl: CFG.baseUrl, model: CFG.model, protocol: CFG.protocol,
+    chatCompletionsPath: CFG.chatCompletionsPath, responsesPath: CFG.responsesPath, stream: CFG.stream,
     timeoutMs: CFG.timeoutMs, temperature: CFG.temperature, maxTokens: CFG.maxTokens,
     hasKey: !!CFG.apiKey
   };
@@ -301,7 +336,7 @@ const server = http.createServer(async (req, res) => {
         return;
       }
       const patch = await readBody(req, 16 * 1024);
-      const allow = ['baseUrl', 'model', 'chatCompletionsPath', 'stream', 'timeoutMs', 'temperature', 'maxTokens', 'mode'];
+      const allow = ['baseUrl', 'model', 'protocol', 'chatCompletionsPath', 'responsesPath', 'stream', 'timeoutMs', 'temperature', 'maxTokens', 'mode'];
 
       if (typeof patch.baseUrl === 'string' && patch.baseUrl) {
         try {

@@ -383,6 +383,35 @@ function mapUnityEvent(ev) {
     }
   }
 
+  /* 答题面板的题干（UISelectionExamPanel.questionTip）能直接定位任务主题：
+     点「下肢深静脉血栓」出的题是「术后预防深静脉血栓的最佳运动方式」。
+     这是术后任务项最可靠的一条证据。 */
+  const examQ = String(ev.examQuestion || '');
+  if (examQ) {
+    for (const r of POSTOP_ITEM_RULES) {
+      if (!r.re.test(examQ)) continue;
+      phase = 'postop'; taskId = r.taskId; taskName = r.taskName;
+      why = '术后答题题干：' + examQ.slice(0, 40);
+      break;
+    }
+  }
+  /* 术后考核面板里按天分的 ToggleList（panel01/02/03ToggleList），
+     每项写成「序号:名称:是否选中」，isOn=1 的那项就是学生此刻在做的观察项。
+     实测 currentTarget 指的是天数按钮组，靠不住；这条才是任务级来源。 */
+  const listRaw = String(ev.examList1 || ev.examList2 || ev.examList3 || '');
+  if (listRaw) {
+    const item = listRaw.split('|').map(x => x.split(':')).find(p => p[2] === '1');
+    const curItem = item && item[1] ? item[1] : null;
+    if (curItem) {
+      for (const r of POSTOP_ITEM_RULES) {
+        if (!r.re.test(curItem)) continue;
+        phase = 'postop'; taskId = r.taskId; taskName = r.taskName;
+        why = '术后考核面板当前项：' + curItem;
+        break;
+      }
+    }
+  }
+
   let postopDay = null;
   const dt = Number(ev.dayTime);
   if (Number.isFinite(dt) && dt >= 1 && dt <= 7) postopDay = dt;
@@ -425,6 +454,7 @@ function mapUnityEvent(ev) {
       selectedTasks: selected,
       taskCurrentText: ev.taskCurrentText || null,
       sence3Order: ev.sence3Order != null ? Number(ev.sence3Order) : null,
+      examQuestion: ev.examQuestion || null,
       quizOn,
       dayTime: Number.isFinite(dt) ? dt : null,
       isFirstDay: String(ev.isFirstDay) === 'true',

@@ -218,6 +218,22 @@ namespace Gqy
                         Add(d, "sence3Day", Field(t, b, "dayTime"));
                         Add(d, "sence3Order", Field(t, b, "orderIndex"));
                     }
+                    else if (tn == "Nurse.Logic.UISelectionOtherExamPanel")
+                    {
+                        /* 术后任务项的考核面板：三个 ToggleList 分别是第1/2/3天的任务清单，
+                           选中项 isOn=true → 学生当前在做的并发症观察项 */
+                        Add(d, "examDay", Field(t, b, "dayTime"));
+                        Add(d, "examList1", ToggleListInfo(Field(t, b, "panel01ToggleList")));
+                        Add(d, "examList2", ToggleListInfo(Field(t, b, "panel02ToggleList")));
+                        Add(d, "examList3", ToggleListInfo(Field(t, b, "panel03ToggleList")));
+                    }
+                    else if (tn == "Nurse.Logic.UISelectionExamPanel")
+                    {
+                        /* 是/否选择题：题干本身能直接定位任务主题 */
+                        Add(d, "examIndex", Field(t, b, "currIndex"));
+                        var qTip = TextOf(Field(t, b, "questionTip"));
+                        if (!string.IsNullOrEmpty(qTip)) d["examQuestion"] = qTip.Length > 160 ? qTip.Substring(0, 160) : qTip;
+                    }
                     else if (tn == "Nurse.Logic.UISkeletaTractionOptPanel")
                     {
                         Add(d, "tractionWeight", Field(t, b, "weightValue"));
@@ -320,6 +336,52 @@ namespace Gqy
                 catch { }
             }
             return outp.ToArray();
+        }
+
+        /* 读取 UnityEngine.UI.Text 组件的文本（反射） */
+        private static string TextOf(object comp)
+        {
+            if (comp == null) return null;
+            try
+            {
+                var t = comp.GetType();
+                var p = t.GetProperty("text");
+                return p != null ? p.GetValue(comp, null) as string : null;
+            }
+            catch { return null; }
+        }
+
+        /* 术后勾选列表：把每一项读成 "序号:名称:是否选中"
+         * UISelectionOtherExamPanel.panel01/02/03ToggleList 就是第一天/第二天/第三天的任务清单，
+           选中态 = 学生当前正在做的并发症观察项。 */
+        private static string ToggleListInfo(object tr)
+        {
+            var t = tr as UnityEngine.Transform;
+            if (t == null) return null;
+            var toggleType = Type.GetType("UnityEngine.UI.Toggle, UnityEngine.UI");
+            var onProp = toggleType != null ? toggleType.GetProperty("isOn") : null;
+            var sb = new System.Text.StringBuilder();
+            for (int i = 0; i < t.childCount; i++)
+            {
+                var child = t.GetChild(i);
+                if (child == null) continue;
+                var name = TextUnderTransform(child);
+                if (string.IsNullOrEmpty(name)) name = child.name;
+                int on = 0;
+                if (toggleType != null && onProp != null)
+                {
+                    try
+                    {
+                        var tg = child.GetComponent(toggleType);
+                        if (tg != null && Convert.ToBoolean(onProp.GetValue(tg, null))) on = 1;
+                    }
+                    catch { }
+                }
+                if (sb.Length > 0) sb.Append('|');
+                sb.Append(i).Append(':').Append(name).Append(':').Append(on);
+                if (sb.Length > 400) break;
+            }
+            return sb.Length > 0 ? sb.ToString() : null;
         }
 
         private static void Add(Dictionary<string, object> d, string key, object v)
