@@ -875,9 +875,17 @@ async function buildState() {
     if (uni.phase) {
       phase = uni.phase;
       postopDay = uni.postopDay;
-      taskId = uni.taskId;
-      taskName = uni.taskName;
-      confidence = unityBest.live ? uni.confidence : 'low';
+      if (unityBest.live) {
+        taskId = uni.taskId;
+        taskName = uni.taskName;
+        confidence = uni.confidence;
+      } else {
+        // 客户端事件已过期（退出/卡死）：不再展示"当前任务"，避免误导学生
+        taskId = null;
+        taskName = null;
+        confidence = 'low';
+        evidence = ['客户端状态已过期，请重新进入实验任务'];
+      }
     } else {
       confidence = 'low';                       // 只有运行事件，不能证明业务阶段
     }

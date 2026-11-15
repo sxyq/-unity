@@ -566,21 +566,24 @@
     if (msg.id && state.activeReqId && msg.id !== state.activeReqId) return;
 
     if (msg.type === 'chunk') {
-      const th = currentThread();
+      const th = streamThread();
       const last = th[th.length - 1];
       if (last && last.streaming) {
         last.text += msg.text;
-        const bubbles = els.body.querySelectorAll('.bt-bubble');
-        const node = bubbles[bubbles.length - 1];
-        if (node) node.textContent = last.text;
-        els.body.scrollTop = els.body.scrollHeight;
+        // 只有当前正在看这个会话时才更新 DOM
+        if (threadKey() === state.activeThreadKey) {
+          const bubbles = els.body.querySelectorAll('.bt-bubble');
+          const node = bubbles[bubbles.length - 1];
+          if (node) node.textContent = last.text;
+          els.body.scrollTop = els.body.scrollHeight;
+        }
       }
       return;
     }
     if (msg.type === 'done') { finishStream('done'); return; }
     if (msg.type === 'aborted') { finishStream('aborted'); return; }
     if (msg.type === 'error') {
-      const th = currentThread();
+      const th = streamThread();
       const last = th[th.length - 1];
       if (last && last.streaming) {
         last.streaming = false;
@@ -646,6 +649,14 @@
     gameTimer = setInterval(pull, 2000);
   }
 
+  /* SSE 归属：发起请求时记住会话键，回流时写回原会话。
+     否则场景切换后，chunk 会被 currentThread() 写到新会话里（串台）。 */
+  function streamThread() {
+    const k = state.activeThreadKey || threadKey();
+    if (!state.threads[k]) state.threads[k] = [];
+    return state.threads[k];
+  }
+
   function finishStream(reason) {
     const th = currentThread();
     const last = th[th.length - 1];
@@ -693,6 +704,7 @@
     if (!text) return;
 
     const th = currentThread();
+    state.activeThreadKey = threadKey();     // 记住本次请求属于哪个会话
     th.push({ role: 'user', text });
     th.push({ role: 'assistant', roleKey: roleOfScene(), text: '', streaming: true });
     state.busy = true;
@@ -884,11 +896,13 @@
       const rows = Object.entries(cs.bySection || {}).map(([k, v]) =>
         `<div>${k}：<b>${v.right}/${v.total}</b> 正确，${v.score} 分</div>`).join('');
       const wrong = (cs.wrongItems || []).slice(0, 10).map((w) =>
-        `<li><b>${w.sn}</b>${w.section ? ' · ' + w.section : ''}${w.feedback ? '：' + w.feedback : ''}</li>`).join('');
+        `<li><b>${w.sn}</b>${w.section ? ' · ' + w.section : ''}${w.feedback ? '：' + w.feedback : ''}`
+        + ` <button class="bt-ask" data-ask="${String(w.sn).replace(/"/g, '')} 这一项为什么错了？应该怎么做？">追问</button></li>`).join('');
       els.setBody.innerHTML = `
         <div class="bt-field">
           <label>总分：<b>${cs.totalScore}</b> / 正确 ${cs.rightItems}/${cs.totalItems}</label>
           <div class="hint">进度 PV ${cs.pv}/${cs.maxPV}${cs.isDone ? ' · 已完成' : ''}${cs.isStudyModel ? ' · 学习模式' : ''}</div>
+          <div class="hint">来源：本次实验运行数据（游戏内 ScoreMgr 实时读取，非历史成绩）</div>
         </div>
         <div class="bt-field">
           <label>分类得分</label>
@@ -897,6 +911,10 @@
         <div class="bt-field">
           <label>错项（${(cs.wrongItems || []).length}）</label>
           <ul class="bt-score-wrong">${wrong || '<li>没有错项</li>'}</ul>
+        </div>
+        <div class="bt-field">
+          <button class="bt-mini-btn primary" data-act="review">根据这些错项生成复习建议</button>
+          <div class="hint">会把真实错项带入模型上下文，不是通用建议。</div>
         </div>`;
       return;
     }
@@ -1200,6 +1218,13 @@
 
     els.select.addEventListener('change', () => {
       const v = els.select.value;
+      // 考核锁：不允许通过手动切换场景绕开考核（不能用换场景的方式找答案）
+      if (state.examLock && v !== 'auto') {
+        toast('考核进行中，不能切换智能场景');
+        const cur = activeScene();
+        els.select.value = (cur && cur.scenarioId) ? cur.scenarioId : 'auto';
+        return;
+      }
       if (v === 'auto') {
         state.override = null;
         applyScene(window.BT_SCENE.detect(), true);
