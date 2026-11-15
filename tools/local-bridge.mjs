@@ -8,12 +8,17 @@
  *
  * 用法：
  *   node tools/local-bridge.mjs                 # 监听 9090，回复握手（默认）
+ *   node tools/local-bridge.mjs --silent        # 监听 9090，静默不回复（测测试副本）
  *   node tools/local-bridge.mjs --port=9090
  *
  * 实测平台前端（baselarning.*.js）：onopen 发 "Hello from client"，
  * onmessage 收到**任何**消息就 window.location = <MLauncher URL>。
  * 所以本桥只需要回一条消息，剩下的协议跳转由浏览器 + 已注册的 MLauncher:// 完成；
  * 页面不会在 ws 里下发 URL，本桥也绝不替页面启动进程。
+ *
+ * ⚠ --silent：收到消息只记录、不回复、不断连。页面收不到消息就不会执行
+ *   window.location = MLauncher:// 协议跳转，从而不会拉起原版启动器与
+ *   测试副本竞争（实测该竞争会把测试副本静默杀死在 QUIPanelStack init）。
  */
 import http from 'node:http';
 import crypto from 'node:crypto';
@@ -99,6 +104,8 @@ server.on('upgrade', (req, socket) => {
   socket.on('data', (chunk) => {
     decodeFrames(state, chunk, (text) => {
       LOG('[页面→ws]', text.slice(0, 500));
+      // --silent：只记录，不回复、不断连 → 页面不会触发 MLauncher:// 协议跳转
+      if (opt.silent) { LOG('[ws] silent 模式，保持不回复'); return; }
       // 回复任意消息即可让页面执行协议跳转；不解析、不落盘、不打印票据
       send({ code: 200, msg: 'ok', data: null });
     }, () => { LOG('[ws] 页面断开'); socket.destroy(); });

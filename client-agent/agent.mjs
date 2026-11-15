@@ -250,9 +250,16 @@ function parseLifecycle(lines) {
 const UNITY_PANEL_RULES = [
   { re: /UIHistoryTakingPanel/i, phase: 'preop', taskId: 'preop-history', taskName: '病史采集与症状问诊', why: '原程序 UIHistoryTakingPanel（病史采集面板）' },
   { re: /UISkeletaTractionOptPanel/i, phase: 'intraop', taskId: 'intraop-principle', taskName: '牵引原理', why: '原程序 UISkeletaTractionOptPanel（牵引重量操作面板）' },
-  { re: /UITaskOptPanel/i, phase: 'postop', taskId: null, why: '原程序 UITaskOptPanel（术后每日任务面板）' }
+  { re: /UITaskOptPanel/i, phase: 'postop', taskId: null, why: '原程序 UITaskOptPanel（术后每日任务面板）' },
+  /* 2026-11-15 实机实测：真实客户端的入院记录病历面板（热点「1.入院记录」） */
+  { re: /UISampleBingLiPanel/i, phase: 'preop', taskId: 'preop-history', taskName: '病史采集与症状问诊', why: '实测 UISampleBingLiPanel+RecordPanel（入院记录病历：主诉/现病史/辅助检查/专科检查）' }
 ];
 const UNITY_TASK_RULES = [
+  /* 2026-11-15 实机实测：真实客户端热点/病历页签的 selectedTasks 任务名 */
+  { re: /^入院记录$/, phase: 'preop', taskId: 'preop-history', taskName: '病史采集与症状问诊' },
+  { re: /^辅助检查$/, phase: 'preop', taskId: 'preop-history', taskName: '病史采集与症状问诊' },
+  { re: /^专科检查$/, phase: 'preop', taskId: 'preop-history', taskName: '病史采集与症状问诊' },
+  { re: /^术前准备$/, phase: 'preop', taskId: null, taskName: '术前准备' },
   { re: /病史采集|病史回顾|主诉|现病史|问诊/, phase: 'preop', taskId: 'preop-history', taskName: '病史采集与症状问诊' },
   { re: /术前谈话|术前沟通|知情同意/, phase: 'preop', taskId: 'preop-talk', taskName: '术前沟通与疑问交流' },
   { re: /身份核对|部位确认|宣教/, phase: 'intraop', taskId: 'intraop-communicate', taskName: '术中沟通与宣教' },
