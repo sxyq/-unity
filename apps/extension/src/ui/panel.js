@@ -631,7 +631,23 @@
       }
       return;
     }
-    if (state.stale) { state.stale = null; state.lastUnity = null; state._staleKey = ''; }
+    if (state.stale) {
+      state.stale = null; state.lastUnity = null; state._staleKey = '';
+      /* 新实验会话开始：上一轮的考核锁必须解除，否则新一轮学习环节会一直显示“考核中”。
+         如果新会话本身就在答题，下面的 cs.mode==='exam' 会立刻重新锁上。 */
+      if (state.examLock) {
+        state.examLock = false;
+        if (state.scene && state.scene.mode === 'exam') state.scene.mode = 'study';
+        T.log('exam-reset', { reason: 'new-session' });
+      }
+      /* 上一轮的手动选择也属于那次实验；新会话要恢复自动跟随，
+         否则学生会以为面板坏了（一直停在旧任务上）。 */
+      if (state.override) {
+        state.override = null;
+        saveManualScene(null);
+        T.log('manual-reset', { reason: 'new-session' });
+      }
+    }
 
     if (cs.ts) {
       if (cs.ts === state.clientTs) return;   // 后台推送与面板轮询会重复，去重

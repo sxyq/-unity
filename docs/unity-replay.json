@@ -1,8 +1,8 @@
 {
-  "at": "2026-11-15T21:37:56.562Z",
+  "at": "2026-11-15T23:45:09.937Z",
   "note": "离线回放 2026-11-15 真实 GQY_STATE；证明映射层，不证明 Unity 当前在运行。",
-  "pass": 11,
-  "total": 11,
+  "pass": 13,
+  "total": 13,
   "rows": [
     {
       "name": "01 病史",
@@ -187,6 +187,40 @@
         "phase": "preop",
         "taskId": null,
         "postopDay": null,
+        "mode": "study"
+      },
+      "ok": true
+    },
+    {
+      "name": "05 操作观察（视诊触诊动诊量诊）",
+      "source": "live-2026-11-16-05",
+      "expected": {
+        "phase": "intraop",
+        "taskId": "intraop-observe",
+        "postopDay": null,
+        "mode": "study"
+      },
+      "got": {
+        "phase": "intraop",
+        "taskId": "intraop-observe",
+        "postopDay": null,
+        "mode": "study"
+      },
+      "ok": true
+    },
+    {
+      "name": "06 术后心理（对白）",
+      "source": "live-psych-2026-11-16",
+      "expected": {
+        "phase": "postop",
+        "taskId": "postop-psych",
+        "postopDay": 1,
+        "mode": "study"
+      },
+      "got": {
+        "phase": "postop",
+        "taskId": "postop-psych",
+        "postopDay": 1,
         "mode": "study"
       },
       "ok": true

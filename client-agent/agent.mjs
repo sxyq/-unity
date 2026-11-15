@@ -421,6 +421,9 @@ function mapUnityEvent(ev) {
     } else if (/UISkeletaTractionOptPanel/i.test(panels)) {
       phase = 'intraop'; taskId = 'intraop-principle'; taskName = '牵引原理';
       why = '模块2·手术治疗（UISkeletaTractionOptPanel 牵引重量操作）';
+    } else if (/UISecondSenceOptPanel/i.test(panels) && /胫骨结节牵引|跟骨牵引|股骨髁上牵引|骨牵引装置/.test(uiJoined)) {
+      phase = 'intraop'; taskId = 'intraop-principle'; taskName = '牵引原理';
+      why = '模块2·手术治疗（牵引部位/装置选择：' + (uTexts.find(t => /牵引/.test(t)) || '').slice(0, 20) + '）';
     } else if (/UISecondSenceOptPanel/i.test(panels) && uiJoined.includes('量诊')) {
       phase = 'intraop'; taskId = 'intraop-observe'; taskName = '操作观察与效果判断';
       why = '模块2·体格检查（UISecondSenceOptPanel：视诊/触诊/动诊/量诊）';
@@ -468,6 +471,14 @@ function mapUnityEvent(ev) {
       phase = 'preop'; taskId = 'preop-history'; taskName = '病史采集与症状问诊';
       why = '3D 菜单按钮：入院记录';
     }
+  }
+
+  /* 术后心理护理：点病人菜单的「心理护理」后，菜单关闭、tipOptButtons 清空，
+     只剩一段固定开场对白「您的手术很顺利，今天是术后第一天，您看起来…」。
+     用这段对白把任务保持住，避免掉回“仅阶段”。 */
+  if (/UIDialoogConentPanel/i.test(panels) && /手术很顺利|今天是术后第[一二三七]天.*您看起来|伤筋动骨|回.{0,3}不了家|睡不着|心里.{0,4}(烦|担心)/.test(uiJoined)) {
+    phase = 'postop'; taskId = 'postop-psych'; taskName = '术后心理护理';
+    why = '术后心理护理开场对白';
   }
 
   /* 术后「疼痛」任务：点任务栏的疼痛后，原程序开的是患者对白
