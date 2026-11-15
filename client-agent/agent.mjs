@@ -248,6 +248,8 @@ function parseLifecycle(lines) {
  * 这里只做「可证实的映射」，不把任务列表里出现过的词当成当前任务。
  */
 const UNITY_PANEL_RULES = [
+  /* 2026-11-15 实测：原程序结束后的综合表现记录面板（成绩单）→ 报告阶段 */
+  { re: /UIComprehensivePerformanceRecordPanel/i, phase: 'report', taskId: 'report-score', taskName: '成绩与能力分析', why: '原程序 UIComprehensivePerformanceRecordPanel（综合表现记录/成绩）' },
   { re: /UIHistoryTakingPanel/i, phase: 'preop', taskId: 'preop-history', taskName: '病史采集与症状问诊', why: '原程序 UIHistoryTakingPanel（病史采集面板）' },
   { re: /UISkeletaTractionOptPanel/i, phase: 'intraop', taskId: 'intraop-principle', taskName: '牵引原理', why: '原程序 UISkeletaTractionOptPanel（牵引重量操作面板）' },
   { re: /UITaskOptPanel/i, phase: 'postop', taskId: null, why: '原程序 UITaskOptPanel（术后每日任务面板）' },
