@@ -321,13 +321,36 @@ function mapUnityEvent(ev) {
     phase = r.phase; taskId = r.taskId; taskName = r.taskName || null; why = r.why;
   }
   // 只有「当前选中」的任务才允许推出 taskId；uiTexts 里列着的任务不算
+  const sence = String(ev.senceState || '');
   for (const s of selected) {
     for (const r of UNITY_TASK_RULES) {
       if (!r.re.test(s)) continue;
+      /* 实测坑：ChildSence02 里病历页签同样会写 selectedTasks=["入院记录"]，
+         但那时它只是「电子病历的当前页签」，不是场景 01 的任务。
+         因此病历页签类任务名只在 ChildSence01 生效。 */
+      if (/^(入院记录|辅助检查|专科检查)$/.test(s) && !/ChildSence01/i.test(sence)) continue;
       phase = r.phase; taskId = r.taskId; taskName = r.taskName; why = '当前选中任务：' + s;
       break;
     }
     if (taskId) break;
+  }
+
+  /* 模块 2「骨牵引的操作方法及原理」的真实任务（2026-11-15 实测热点）：
+     1.医患沟通 / 2.体格检查 / 3.辅助检查 / 4.手术治疗
+     - 体格检查 → UISecondSenceOptPanel（视诊/触诊/动诊/量诊）
+     - 手术治疗 → UISkeletaTractionOptPanel（牵引重量操作）
+     这两个面板在别的场景不出现，因此按面板识别即可，但要限定在 ChildSence02。 */
+  if (/ChildSence02/i.test(sence)) {
+    if (/UISecondSenceOptPanel/i.test(panels)) {
+      phase = 'intraop'; taskId = 'intraop-observe'; taskName = '操作观察与效果判断';
+      why = '模块2·体格检查（UISecondSenceOptPanel：视诊/触诊/动诊/量诊）';
+    } else if (/UISkeletaTractionOptPanel/i.test(panels)) {
+      phase = 'intraop'; taskId = 'intraop-principle'; taskName = '牵引原理';
+      why = '模块2·手术治疗（UISkeletaTractionOptPanel 牵引重量操作）';
+    } else if (/UIDialoogConentPanel/i.test(panels)) {
+      phase = 'intraop'; taskId = 'intraop-communicate'; taskName = '术中沟通与宣教';
+      why = '模块2·医患沟通（护患对白）';
+    }
   }
 
   /* 术后任务栏的「当前选中项」是任务级真实来源（UITaskOptPanel.currentTarget 的子 Text）。
@@ -347,6 +370,12 @@ function mapUnityEvent(ev) {
   if (Number.isFinite(dt) && dt >= 1 && dt <= 7) postopDay = dt;
   else if (String(ev.isFirstDay) === 'true') postopDay = 1;
 
+  /* 模块 2 的「3.辅助检查」也会打开同一份电子病历（RecordPanel/UISampleBingLiPanel），
+     但它不是场景 01 的病史问诊——面板名相同而已。此时只保留阶段，不认领任务。 */
+  if (/ChildSence02/i.test(sence) && taskId === 'preop-history') {
+    phase = 'intraop'; taskId = null; taskName = null;
+    why = '模块2·辅助检查（复用了电子病历面板，非场景01）';
+  }
   /* 术前谈话（2026-11-15 实测）：点「3.术前谈话」热点不写 selectedTasks，
      但会打开 UIDialoogConentPanel 对白，且动作栏出现「同意书」。
      用「对白面板 + 同意书」作为证据，避免把普通对白误判成术前谈话。 */
