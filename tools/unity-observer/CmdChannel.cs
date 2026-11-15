@@ -88,6 +88,84 @@ namespace Gqy
                 return "replaced " + n;
             }
 
+            if (verb == "btnclick")
+            {
+                /* 按索引触发某面板上的第 N 个可见 Button：
+                   有些按钮没有文字（图片按钮），只能按索引点。 */
+                var tn = parts.Length > 1 ? parts[1].Trim() : "";
+                var ty = Type.GetType(tn + ", Assembly-CSharp") ?? Type.GetType(tn);
+                if (ty == null) return "no type " + tn;
+                var host = UnityEngine.Object.FindObjectOfType(ty) as Component;
+                if (host == null) return "no instance";
+                var btnType = Type.GetType("UnityEngine.UI.Button, UnityEngine.UI");
+                if (btnType == null) return "no UI";
+                var list = host.GetComponentsInChildren(btnType, true)
+                    .Where(x => x != null && x.gameObject.activeInHierarchy)
+                    .ToArray();
+                var idx = parts.Length > 2 ? int.Parse(parts[2]) : 0;
+                if (idx < 0 || idx >= list.Length) return "index out of range " + list.Length;
+                var b = list[idx];
+                var nm = b.name;
+                var ev = btnType.GetProperty("onClick").GetValue(b, null);
+                if (ev == null) return "button without onClick: " + nm;
+                ev.GetType().GetMethod("Invoke").Invoke(ev, null);
+                return "clicked button #" + idx + "/" + list.Length + " name=" + nm;
+            }
+
+            if (verb == "uiclick")
+            {
+                /* 按界面文字找最近的 Button/Toggle，直接触发 onClick。
+                   用途：模式选择、弹窗确定等没有稳定坐标的按钮；绕开 DPI 换算。 */
+                var want = parts.Length > 1 ? parts[1].Trim() : "";
+                var txtType = Type.GetType("UnityEngine.UI.Text, UnityEngine.UI");
+                if (txtType == null) return "no UI";
+                var tp = txtType.GetProperty("text");
+                var btnType = Type.GetType("UnityEngine.UI.Button, UnityEngine.UI");
+                var toggleType = Type.GetType("UnityEngine.UI.Toggle, UnityEngine.UI");
+                foreach (var o in Resources.FindObjectsOfTypeAll(txtType))
+                {
+                    var c = o as Component;
+                    if (c == null || !c.gameObject.activeInHierarchy) continue;
+                    if (!c.gameObject.scene.IsValid()) continue;
+                    var s0 = tp.GetValue(c, null) as string;
+                    if (string.IsNullOrEmpty(s0) || s0.IndexOf(want, StringComparison.Ordinal) < 0) continue;
+                    var t = c.transform;
+                    for (int i = 0; i < 10 && t != null; i++)
+                    {
+                        if (btnType != null)
+                        {
+                            var b = t.GetComponent(btnType);
+                            if (b != null)
+                            {
+                                var nm = t.name;              // 点击可能销毁面板，先取名字
+                                var label = s0.Trim();
+                                var ev = btnType.GetProperty("onClick").GetValue(b, null);
+                                if (ev == null) return "button without onClick: " + nm;
+                                ev.GetType().GetMethod("Invoke").Invoke(ev, null);
+                                return "clicked button [" + label + "] on " + nm;
+                            }
+                        }
+                        if (toggleType != null)
+                        {
+                            var tg = t.GetComponent(toggleType);
+                            if (tg != null)
+                            {
+                                var nm = t.name;
+                                var label = s0.Trim();
+                                toggleType.GetProperty("isOn").SetValue(tg, true, null);
+                                var ev = toggleType.GetProperty("onValueChanged").GetValue(tg, null);
+                                if (ev != null)
+                                    ev.GetType().GetMethod("Invoke", new[] { typeof(bool) }).Invoke(ev, new object[] { true });
+                                return "toggled [" + label + "] on " + nm;
+                            }
+                        }
+                        t = t.parent;
+                    }
+                    return "text without button: [" + s0.Trim() + "] on " + c.gameObject.name;
+                }
+                return "no text " + want;
+            }
+
             if (verb == "scan")
             {
                 // 扫描所有 *Panel 类实例上可见按钮，按文字过滤，返回「类型|文字@x,y」

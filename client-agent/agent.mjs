@@ -317,15 +317,19 @@ const POSTOP_ITEM_RULES = [
 /* 字幕劫持用：从面板文本里挑出「最像一句台词」的那条
    规则：含中文、长度 6~80、排除按钮词与纯数字 */
 function pickSubtitle(texts) {
-  const BAN = /^(确定|取消|提交|关闭|返回|跳过|是|否|下一|上一|我已知道|提示|退出|答题测试|任务栏)$/;
-  let best = '';
+  const BAN = /^(确定|取消|提交|关闭|返回|跳过|是|否|下一|上一|我已知道|提示|退出|答题测试|任务栏|得分|时间|计时)$/;
+  let best = '', bestScore = -99;
   for (const raw of (texts || [])) {
     const t = String(raw || '').trim();
-    if (!t || t.length < 6 || t.length > 80) continue;
+    if (!t || t.length < 2 || t.length > 80) continue;
     if (BAN.test(t)) continue;
     if (!/[\u4e00-\u9fa5]/.test(t)) continue;
     if (/^[\d\s.,%/]+$/.test(t)) continue;
-    if (t.length > best.length) best = t;
+    let score = 0;
+    if (/记录|检查|护理|观察|牵引|评估|沟通|宣教|心理|并发|病房|任务|病历|信息/.test(t)) score += 10;
+    if (t.length >= 4 && t.length <= 20) score += 5;
+    if (/\d/.test(t) || /地址|路|号|床|日期|时间/.test(t)) score -= 10;
+    if (score > bestScore) { bestScore = score; best = t; }
   }
   return best || null;
 }
@@ -340,7 +344,21 @@ function parseUnityEvent(text) {
     let e = text.indexOf('\n', s);
     if (e < 0) e = text.length;
     const raw = text.slice(s, e).trim();
-    try { const v = JSON.parse(raw); if (v && typeof v === 'object') last = v; } catch (e2) { /* 半行忽略 */ }
+    /* 原程序的 uiTexts 里可能带未转义的换行/制表符，严格 JSON.parse 会整条失败。
+       实测开场引导文字就带换行，导致「游戏在跑但状态永远为空」。
+       先按原样解析；失败再把控制字符替换成空格重试。 */
+    try {
+      const v = JSON.parse(raw);
+      if (v && typeof v === 'object') last = v;
+    } catch (e2) {
+      try {
+        const v = JSON.parse(raw.replace(/[\u0000-\u001F]/g, ' '));
+        if (v && typeof v === 'object') last = v;
+      } catch (e3) {
+        if (process.env.BT_DEBUG_PARSE) console.error('[parse] fail len=' + raw.length + ' ' + e2.message + ' / fallback: ' + e3.message);
+        /* 半行/损坏行忽略 */
+      }
+    }
     from = e + 1;
   }
   return last;
@@ -849,10 +867,12 @@ async function buildState() {
     // 只把「本实验的两份日志」视为可延续的会话，别的游戏日志不因进程同名被带活
     const isOurLog = /Mengoo|MCLocalLauncher|HLF10631030/i.test([meta.company, meta.product].join('/'));
     const fresh = ageMs <= ACTIVE_MS;
-    /* 实验进程还在 → 日志静默也仍然算活（加载/看视频/答题都可能几十秒不写日志）；
-       进程没了 → 只有 60 秒内的写入才算活，避免把退出前的状态当成当前。 */
+    /* 实验进程还在 → 日志静默也仍然算活（加载/看视频/答题都可能几十秒不写日志）。 */
     const procForLog = /HLF10631030/i.test(meta.product || '') ? gameRunning : launcherRunning;
-    const live = isOurLog ? (fresh || procForLog) : (ageMs <= RECENT_MS);
+    /* Windows 上进程表是确定信号：实验进程没了就立刻判过期，
+       不再给 60 秒“日志还新鲜”的宽限，否则关闭实验后还会继续显示上次任务。
+       非 Windows 没有可靠进程表，才退回按日志新鲜度判断。 */
+    const live = isOurLog ? ((!IS_WIN && fresh) || procForLog) : (ageMs <= RECENT_MS);
 
     // 真实实验本体日志里的两种额外证据：UI 生命周期、逐步骤成绩
     const text = readText(meta.file);
@@ -868,6 +888,7 @@ async function buildState() {
         : (pd.attribution === 'current-session' ? 'current-last-run' : 'history');
     }
     const ue = parseUnityEvent(text);
+    if (process.env.BT_DEBUG_PARSE) console.error('[log] ' + meta.file + ' text=' + text.length + ' gqy=' + text.includes('GQY_STATE') + ' ue=' + !!ue + ' pan=' + (ue && ue.panels ? ue.panels.length : '?'));
     const lastLc = lc.length ? lc[lc.length - 1] : null;
 
     detail.push({

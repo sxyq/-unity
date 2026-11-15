@@ -1,7 +1,7 @@
 /*!
  * 骨牵引护理情境化智能交互系统 · 服务端注入版
  * 由 server-hook/build.mjs 自动生成，请勿手改。
- * 生成时间: 2026-11-15T21:46:56.419Z
+ * 生成时间: 2026-11-15T22:24:49.154Z
  * 来源: extension/src/{web-shim.js,data/case-data.js,data/prompt.js,core/instrument.js,platform/bridge.js,platform/score-parse.js,scene/rules.js,scene/detect.js,ui/template.js,ui/panel.js,boot/main.js}
  */
 
@@ -1872,6 +1872,11 @@
       els.current.querySelectorAll('[data-sub]').forEach((b) => b.addEventListener('click', () => {
         const sub = b.dataset.sub;
         if (!activeScene() || !activeScene().scenarioId) { toast('请先选择场景'); return; }
+        /* 只有原实验真的停在这一页时才这样问；否则不能替学生声称“我在这一页”。 */
+        if (!b.classList.contains('on')) {
+          toast(`请先在原实验切到「${sub}」，我会自动跟随`);
+          return;
+        }
         send(`我当前在原实验「${sub}」这一页，请结合这一页继续问我。`);
       }));
       const fol = els.current.querySelector('[data-follow]');

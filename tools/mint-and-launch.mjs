@@ -66,13 +66,16 @@ if (!url && consoleUrl) { url = consoleUrl; console.log('via console'); }
 ws.close();
 if (!url) { console.log('no url'); process.exit(1); }
 
-// 保留原始 scheme 大小写（实测成功日志为 MLauncher://，游戏端区分大小写，勿改）
+/* 实测：客户端只认小写 scheme，且第 6 段必须是 `https//`（无冒号）。
+   平台返回的可能是 MLauncher:// 且该段带冒号，直接传会秒退。 */
 const parts = url.split('&');
 let ticket = parts[16];
-if (ticket.startsWith('http')) ticket = parts[18];
+if (ticket && ticket.startsWith('http')) ticket = parts[18];
 if (!/^[0-9a-f]{8}-/i.test(ticket)) { console.log('票号格式异常'); process.exit(1); }
 parts[16] = HOST;
 parts[18] = ticket;
+parts[0] = 'mlauncher://';
+parts[6] = String(parts[6] || '').replace('https://', 'https//');
 const gameUrl = parts.join('&');
 fs.writeFileSync('C:\\Temp\\mlaunch-url.txt', url, 'utf8');
 fs.writeFileSync('C:\\Temp\\mlaunch-url-game.txt', gameUrl, 'utf8');

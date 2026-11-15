@@ -262,6 +262,11 @@
       els.current.querySelectorAll('[data-sub]').forEach((b) => b.addEventListener('click', () => {
         const sub = b.dataset.sub;
         if (!activeScene() || !activeScene().scenarioId) { toast('请先选择场景'); return; }
+        /* 只有原实验真的停在这一页时才这样问；否则不能替学生声称“我在这一页”。 */
+        if (!b.classList.contains('on')) {
+          toast(`请先在原实验切到「${sub}」，我会自动跟随`);
+          return;
+        }
         send(`我当前在原实验「${sub}」这一页，请结合这一页继续问我。`);
       }));
       const fol = els.current.querySelector('[data-follow]');
