@@ -509,10 +509,23 @@
     });
   }
 
+  let lastClientAt = 0;
   function onClientState(cs) {
     state.client = cs;
+    lastClientAt = Date.now();
     // 真实实验本体日志里没有「术前/术中/术后」阶段词，但会打印 UI 生命周期
     // 和整份逐步骤成绩。这些证据与 phase 无关，必须单独收下。
+    if (!cs || !cs.ok) {
+      // 客户端没在跑：解除上一轮的任务展示，避免界面继续显示过期任务
+      if (Date.now() - lastClientAt > 90000) {
+        state.clientEvidence = null;
+        if (!state.override && state.scene && state.scene.contextSource !== 'manual') {
+          state.scene = null;
+          renderedKey = '';
+          renderScene();
+        }
+      }
+    }
     if (cs && cs.ok && (cs.scoreDetails || cs.lifecycle)) {
       state.clientEvidence = { score: cs.scoreDetails || null, lifecycle: cs.lifecycle || null };
       const sc0 = activeScene();
@@ -1321,6 +1334,14 @@
       els.mini.classList.add('bt-hidden');
       setForm('panel');
       state.open = true;
+      /* 重启后恢复上次手动选择的场景（只恢复手动指定，不覆盖自动识别） */
+      try {
+        const savedScene = localStorage.getItem('bt_scene_manual');
+        if (savedScene && C.byId[savedScene]) {
+          state.override = C.byId[savedScene];
+          state.scene = state.override;
+        }
+      } catch (e) { }
       ensureGreeting();
       renderScene();
       renderThread();
