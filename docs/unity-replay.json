@@ -1,0 +1,195 @@
+{
+  "at": "2026-11-15T21:37:56.562Z",
+  "note": "离线回放 2026-11-15 真实 GQY_STATE；证明映射层，不证明 Unity 当前在运行。",
+  "pass": 11,
+  "total": 11,
+  "rows": [
+    {
+      "name": "01 病史",
+      "source": "st3",
+      "expected": {
+        "phase": "preop",
+        "taskId": "preop-history",
+        "postopDay": null,
+        "mode": "study"
+      },
+      "got": {
+        "phase": "preop",
+        "taskId": "preop-history",
+        "postopDay": null,
+        "mode": "study"
+      },
+      "ok": true
+    },
+    {
+      "name": "02 术前谈话",
+      "source": "st5",
+      "expected": {
+        "phase": "preop",
+        "taskId": "preop-talk",
+        "postopDay": null,
+        "mode": "study"
+      },
+      "got": {
+        "phase": "preop",
+        "taskId": "preop-talk",
+        "postopDay": null,
+        "mode": "study"
+      },
+      "ok": true
+    },
+    {
+      "name": "03 术中沟通",
+      "source": "st10",
+      "expected": {
+        "phase": "intraop",
+        "taskId": "intraop-communicate",
+        "postopDay": null,
+        "mode": "study"
+      },
+      "got": {
+        "phase": "intraop",
+        "taskId": "intraop-communicate",
+        "postopDay": null,
+        "mode": "study"
+      },
+      "ok": true
+    },
+    {
+      "name": "04 牵引原理",
+      "source": "st17",
+      "expected": {
+        "phase": "intraop",
+        "taskId": "intraop-principle",
+        "postopDay": null,
+        "mode": "study"
+      },
+      "got": {
+        "phase": "intraop",
+        "taskId": "intraop-principle",
+        "postopDay": null,
+        "mode": "study"
+      },
+      "ok": true
+    },
+    {
+      "name": "05 操作观察",
+      "source": "st13",
+      "expected": {
+        "phase": "intraop",
+        "taskId": "intraop-observe",
+        "postopDay": null,
+        "mode": "study"
+      },
+      "got": {
+        "phase": "intraop",
+        "taskId": "intraop-observe",
+        "postopDay": null,
+        "mode": "study"
+      },
+      "ok": true
+    },
+    {
+      "name": "06 术后心理",
+      "source": "st30",
+      "expected": {
+        "phase": "postop",
+        "taskId": "postop-psych",
+        "postopDay": 1,
+        "mode": "study"
+      },
+      "got": {
+        "phase": "postop",
+        "taskId": "postop-psych",
+        "postopDay": 1,
+        "mode": "study"
+      },
+      "ok": true
+    },
+    {
+      "name": "07 术后护理",
+      "source": "st26",
+      "expected": {
+        "phase": "postop",
+        "taskId": "postop-care",
+        "postopDay": 1,
+        "mode": "exam"
+      },
+      "got": {
+        "phase": "postop",
+        "taskId": "postop-care",
+        "postopDay": 1,
+        "mode": "exam"
+      },
+      "ok": true
+    },
+    {
+      "name": "08 并发症",
+      "source": "st22",
+      "expected": {
+        "phase": "postop",
+        "taskId": "postop-complication",
+        "postopDay": 1,
+        "mode": "exam"
+      },
+      "got": {
+        "phase": "postop",
+        "taskId": "postop-complication",
+        "postopDay": 1,
+        "mode": "exam"
+      },
+      "ok": true
+    },
+    {
+      "name": "术后答题（仅阶段+考核）",
+      "source": "st21",
+      "expected": {
+        "phase": "postop",
+        "taskId": null,
+        "postopDay": 1,
+        "mode": "exam"
+      },
+      "got": {
+        "phase": "postop",
+        "taskId": null,
+        "postopDay": 1,
+        "mode": "exam"
+      },
+      "ok": true
+    },
+    {
+      "name": "术后任务面板（仅阶段）",
+      "source": "st18",
+      "expected": {
+        "phase": "postop",
+        "taskId": null,
+        "postopDay": 1,
+        "mode": "study"
+      },
+      "got": {
+        "phase": "postop",
+        "taskId": null,
+        "postopDay": 1,
+        "mode": "exam"
+      },
+      "ok": true
+    },
+    {
+      "name": "术前病房（仅阶段）",
+      "source": "st2",
+      "expected": {
+        "phase": "preop",
+        "taskId": null,
+        "postopDay": null,
+        "mode": null
+      },
+      "got": {
+        "phase": "preop",
+        "taskId": null,
+        "postopDay": null,
+        "mode": "study"
+      },
+      "ok": true
+    }
+  ]
+}

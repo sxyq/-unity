@@ -1,0 +1,25 @@
+{
+  "note": "2026-11-16 04:55 从 C:/Users/syy/AppData/LocalLow/Mengoo/HLF10631030/Player.log 的原程序 progress 回包提取。39 项的 score 全为 0、time 全为 0，属未作答，不是错项。用于在实验退出后复现报告场景的提示词与模型行为。",
+  "scoreDetails": {
+    "source": "client-log",
+    "attribution": "current-last-run",
+    "capturedAt": "2026-11-15T20:55:47.800Z",
+    "currentExpProgress": 2,
+    "isDone": false,
+    "isStudyModel": true,
+    "pv": 2,
+    "maxPV": 0,
+    "totalItems": 39,
+    "answeredItems": 0,
+    "pendingItems": 39,
+    "rightItems": 0,
+    "noAttempts": true,
+    "totalScore": 0,
+    "bySection": {
+      "骨牵引的操作前准备": { "total": 6, "right": 0, "score": 0, "answered": 0 },
+      "骨牵引的操作方法及原理": { "total": 1, "right": 0, "score": 0, "answered": 0 },
+      "骨牵引术后的病情观察": { "total": 32, "right": 0, "score": 0, "answered": 0 }
+    },
+    "wrongItems": []
+  }
+}

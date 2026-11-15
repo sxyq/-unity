@@ -17,8 +17,10 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 using Forms = System.Windows.Forms;
@@ -77,6 +79,75 @@ namespace GouQianYinOverlay
         private IntPtr target = IntPtr.Zero;
         private SubtitleForm subtitle;
 
+        /* 窗口状态持久化：
+           以前的跟随 tick 每 900ms 强制写回 420x820 和右侧停靠，
+           学生手动拖过/拉过的窗口会立刻弹回去，重启也不记得。
+           现在只在「用户没有手动调整过」时才套默认布局。 */
+        private bool userSized = false;
+        private bool userMoved = false;
+        private bool applyingLayout = false;
+        private DateTime layoutAt = DateTime.MinValue;
+        private readonly Forms.Timer saveTimer = new Forms.Timer { Interval = 700 };
+        private static string BoundsPath
+        {
+            get
+            {
+                var dir = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "GouQianYinOverlay");
+                return Path.Combine(dir, "bounds.json");
+            }
+        }
+
+        private class BoundsState
+        {
+            public int X { get; set; }
+            public int Y { get; set; }
+            public int W { get; set; }
+            public int H { get; set; }
+            public bool Pinned { get; set; }
+            public bool UserSized { get; set; }
+            public bool UserMoved { get; set; }
+        }
+
+        private void SaveBounds()
+        {
+            try
+            {
+                if (WindowState != Forms.FormWindowState.Normal) return;
+                var dir = Path.GetDirectoryName(BoundsPath);
+                if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
+                var st = new BoundsState
+                {
+                    X = Bounds.X, Y = Bounds.Y, W = Bounds.Width, H = Bounds.Height,
+                    Pinned = pinned, UserSized = userSized, UserMoved = userMoved
+                };
+                File.WriteAllText(BoundsPath, JsonSerializer.Serialize(st));
+            }
+            catch { /* 持久化失败不影响使用 */ }
+        }
+
+        private void RestoreWindowBounds()
+        {
+            try
+            {
+                if (!File.Exists(BoundsPath)) return;
+                var st = JsonSerializer.Deserialize<BoundsState>(File.ReadAllText(BoundsPath));
+                if (st == null || st.W < 200 || st.H < 100) return;
+                var screen = Screen.FromPoint(new Point(st.X + 40, st.Y + 40)).WorkingArea;
+                var r = new Rectangle(st.X, st.Y, st.W, st.H);
+                if (!screen.IntersectsWith(r))
+                    r = new Rectangle(screen.Right - st.W - 24, screen.Top + 40, st.W, st.H);
+                applyingLayout = true;
+                Bounds = r;
+                pinned = st.Pinned;
+                userSized = st.UserSized;
+                userMoved = st.UserMoved;
+                applyingLayout = false;
+            }
+            catch { /* 配置损坏时用默认布局 */ }
+        }
+
         /* 三态尺寸：Ctrl+Alt+M 循环切换。
            展开 420x820 / 窄条 360x104 / 小球 78x78 —— 窗口真的变小，不是只藏内容。 */
         private static readonly Size[] FORMS = { new Size(420, 820), new Size(360, 104), new Size(78, 78) };
@@ -105,7 +176,38 @@ namespace GouQianYinOverlay
             Controls.Add(web);
 
             Load += OnLoaded;
-            FormClosing += (_, __) => { follow.Stop(); retry.Stop(); formTimer.Stop(); subtitle?.Close(); };
+            FormClosing += (_, __) =>
+            {
+                SaveBounds();
+                follow.Stop(); retry.Stop(); formTimer.Stop(); saveTimer.Stop(); subtitle?.Close();
+            };
+
+            /* 用户手动拉伸 → 记住尺寸，不再被跟随逻辑改回默认 420x820 */
+            ResizeEnd += (_, __) =>
+            {
+                if (applyingLayout) return;
+                userSized = true;
+                saveTimer.Stop(); saveTimer.Start();
+            };
+
+            /* 用户拖动窗口 → 自动取消「跟随实验窗口」，并保存位置。
+               跟随逻辑自己设置 Location 时会先置 applyingLayout，不会误判。 */
+            LocationChanged += (_, __) =>
+            {
+                if (applyingLayout || !Visible) return;
+                /* 程序自己改尺寸/位置时，LocationChanged 可能晚于 applyingLayout 复位，
+                   用 400ms 窗口过滤掉，避免把自动布局误判成用户拖动。 */
+                if ((DateTime.Now - layoutAt).TotalMilliseconds < 400) return;
+                if (pinned)
+                {
+                    pinned = false;
+                    Text = "骨牵引智能交互 · 位置已固定（Ctrl+Alt+P 恢复跟随）";
+                }
+                userMoved = true;
+                saveTimer.Stop(); saveTimer.Start();
+            };
+
+            saveTimer.Tick += (_, __) => { saveTimer.Stop(); SaveBounds(); };
 
             follow.Tick += (_, __) => { if (pinned) FollowTarget(); };
             retry.Tick += (_, __) => { retry.Stop(); if (retries-- > 0) LoadPanel(); };
@@ -141,6 +243,7 @@ namespace GouQianYinOverlay
                 return;
             }
 
+            RestoreWindowBounds();
             LoadPanel();
             FollowTarget();
             follow.Start();
@@ -176,13 +279,20 @@ namespace GouQianYinOverlay
 
         private void ApplyMode(string m)
         {
+            var wasPanel = formMode == "panel";
+            formMode = m;
             Size f;
             if (m == "launcher") f = new Size(78, 78);
             else if (m == "mini") f = new Size(360, 104);
             else f = FORMS[0];
+            /* 从收起态回到面板：恢复默认面板尺寸；面板内部再收放则保留用户拉伸过的尺寸 */
+            if (m == "panel" && !wasPanel) userSized = false;
             if (MinimumSize.Width > f.Width || MinimumSize.Height > f.Height)
                 MinimumSize = new Size(60, 60);
+            applyingLayout = true;
+            layoutAt = DateTime.Now;
             Size = f;
+            applyingLayout = false;
             FollowTarget();
         }
 
@@ -191,7 +301,10 @@ namespace GouQianYinOverlay
             var f = FORMS[formIndex];
             if (MinimumSize.Width > f.Width || MinimumSize.Height > f.Height)
                 MinimumSize = new Size(60, 60);
+            applyingLayout = true;
+            layoutAt = DateTime.Now;
             Size = f;
+            applyingLayout = false;
             FollowTarget();
         }
 
@@ -218,7 +331,10 @@ namespace GouQianYinOverlay
             else if (e.KeyCode == Forms.Keys.P)
             {
                 pinned = !pinned;
+                if (pinned) userMoved = false;   // 重新跟随：放弃手动位置
                 Text = "骨牵引智能交互 · " + (pinned ? "跟随实验窗口" : "位置已固定");
+                FollowTarget();
+                saveTimer.Stop(); saveTimer.Start();
                 e.Handled = true;
             }
         }
@@ -303,20 +419,54 @@ namespace GouQianYinOverlay
                屏幕放不下时才回退到窗口内部右下角。 */
             const int inset = 16;
             var screen = Screen.FromRectangle(targetRect).WorkingArea;
-            int w = Math.Min(Width, 480);
-            int h2 = Math.Min(820, Math.Max(420, targetRect.Height));
-            int x = targetRect.Right + inset;
-            int y = targetRect.Top;
-            if (x + w > screen.Right)
-            {
-                // 右边放不下 → 贴窗口内部右下（此时才可能遮挡，用 Ctrl+Alt+T 穿透）
-                x = targetRect.Right - w - inset;
-                y = targetRect.Bottom - h2 - inset;
-            }
 
-            if (Size.Width != w) Width = w;
-            if (Height != h2) Height = h2;
-            if (Location.X != x || Location.Y != y) Location = new Point(x, y);
+            if (formMode == "panel")
+            {
+                /* 只有用户没手动拉过尺寸时才套默认宽高，否则保留他的手感 */
+                if (!userSized)
+                {
+                    int w = Math.Min(Width, 480);
+                    int h2 = Math.Min(820, Math.Max(420, targetRect.Height));
+                    applyingLayout = true;
+                    layoutAt = DateTime.Now;
+                    if (Size.Width != w) Width = w;
+                    if (Height != h2) Height = h2;
+                    applyingLayout = false;
+                }
+
+                if (pinned)
+                {
+                    int w = Width, h2 = Height;
+                    int x = targetRect.Right + inset;
+                    int y = targetRect.Top;
+                    if (x + w > screen.Right)
+                    {
+                        // 右边放不下 → 贴窗口内部右下（此时才可能遮挡，用 Ctrl+Alt+T 穿透）
+                        x = targetRect.Right - w - inset;
+                        y = targetRect.Bottom - h2 - inset;
+                    }
+                    applyingLayout = true;
+                    layoutAt = DateTime.Now;
+                    if (Location.X != x || Location.Y != y) Location = new Point(x, y);
+                    applyingLayout = false;
+                }
+                else if (!screen.IntersectsWith(Bounds))
+                {
+                    applyingLayout = true;
+                    Location = new Point(screen.Right - Width - inset, screen.Top + 40);
+                    applyingLayout = false;
+                }
+            }
+            else
+            {
+                /* 收起态（窄条/小球）：保持小尺寸，贴在实验窗口右下角 */
+                int w = Width, h2 = Height;
+                int x = Math.Max(screen.Left, targetRect.Right - w - inset);
+                int y = Math.Max(screen.Top, targetRect.Bottom - h2 - inset);
+                applyingLayout = true;
+                if (Location.X != x || Location.Y != y) Location = new Point(x, y);
+                applyingLayout = false;
+            }
 
             /* Unity 会在获得焦点时把自己重新置顶，把面板压到后面。
                每次跟随都把自己重新压回最上层，保证面板始终可见。 */

@@ -51,13 +51,21 @@ node apps/model-gateway/server.mjs        # 127.0.0.1:8787（默认演示模式�
 - **术后不串台**：术后第 1/2/3/7 天各自独立会话，切日期即切上下文。
 - **密钥不出服务端**：`/api/config` 只返回 `hasKey`，且只接受本机页面/扩展写入（跨站 403）。
 - **实时状态两条腿**：平台 `GetProcess` 轮询（进度/次数/用时）+ 客户端 `Player.log`。
-- **实机更正（2026-11-15）**：真实骨牵引客户端不打印阶段/任务标记，只打印 UI 面板生命周期
-  与 `progress requestBody` 里的**逐步骤分项成绩**（39 项、含错项原文）。因此 `phase`/`taskId`
-  保持 `null` 要求学生手动选任务，而 09/10 场景会自动带入真实分项。详见 `docs/Windows实测记录.md` §7。
+- **实机更正（2026-11-16）**：原程序 `ScoreDatas` 会把 39 项全部写出来，未作答项同样是
+  `isRight=false / score=0 / time=0`，因此**不能把 39 项都算错项**。状态层现在区分
+  「已作答 / 未作答」，并把成绩归属标成 `本次运行 / 上一次运行 / 历史记录`；
+  没有已作答记录时，模型只能说明数据不足，不得编造薄弱点。
+- **过期状态不再冒充当前**：实验进程退出后，最后一条 `GQY_STATE` 只作为「上次识别到」提示，
+  `phase/taskId` 会被清空；面板显示"实验未运行"，不再自动切入旧任务。
 - **本地测试副本（2026-11-15 续）**：`tools/unity-observer` 在独立副本里只读反射原程序运行时状态
   （`SenceState` / `DayTime` / `isStudyModel` / `WeightValue` / `ScoreDatas`），输出 `GQY_STATE:`；
   `client-agent` 解析为 `unity-event` 驱动面板自动切换。使用 REA 与 Craft Anything CLI 完成程序集取证。
-  见 `docs/Unity本地状态输出.md`。**未嵌入 Unity 原生 UI**，仍用外部悬浮窗。
+  **未嵌入 Unity 原生 UI**，仍用外部悬浮窗。悬浮窗会记住用户拖动/拉伸后的位置与尺寸。
+  见 `docs/Unity本地状态输出.md`。
+- **十场景可复跑**：`node tools/scenario-selftest.mjs` 用真实网关逐场景发请求，校验角色、
+  事实边界、未作答口径与考核保护，结果写入 `docs/model-selftest.md`。
+- **状态映射可复跑**：`node tools/replay-unity-states.mjs` 用 2026-11-15 真实抓到的
+  `GQY_STATE` 事件离线回放 11 个状态，核对阶段/任务映射，结果写入 `docs/unity-replay.json`。
 
 Windows 实机接管过程、误报修复与十场景核对见 `docs/Windows实测记录.md`。
 

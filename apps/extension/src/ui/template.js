@@ -22,6 +22,7 @@
               <div class="bt-subtitle">正在识别当前场景…</div>
             </div>
             <div class="bt-head-actions">
+              <button class="bt-icon-btn bt-fold" data-act="fold" title="收起为窄条（Ctrl+Alt+M 也可）">▾</button>
               <button class="bt-icon-btn" data-act="settings" title="设置">⚙</button>
               <button class="bt-icon-btn" data-act="min" title="收起">—</button>
               <button class="bt-icon-btn" data-act="close" title="关闭">✕</button>

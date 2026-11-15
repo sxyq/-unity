@@ -1,7 +1,7 @@
 /*!
  * 骨牵引护理情境化智能交互系统 · 服务端注入版
  * 由 server-hook/build.mjs 自动生成，请勿手改。
- * 生成时间: 2026-11-14T11:49:43.804Z
+ * 生成时间: 2026-11-15T21:38:40.566Z
  * 来源: extension/src/{web-shim.js,data/case-data.js,data/prompt.js,core/instrument.js,platform/bridge.js,platform/score-parse.js,scene/rules.js,scene/detect.js,ui/template.js,ui/panel.js,boot/main.js}
  */
 
@@ -201,58 +201,65 @@
 
     patient: {
       id: 'case-patient-01',
-      name: '王建国',
+      name: '李波',
       sex: '男',
-      age: 38,
-      height: 170,
-      weight: 70,
-      bed: '创伤骨科 3 床',
-      diagnose: '右股骨干骨折（闭合性）',
-      allergy: '磺胺类药物过敏'
+      age: 33,
+      bed: '创伤骨科 2 床',
+      diagnose: '左侧股骨中下段骨折（断端错位）',
+      allergy: '否认食物、药物过敏史',
+      admit: '2020-08-18 经急诊入院'
     },
 
+    /* 全部取自原实验「电子病历」面板（截图与面板文字双向核对） */
     facts: [
-      { k: '受伤经过', v: '骑电动车摔倒，右大腿外侧着地，伤后右大腿剧痛、肿胀，不能站立行走，被家人送来急诊。', source: '教学病例设定' },
-      { k: '受伤时间', v: '入院前约 2 小时。', source: '教学病例设定' },
-      { k: '疼痛', v: '右大腿持续性胀痛，活动时明显加重，目前 NRS 评分 6 分。', source: '原系统考核题' },
-      { k: '疼痛评分', v: '采用 NRS 数字评分法，现在是 6 分，属于中度疼痛。', source: '原系统考核题' },
-      { k: '伴随症状', v: '受伤后没有昏迷，没有胸闷、气促，没有开放伤口，没有明显出血。', source: '教学病例设定' },
-      { k: '既往病史', v: '平时身体一般，没有糖尿病、心脏病，没有手术史。', source: '教学病例设定' },
-      { k: '过敏史', v: '对磺胺类药物过敏，以前吃过磺胺类药起过皮疹。', source: '原系统考核题' },
-      { k: '体重身高', v: '体重 70kg，身高 170cm。', source: '原系统考核题' },
-      { k: '术前准备', v: '已经禁食禁饮，做过皮试，建立了静脉通路，备皮完成，牵引架和砝码已备好。', source: '教学病例设定' }
+      { k: '受伤经过', v: '乘坐降落伞降落时与围墙相撞，致左侧大腿肿胀疼痛；由 120 送入医院，急诊 CT 后以「左侧股骨中段骨折」收入院。', source: '原实验·入院记录·现病史' },
+      { k: '受伤时间', v: '约 6 小时前。', source: '原实验·主诉「外伤致全身多处损伤 6 小时」' },
+      { k: '疼痛', v: '左侧大腿肿胀疼痛，膝关节屈曲、活动受限；左下肢轴向叩击痛（+）。', source: '原实验·专科检查' },
+      { k: '疼痛评分', v: '病历里没有记录 NRS 具体分值，需要护士现场评估。', source: '原实验·病历（未记录）' },
+      { k: '伴随症状', v: '无心慌、气促、胸闷等不适；神志清醒，精神尚可，食欲正常，二便正常，体重无明显变化。', source: '原实验·现病史' },
+      { k: '既往病史', v: '慢性胃炎病史 10+ 年，曾就诊当地医院住院治疗，病情好转出院；否认高血压、糖尿病、冠心病、传染病病史；否认手术外伤史、输血史。', source: '原实验·既往史' },
+      { k: '过敏史', v: '否认食物、药物过敏史。', source: '原实验·既往史' },
+      { k: '个人史', v: '出生于福建、生长于福建；吸烟 15 年，每日约 20 支；饮酒 15 年，每日约 500ml 啤酒；否认疫水、疫区及放射性/化学毒物接触史。', source: '原实验·个人史' },
+      { k: '婚育史', v: '未婚。', source: '原实验·婚育史' },
+      { k: '家族史', v: '家人体健；否认家族传染病史，否认糖尿病、血友病家族遗传病史。', source: '原实验·家族史' },
+      { k: '专科检查', v: '腰背部及左大腿未见明显创面；左大腿外旋，膝关节屈曲肿胀畸形；左大腿远端可扪及骨擦感、闻及骨擦音；左足背动脉可扪及；左膝因疼痛活动受限，左踝及肢端活动可；左下肢较右侧短缩约 2cm；肢端皮温正常、感觉正常、末梢血运良好。', source: '原实验·专科检查' },
+      { k: '辅助检查', v: '左侧股骨 CT：左侧股骨干中下段骨折，断端错位，远端向后向上移位。血常规：白细胞 14.03×10⁹/L↑、中性粒细胞百分比 83.6%↑、红细胞 3.72×10¹²/L↓ 等。', source: '原实验·辅助检查' },
+      { k: '入院信息', v: '2020-08-18 经急诊入院，床号 2，职业「其他」，住址福建省厦门市同安区五显镇香溪南路 169 号。', source: '原实验·入院记录·基本信息' }
     ],
 
     unknowns: [
-      '具体的手术方案和主刀医生',
-      '化验单、X 光片的具体数值与报告原文',
+      '身高、体重（病历未记录，牵引重量需按医嘱与现场测量）',
+      '具体手术方案和主刀医生',
       '住院费用、出院时间',
       '家族里其他人的疾病情况'
     ],
 
-    /* ---------------- 术后时间线 ---------------- */
+    /* ---------------- 术后时间线 ----------------
+       注意：这是**教学情境设定**，不是原实验病历里的逐日记录。
+       原实验只给出术后第 1/2/3/7 天的任务清单（dayTaskNames），
+       逐日症状描述用于练习沟通，提示词里必须标明来源，不能冒充原始病例。 */
     postopDays: {
       1: {
         label: '术后第 1 天',
-        pain: '切口和牵引侧大腿胀痛，NRS 5 分，活动时加重。',
+        pain: '切口和左大腿牵引侧胀痛，活动时加重。',
         psych: '麻醉刚过，人有点烦躁，怕疼，不太敢动。',
         focus: ['疼痛护理', '患肢血运观察', '体位与翻身']
       },
       2: {
         label: '术后第 2 天',
-        pain: '疼痛比昨天轻，NRS 3 分，主要是酸胀。',
+        pain: '疼痛比昨天轻，以酸胀为主。',
         psych: '情绪平稳一些，开始问什么时候能坐起来。',
         focus: ['针眼护理', '早期床上活动', '皮肤压力性损伤预防']
       },
       3: {
         label: '术后第 3 天',
-        pain: '牵引侧大腿酸胀，针眼处偶尔有牵拉感，NRS 2 分。',
+        pain: '左大腿牵引侧酸胀，针眼处偶尔有牵拉感。',
         psych: '躺了几天有点烦躁，担心拖累家里人，晚上睡不好。',
         focus: ['心理护理', '睡眠', '并发症观察']
       },
       7: {
         label: '术后第 7 天',
-        pain: '疼痛明显缓解，NRS 1 分，主要是活动时不适。',
+        pain: '疼痛明显缓解，主要是活动时不适。',
         psych: '情绪好转，关心康复进度和出院时间。',
         focus: ['康复指导', '牵引有效性复核', '出院准备']
       }
@@ -262,13 +269,13 @@
   /* ---------------- 护理知识库 ---------------- */
   CASE.knowledge = [
     { id: 'traction-principle', title: '骨牵引的原理', tags: ['牵引原理', '为什么', '原理'], body: '骨牵引通过牵引绳、支架与滑车连接砝码，沿肢体纵轴持续施加拉力，对抗肌肉痉挛与收缩，使骨折断端复位并保持稳定；牵引针直接作用于骨骼，牵引力比皮肤牵引更大、更持久。' },
-    { id: 'traction-weight', title: '牵引重量怎么定', tags: ['牵引重量', '砝码', '多少公斤', '重量'], body: '下肢骨牵引重量一般为体重的 1/7～1/10。本例体重 70kg，对应约 7～10kg；具体数值按医嘱和复位情况调整，不可随意增减，也不可随意放松或提拉砝码。' },
+    { id: 'traction-weight', title: '牵引重量怎么定', tags: ['牵引重量', '砝码', '多少公斤', '重量'], body: '下肢骨牵引重量一般为体重的 1/7～1/10。本病例病历未记录体重，实际数值须以医嘱和复位情况为准，不可随意增减，也不可随意放松或提拉砝码。' },
     { id: 'traction-position', title: '体位与装置要求', tags: ['体位', '患肢体位', '牵引架', '滑轮'], body: '患肢保持外展中立位，牵引绳与患肢长轴在同一直线上，滑轮灵活、砝码悬空不触地、不靠床；重量一经设定不得随意改变，床上避免堆放物品压迫牵引绳。' },
     { id: 'neurovascular', title: '患肢血运与感觉观察', tags: ['血运', '末梢', '感觉', '足背动脉', '麻木'], body: '牵引后需复测患肢感觉与末梢血运：观察皮肤颜色、温度、毛细血管充盈时间，触摸足背动脉搏动，询问有无麻木、发凉、剧痛。发现苍白、发凉、麻木或搏动减弱，立即报告医生。' },
     { id: 'pin-care', title: '牵引针眼护理', tags: ['针眼', '感染', '进针处'], body: '针眼处每日用 75% 乙醇滴注消毒，保持清洁干燥，不随意擦拭或覆盖不洁敷料；观察红肿、渗液、疼痛加剧及体温升高，警惕针道感染。' },
     { id: 'complication', title: '常见并发症观察', tags: ['并发症', '观察什么', '风险'], body: '重点观察：针眼感染、足下垂（腓总神经受压）、关节僵硬与肌肉萎缩、深静脉血栓、过牵导致的疼痛加剧或肢体麻木、坠积性肺炎与压疮等卧床相关并发症。' },
-    { id: 'pain-nrs', title: '疼痛评估与再评估', tags: ['疼痛', 'NRS', '评分', '评估'], body: 'NRS 数字评分法 0～10 分：1～3 轻度，4～6 中度，7～10 重度。本例 6 分为中度疼痛。静脉给药镇痛后一般 15～30 分钟内再次评估并记录。' },
-    { id: 'analgesia', title: '镇痛用药注意', tags: ['镇痛', '用药', '凯纷', '氟比洛芬'], body: '本例使用 0.9% 氯化钠 100ml + 凯纷（氟比洛芬酯）50mg 静脉注射。用药前核对过敏史（本例磺胺类过敏），给药后观察镇痛效果与不良反应，并按医嘱时限复评疼痛。' },
+    { id: 'pain-nrs', title: '疼痛评估与再评估', tags: ['疼痛', 'NRS', '评分', '评估'], body: 'NRS 数字评分法 0～10 分：1～3 轻度，4～6 中度，7～10 重度。本病例病历未记录具体分值，须由护士现场询问患者后评分。静脉给药镇痛后一般 15～30 分钟内再次评估并记录。' },
+    { id: 'analgesia', title: '镇痛用药注意', tags: ['镇痛', '用药', '医嘱'], body: '镇痛用药须严格按医嘱执行，用药前核对过敏史（本例病历记载否认食物、药物过敏史），给药后观察镇痛效果与不良反应，并按医嘱时限复评疼痛。具体药名与剂量以医嘱为准，不得自行推测。' },
     { id: 'communication', title: '牵引期间的护患沟通要点', tags: ['沟通', '宣教', '怎么跟病人说'], body: '用患者能听懂的话说明目的与配合方法：为什么要牵引、会有什么感觉、需要怎样配合、出现什么情况要按铃。每次操作前先告知、操作中安抚、操作后交代注意事项。' },
     { id: 'psych-care', title: '术后心理护理', tags: ['心理', '情绪', '烦躁', '焦虑'], body: '长期卧床与活动受限易出现烦躁、焦虑。引导患者说出担心的事，解释牵引周期与康复计划，鼓励家属参与陪伴，安排可行的床上活动与作息，必要时请心理护理专科会诊。' },
     { id: 'dvt', title: '深静脉血栓观察', tags: ['血栓', 'DVT', '肿胀', '小腿'], body: '观察患肢有无突发肿胀、疼痛、皮温升高、浅静脉扩张，测量双下肢周径并对比。怀疑血栓时禁止按摩和热敷，立即制动并报告医生。' },
@@ -338,13 +345,13 @@
       functionName: FN.GUIDE, taskName: '并发症观察',
       role: 'tutor', mode: 'study',
       tags: ['并发症观察', '病情观察', '肿胀', '血栓', '牵引失效'],
-      chips: ['要警惕哪些并发症？', '怎么 early 发现血栓？', '牵引失效有什么表现？', '针眼感染看什么？'],
+      chips: ['要警惕哪些并发症？', '怎么早期发现血栓？', '牵引失效有什么表现？', '针眼感染看什么？'],
       goal: '学生依据患者陈述与既有资料判断，答题后才给错因解释'
     },
     {
       id: 'report-score', no: '09', phase: 'report',
       functionName: FN.FEEDBACK, taskName: '成绩与能力分析',
-      role: 'coach', mode: 'exam',
+      role: 'coach', mode: 'study',
       tags: ['考核评价', '成绩', '得分', '能力'],
       chips: ['我哪些能力掌握得比较好？', '哪些操作需要加强？', '为什么这项护理判断容易出错？'],
       goal: '基于真实成绩分析，无成绩时只给一般性建议'
@@ -352,7 +359,7 @@
     {
       id: 'report-review', no: '10', phase: 'report',
       functionName: FN.FEEDBACK, taskName: '个性化复习建议',
-      role: 'coach', mode: 'exam',
+      role: 'coach', mode: 'study',
       tags: ['学习反馈', '复习', '成绩分析', '下一步'],
       chips: ['下一次应该重点复习什么？', '怎么提升牵引护理能力？', '推荐哪些练习顺序？'],
       goal: '给出可执行的复习路径'
@@ -384,10 +391,11 @@
       name: '虚拟患者',
       avatar: 'patient',
       brief: [
-        '你现在扮演本病例中的患者本人，姓王，男，38 岁，右股骨干骨折，正在接受骨牵引。',
+        `你现在扮演本病例中的患者本人：姓名 ${C.patient.name}，${C.patient.sex}，${C.patient.age} 岁，诊断「${C.patient.diagnose}」，正在接受骨牵引。`,
         '你在和护士/医生对话，用第一人称口语回答，每次 1～3 句，可以有情绪、可以反问，但不要长篇大论。',
         '你只知道自己亲身经历和感受到的事，不知道化验单原文、手术方案细节、费用等。',
-        '同一段对话里前后必须一致；不要主动说出学生还没问到的检查结果。'
+        '同一段对话里前后必须一致；不要主动说出学生还没问到的检查结果。',
+        '你的姓名、年龄、床号、诊断必须与上文完全一致，不得自称其他姓名或被改写成别的病人。'
       ]
     },
     nurse: {
@@ -434,8 +442,68 @@
     if (!d) {
       return '\n## 术后时间线\n当前术后日期未知。回答时不要假定是哪一天，先请学生确认当前术后第几天。\n';
     }
-    return `\n## 当前术后时间线：${d.label}\n- 疼痛：${d.pain}\n- 心理状态：${d.psych}\n- 本日重点：${d.focus.join('、')}\n不得使用其他术后日期的症状描述。\n`;
+    return `\n## 当前术后时间线：${d.label}【教学情境设定，非原病历记录】\n`
+      + `- 疼痛：${d.pain}\n- 心理状态：${d.psych}\n- 本日重点：${d.focus.join('、')}\n`
+      + '这些描述用于练习沟通与评估，不是原实验病历里的原文。引用时要说明是「这一天的教学情境」，不得当作病历事实。\n'
+      + '不得使用其他术后日期的症状描述。\n';
   }
+
+  /* 每个场景的额外约束：只写该场景真正需要的，避免所有场景收到同一套空话 */
+  const SCENARIO_SPEC = {
+    'preop-history': [
+      '学生是护士，你是患者。只回答他问到的内容，用第一人称口语，1～3 句。',
+      '病历里没有的（身高体重、手术方案、费用等）就说「这个我不清楚/记不清了」。',
+      '不要主动报检查数值；学生问化验单时，只说你记得医生提过的结论，不背化验单。'
+    ],
+    'preop-talk': [
+      '你是即将接受骨牵引的患者，可以提出真实的术前担心（疼不疼、要不要开刀、多久能好、家里怎么办）。',
+      '学生解释清楚后，你的担心要有所缓解；解释含糊时可以继续追问。',
+      '不要替学生总结操作步骤，也不要表现得比护士更懂专业术语。'
+    ],
+    'intraop-communicate': [
+      '你是责任护士，带教学生做术中沟通。',
+      '当学生给出要对患者说的话时，先用「患者可能会这样回应：」模拟患者的自然反应，再判断这句话是否合适。',
+      '需要给示范话术时必须标注「示范话术：」，并说明这是示范，不是让学生照背。',
+      '不得虚构患者此刻的疼痛评分或生命体征；未提供就说「以现场评估为准」。'
+    ],
+    'intraop-principle': [
+      '只讲牵引的力学原理、装置作用与核对方法。',
+      '若上文提供了「牵引重量」实测值，解释这个数值意味着什么、怎么核对；没有提供时明确说「当前没有读到重量」，不得假定 5kg/7kg 等具体数值。',
+      '不替学生点击或判断原实验的操作是否完成。'
+    ],
+    'intraop-observe': [
+      '把「患肢血运」「感觉」「牵引有效性」分开讲，不要混成一个结论。',
+      '系统没有给出观察结果时，只能告诉学生该看什么、怎么判断，不能替他认定「血运良好/牵引有效」。',
+      '学生说出自己的判断时，先问他依据哪几项观察，再指出依据是否足够。'
+    ],
+    'postop-psych': [
+      '你是术后患者，情绪和担心要符合当前术后日期。',
+      '学生安慰得具体、愿意听你说时，你可以多说一点；被说教或被打断时，回应会变短。',
+      '不要主动提到未来日期才会出现的情况。'
+    ],
+    'postop-care': [
+      '围绕当前任务（体位、皮肤、翻身、有效咳嗽、活动）给指导，不扩展到无关知识。',
+      '指导要能直接照着做：谁来做、什么时候做、做到什么程度、出现什么要报告。',
+      '不替学生完成原实验操作，也不修改原评分。'
+    ],
+    'postop-complication': [
+      '「进入并发症观察任务」不等于「患者已经发生并发症」。',
+      '只能给观察要点、判断标准和报告流程；没有实测数据时，不得写「患者已出现肿胀/血栓」。',
+      '学生判断错时，先指出他漏了哪项观察，再解释依据。'
+    ],
+    'report-score': [
+      '先说明数据来源与归属（本次实验 / 上一次运行 / 历史记录），再分析。',
+      '把「分项记录」与「正式计分步骤」分开：客户端 39 项是分项题库记录，不等于原实验 27 个正式计分步骤；不要用 M1_01 这类 SN 冒充操作步骤序号。',
+      '输出顺序：① 数据是否足够 ② 得分分布 ③ 已作答且未得分的具体项 → 对应知识点 ④ 能力判断（只依据有数据的项） ⑤ 仍需补做的部分。',
+      '若成绩说明里写「没有已作答记录」，就直接说无法做能力分析，不得编造薄弱点或错项。'
+    ],
+    'report-review': [
+      '不要重复场景 09 的完整分析，直接给可执行的复习安排。',
+      '给出 3 个具体任务：练什么、怎么练、怎么判断做到了；按「今天 / 本周」排序。',
+      '学生问「为什么」时再解释知识点，解释要回到他具体的错项或未完成项。',
+      '没有真实分项时，给通用但具体的练习，并明确标注「这是通用建议，不是根据你的成绩」。'
+    ]
+  };
 
   function buildSystemPrompt(scene, extra) {
     scene = scene || {};
@@ -454,12 +522,51 @@
     if (scenario) {
       L.push(`功能：${scenario.functionName}｜${scenario.taskName}（场景 ${scenario.no}）`);
       L.push(`本场景教学目标：${scenario.goal}`);
+      const spec = SCENARIO_SPEC[scenario.id];
+      if (spec) {
+        L.push('本场景要求：');
+        for (const s of spec) L.push('- ' + s);
+      }
     } else {
       L.push('当前场景未确认。先简短确认学生正在做哪一步，再回答，不要自行假定。');
     }
     L.push(`阶段：${({ preop: '术前', intraop: '术中', postop: '术后', report: '报告' })[scene.phase] || '未知'}` +
       (scene.postopDay ? `（术后第 ${scene.postopDay} 天）` : ''));
     L.push(`模式：${isExam ? '考核' : '学习'}`);
+
+    /* 原实验实测参数：只列真实读到的，模型不得编造未列出的数值 */
+    const u = (scene && scene.unity) || {};
+    const live = [];
+    if (u.tractionWeight != null && Number.isFinite(Number(u.tractionWeight))) {
+      live.push(`- 牵引重量：${Number(u.tractionWeight)} kg（原实验装置实测）`);
+    }
+    if (u.dayTime != null) live.push(`- 原程序术后天数 dayTime：${u.dayTime}`);
+    if (Array.isArray(u.selectedTasks) && u.selectedTasks.length) {
+      live.push(`- 当前选中任务：${u.selectedTasks.join('、')}`);
+    }
+    if (u.dayTaskNames) live.push(`- 今日任务清单：${String(u.dayTaskNames).split('|').filter(Boolean).join('、')}`);
+    if (u.tipOptButtons) live.push(`- 患者交互菜单：${u.tipOptButtons}`);
+    /* 真实分项（来自原程序 communicationDatas）：报告场景必须基于它分析 */
+    const comm = Array.isArray(u.commDatas) ? u.commDatas : [];
+    if (comm.length && u.commAmbiguous) {
+      L.push('## 客户端分项记录（无法区分对错）');
+      L.push(`共 ${comm.length} 项，分数均为 0、用时均为 0；原程序对未作答项同样写 isRight=false。`);
+      L.push('不得把这批记录称为「错项」，也不得据此分析薄弱知识点；只能说明「尚无已作答数据」。');
+      L.push('');
+    } else {
+      const wrongs = comm.filter((x) => x && x.wrong);
+      if (wrongs.length) {
+        L.push('## 客户端记录的具体未得分项（逐项分析，不得编造其他错项）');
+        L.push(wrongs.slice(0, 20).map((x) =>
+          `- 第${x.sn ?? '?'}步（${x.section || '未标模块'}）：${x.wrong}`).join('\n'));
+        L.push('');
+      }
+    }
+    if (live.length) {
+      L.push('## 当前实验实测参数（只可引用以下数据，不得编造其他数值）');
+      L.push(live.join('\n'));
+      L.push('');
+    }
     L.push(timelineBlock(scene));
     L.push('## 本病例已提供的事实（唯一可用的事实来源）');
     L.push(factsBlock());
@@ -474,10 +581,12 @@
     L.push('## 硬性规则');
     L.push('1. 不得编造检查结果、化验值、影像报告、既往史、用药剂量或医嘱；事实只取自上表。');
     L.push('2. 不得虚构分数、排名、题目对错；没有成绩数据时只给一般性复习建议。');
-    L.push('3. 不替学生操作原系统，不制造「实验已完成」，不输出伪造成绩。');
-    L.push('4. 用简体中文，口语化，专业术语首次出现时用一句话解释。');
-    L.push('5. 默认 120 字以内，除非学生明确要求展开。');
-    L.push('6. 不输出与护理教学无关的内容。');
+    L.push('3. 「未作答」不等于「答错」：成绩文本若说明没有已作答记录，不得推断薄弱点或错项。');
+    L.push('4. 成绩归属只能照抄文本里的「本次实验 / 上一次运行 / 历史记录」，不得把历史记录说成本次成绩。');
+    L.push('5. 不替学生操作原系统，不制造「实验已完成」，不输出伪造成绩。');
+    L.push('6. 用简体中文，口语化，专业术语首次出现时用一句话解释。');
+    L.push('7. 默认 120 字以内，除非学生明确要求展开。');
+    L.push('8. 不输出与护理教学无关的内容。');
 
     if (isExam) {
       L.push('');
@@ -489,7 +598,8 @@
     if (extra && extra.scoreText) {
       L.push('');
       L.push('## 学生提供的成绩/表现信息（仅此为准）');
-      L.push(String(extra.scoreText).slice(0, 1500));
+      L.push('先看第一行的来源与归属（本次实验 / 上一次运行 / 历史记录），只按该归属描述，不要改写成「本次」。');
+      L.push(String(extra.scoreText).slice(0, 2500));
     }
 
     return L.join('\n');
@@ -1416,6 +1526,7 @@
               <div class="bt-subtitle">正在识别当前场景…</div>
             </div>
             <div class="bt-head-actions">
+              <button class="bt-icon-btn bt-fold" data-act="fold" title="收起为窄条（Ctrl+Alt+M 也可）">▾</button>
               <button class="bt-icon-btn" data-act="settings" title="设置">⚙</button>
               <button class="bt-icon-btn" data-act="min" title="收起">—</button>
               <button class="bt-icon-btn" data-act="close" title="关闭">✕</button>
@@ -1426,6 +1537,12 @@
             <span class="bt-dot none"></span>
             <select class="bt-scene-select" title="手动切换当前实验任务"></select>
             <span class="bt-scene-hint">识别中…</span>
+          </div>
+
+          <div class="bt-nav">
+            <div class="bt-phases"></div>
+            <div class="bt-cards"></div>
+            <div class="bt-current"></div>
           </div>
 
           <div class="bt-day">
@@ -1475,6 +1592,7 @@
               <button class="bt-tab on" data-tab="ui">界面</button>
               <button class="bt-tab" data-tab="model">模型</button>
               <button class="bt-tab" data-tab="trace">埋点</button>
+              <button class="bt-tab" data-tab="score">成绩</button>
             </div>
             <div class="bt-set-body"></div>
           </div>
@@ -1509,13 +1627,21 @@
   const AV = { patient: asset('patient.svg'), nurse: asset('nurse.svg'), coach: asset('coach.svg') };
 
   const PFX = { preop: '术前', intraop: '术中', postop: '术后', report: '报告' };
-  const DEFAULT_PREFS = { theme: 'light', width: 392, fontScale: 100, opacity: 100, dock: 'right' };
+  const DEFAULT_PREFS = { theme: 'light', width: 392, fontScale: 100, opacity: 100, dock: 'right', autoFocus: false };
 
   const EMBED = !!window.__BT_EMBED__;
 
   const state = {
-    open: false, mini: false,
+    open: false, mini: false, folded: false,
     scene: null, override: null,
+    examLock: false,            // 一旦确认为考核，任何手动选择都不能解除
+    client: null, clientScene: null, clientTs: 0,
+    clientEvidence: null,       // 客户端日志里的真实 UI 生命周期 / 逐步骤成绩
+    clientSeenAt: 0,            // 最后一次成功拿到客户端状态（用于判断断线）
+    stale: null,                // 客户端明确报告「实验没在跑」时的说明
+    lastUnity: null,            // 上次运行识别到的任务，只用于提示，不作当前任务
+    navPhase: null,             // 三级导航当前浏览的阶段（不影响实际场景）
+    scoreSource: '', scoreCleared: false,
     health: { mode: 'unknown', model: '' },
     threads: {}, busy: false, scoreText: '', scoreOpen: false,
     prefs: { ...DEFAULT_PREFS },
@@ -1536,6 +1662,38 @@
   }
   function savePrefs() {
     try { localStorage.setItem('bt_prefs', JSON.stringify(state.prefs)); } catch (e) {}
+  }
+
+  /* ---------------- 手动场景（可跨重启恢复） ----------------
+     之前只把 C.byId 里的原始配置塞进 state.override，缺 scenarioId，
+     重启后既没有对话也没有角色，还会显示成「仅识别到阶段」。 */
+  function sceneFromScenario(id, day) {
+    const sc = C.byId[id];
+    if (!sc) return null;
+    return {
+      phase: sc.phase,
+      postopDay: sc.phase === 'postop' ? (day || null) : null,
+      taskId: sc.id, taskName: sc.taskName, scenarioId: sc.id,
+      functionName: sc.functionName, mode: (state.examLock && sc.phase !== 'report') ? 'exam' : sc.mode,
+      patientId: C.patient.id, contextSource: 'manual', confidence: 'high',
+      evidence: ['手动选择']
+    };
+  }
+
+  function saveManualScene(s) {
+    try {
+      if (!s || !s.scenarioId) localStorage.removeItem('bt_scene_manual');
+      else localStorage.setItem('bt_scene_manual', JSON.stringify({ id: s.scenarioId, day: s.postopDay || null }));
+    } catch (e) { /* ignore */ }
+  }
+
+  function restoreManualScene() {
+    try {
+      const raw = localStorage.getItem('bt_scene_manual');
+      if (!raw) return null;
+      const v = JSON.parse(raw);
+      return v && v.id ? sceneFromScenario(v.id, v.day) : null;
+    } catch (e) { return null; }
   }
   function applyPrefs() {
     if (!els.panel) return;
@@ -1571,7 +1729,14 @@
 
   function threadKey() {
     const s = activeScene();
-    return s && s.scenarioId ? s.scenarioId : (s && s.phase ? s.phase : 'unknown');
+    if (!s) return 'unknown';
+    if (s.scenarioId) {
+      // 术后不同日期是不同病程，对话上下文必须分开，不能串台
+      const day = s.phase === 'postop' ? ('@d' + (s.postopDay || '?')) : '';
+      return s.scenarioId + day;
+    }
+    // 只识别到阶段、还没选任务时，用阶段占位，不伪造任务
+    return s.phase ? ('phase:' + s.phase) : 'unknown';
   }
 
   function currentThread() {
@@ -1587,15 +1752,22 @@
   }
 
   function greetingFor(s) {
-    if (!s || !s.scenarioId) {
+    if (!s || !s.phase) {
       return '我还没识别出当前实验阶段。请在下方选择“阶段 · 任务”，我会按对应角色和你交流。';
+    }
+    if (!s.scenarioId) {
+      const ph = PFX[s.phase] || s.phase;
+      return `我已经识别到当前是「${ph}阶段」，但还不能确定具体任务（日志/页面只给到阶段）。`
+        + '请在下方选一个具体任务，我再按对应角色开始；选之前我不会替你猜。';
     }
     const sc = C.byId[s.scenarioId];
 
     if (sc.role === 'patient') {
+      const who = `${C.patient.name}`;
+      const bed = C.patient.bed.replace(/^.*?(\d+\s*床)$/, '$1');
       return s.phase === 'preop'
-        ? `您好，我是 3 床王建国。${sc.id === 'preop-history' ? '您想了解我这次受伤的情况，直接问就行。' : '手术前的事我还想再问问您。'}`
-        : `我是王建国。${sc.id === 'postop-psych' ? '这几天躺着，心里有点烦，您能陪我聊会儿吗？' : '您有什么要交代的，我听着。'}`;
+        ? `您好，我是 ${bed}${who}。${sc.id === 'preop-history' ? '您想了解我这次受伤的情况，直接问就行。' : '手术前的事我还想再问问您。'}`
+        : `我是${who}。${sc.id === 'postop-psych' ? '这几天躺着，心里有点烦，您能陪我聊会儿吗？' : '您有什么要交代的，我听着。'}`;
     }
     if (sc.role === 'nurse') return '我是本次操作的责任护士。牵引的配合要点、装置和重量、要观察什么，你可以问我；需要我示范怎么跟患者说，也可以直接讲。';
     if (sc.role === 'tutor') return `我是护理带教老师。这一环节讲「${sc.taskName}」，你可以问原理、判断标准，或者让我解释你看到的现象。`;
@@ -1623,27 +1795,152 @@
     return out.join('');
   }
 
+  const SOURCE_LABEL = {
+    page: '页面识别', 'client-log': '客户端日志', 'window-title': '窗口标题',
+    bridge: '实验事件', api: '平台接口', manual: '手动指定',
+    'unity-event': 'Unity 原生事件'
+  };
+  const CONF_LABEL = { high: '高可信', medium: '中可信', low: '低可信', none: '无证据' };
+
+  /* 三级导航：阶段 → 场景 → 当前 Unity 任务/子任务
+     规则：
+       - 阶段 pill 只切换「浏览哪一组场景」，不替学生选场景；
+       - 场景卡片 = 手动选择（会明确标注「手动」）；
+       - 自动识别成功时，阶段与卡片自动跟随，不需要学生再点一次。 */
+  const PHASES = ['preop', 'intraop', 'postop', 'report'];
+  const SUBTASKS = {
+    'preop-history': ['入院记录', '辅助检查', '专科检查']
+  };
+  function renderNav() {
+    if (!els.phases || !els.cards) return;
+    const s = activeScene() || {};
+    const g = state.game || {};
+    const autoPhase = s.phase || (g.lastUnity && g.lastUnity.phase) || null;
+    const phase = state.navPhase || autoPhase || 'preop';
+
+    els.phases.innerHTML = PHASES.map((ph) =>
+      `<button class="bt-phase${ph === phase ? ' on' : ''}" data-phase="${ph}">${PFX[ph]}</button>`
+    ).join('');
+
+    const list = C.scenarios.filter((x) => x.phase === phase);
+    els.cards.innerHTML = list.map((sc) =>
+      `<button class="bt-card${s.scenarioId === sc.id ? ' on' : ''}" data-scene="${sc.id}"${state.examLock ? ' data-lock="1"' : ''}>
+         <b>${sc.no} ${sc.functionName}</b>
+         <span>${sc.taskName}</span>
+       </button>`
+    ).join('') || '<div style="grid-column:1/-1;color:var(--bt-sub);font-size:12px">该阶段暂无智能场景</div>';
+
+    const parts = [];
+    if (state.stale) {
+      const lu = state.lastUnity;
+      const ago = lu && lu.ageSec != null ? formatAgo(lu.ageSec) : '';
+      parts.push(`<div class="bt-stale"><b>实验未运行</b>：${state.stale.reason || '没有检测到正在运行的实验'}`
+        + (lu && (lu.taskName || lu.phase)
+          ? `　上次识别到「${lu.taskName || PFX[lu.phase] || lu.phase}」${ago ? '（' + ago + '）' : ''}`
+          : '')
+        + '</div>');
+    }
+    const realTask = g.curTask || (g.selectedTasks && g.selectedTasks[0]) || '';
+    if (realTask) {
+      parts.push(`<div><b>当前实验任务</b>：<span class="sub">${realTask}</span>`
+        + (g.tipButtons ? `　<span class="bt-nav-note">病人菜单：${g.tipButtons.split('|').slice(0, 3).join(' / ')}</span>` : '')
+        + '</div>');
+    } else if (g.dayTasks && g.dayTasks.length) {
+      parts.push(`<div><b>今日任务</b>：<span class="sub">${g.dayTasks.slice(0, 3).join(' · ')}</span>`
+        + (g.dayTasks.length > 3 ? ` 等 ${g.dayTasks.length} 项` : '') + '</div>');
+    } else if (g.subtitle) {
+      parts.push(`<div><b>游戏当前</b>：<span class="sub">${g.subtitle.slice(0, 26)}</span></div>`);
+    }
+    /* 第三层：子任务。只展示、不改写原任务顺序；点一下只是就这一页继续问，不重开会话。 */
+    const subs = s.scenarioId ? SUBTASKS[s.scenarioId] : null;
+    if (subs && subs.length) {
+      const cur = (g.selectedTasks || []).find((x) => subs.includes(x)) || (g.uiTexts || []).find((x) => subs.includes(x));
+      parts.push('<div class="bt-subtasks">'
+        + subs.map((x) => `<button class="bt-subtask${x === cur ? ' on' : ''}" data-sub="${x}">${x}</button>`).join('')
+        + '<span class="bt-nav-note">子任务切换不重开会话</span></div>');
+    }
+    const followHtml = state.override
+      ? '<button class="bt-follow show" data-follow="1" title="取消手动选择，回到实验自动识别">← 跟随实验</button>'
+      : '';
+    if (followHtml || parts.length) {
+      els.current.classList.add('show');
+      els.current.innerHTML = followHtml + parts.join('');
+      els.current.querySelectorAll('[data-sub]').forEach((b) => b.addEventListener('click', () => {
+        const sub = b.dataset.sub;
+        if (!activeScene() || !activeScene().scenarioId) { toast('请先选择场景'); return; }
+        send(`我当前在原实验「${sub}」这一页，请结合这一页继续问我。`);
+      }));
+      const fol = els.current.querySelector('[data-follow]');
+      if (fol) fol.addEventListener('click', () => restoreAuto());
+    } else {
+      els.current.classList.remove('show');
+    }
+  }
+
+  function formatAgo(sec) {
+    const s = Number(sec) || 0;
+    if (s < 90) return '刚刚';
+    if (s < 3600) return Math.round(s / 60) + ' 分钟前';
+    return Math.round(s / 3600) + ' 小时前';
+  }
+
+  function restoreAuto() {
+    state.override = null;
+    state.navPhase = null;
+    saveManualScene(null);
+    let next = null;
+    try { next = window.BT_SCENE.detect(); } catch (e) { next = null; }
+    if ((!next || !next.phase) && state.clientScene) next = state.clientScene;
+    applyScene(next, true);
+    toast('已恢复自动识别');
+    T.log('scene', { action: 'auto-restore' });
+  }
+
   function renderScene() {
     const s = activeScene();
-    const conf = state.override ? 'medium' : (s && s.phase ? s.confidence : 'none');
-    els.dot.className = 'bt-dot ' + (s && s.phase ? conf : 'none');
+    const conf = state.stale ? 'none' : (state.override ? 'medium' : (s && s.phase ? s.confidence : 'none'));
+    els.dot.className = 'bt-dot ' + (s && s.phase && !state.stale ? conf : 'none');
 
-    els.hint.textContent = !s || !s.phase ? '未识别，请手动选择'
-      : state.override ? '手动指定'
-        : s.confidence === 'high' ? '自动 · 高可信'
-          : s.confidence === 'medium' ? '自动 · 中可信' : '自动 · 低可信';
+    if (state.stale && !state.override) {
+      // 实验没在跑：不再显示上一次的任务为「当前」，详细的上次记录放在导航区一行
+      els.hint.textContent = '实验未运行 · 自动识别已停用';
+    } else if (!s || !s.phase) {
+      // 客户端日志能证明「实验正在跑、当前是哪个 UI」，但证明不了业务阶段。
+      // 如实显示运行证据，仍然要求手动选任务，不拿界面名猜场景。
+      const lc = state.clientEvidence && state.clientEvidence.lifecycle;
+      const subTxt = (state.game && state.game.subtitle) ? `　「${state.game.subtitle.slice(0, 20)}」` : '';
+      els.hint.textContent = (lc && lc.live
+        ? `客户端已运行 · ${lc.label} · 任务请手动选`
+        : '未识别，请在下方选择场景') + subTxt;
+    } else if (state.override) {
+      els.hint.textContent = '手动指定' + (state.examLock ? ' · 考核保护中' : '') + (state.stale ? ' · 实验未运行' : '');
+    } else {
+      const src = SOURCE_LABEL[s.contextSource] || '自动识别';
+      const sub = (state.game && state.game.subtitle) ? `　「${state.game.subtitle.slice(0, 22)}」` : '';
+      els.hint.textContent = src + ' · ' + (CONF_LABEL[s.confidence] || '已识别')
+        + (s.scenarioId ? '' : ' · 仅到阶段') + sub;
+    }
 
     els.select.innerHTML = sceneOptions();
     if (!state.override && !s) els.select.value = 'auto';
+    if (state.override && s && s.scenarioId) els.select.value = s.scenarioId;
 
     const sc = s && s.scenarioId ? C.byId[s.scenarioId] : null;
     els.title.textContent = sc ? sc.functionName : '智能护理助教';
-    els.subtitle.textContent = sc
-      ? `${sc.taskName}${s.postopDay ? ' · 术后第 ' + s.postopDay + ' 天' : ''}${s.mode === 'exam' && s.phase !== 'report' ? ' · 考核中' : ''}`
-      : (s && s.experiment ? `${s.experiment.typeName} · ${s.experiment.name}` : '请选择当前实验任务');
+    if (sc) {
+      els.subtitle.textContent = `${sc.taskName}${s.postopDay ? ' · 术后第 ' + s.postopDay + ' 天' : ''}${s.mode === 'exam' && s.phase !== 'report' ? ' · 考核中' : ''}`;
+    } else if (s && s.phase) {
+      els.subtitle.textContent = `已识别到${PFX[s.phase] || ''}阶段`
+        + (s.postopDay ? ' · 术后第 ' + s.postopDay + ' 天' : '')
+        + ' · 请选择具体任务';
+    } else {
+      els.subtitle.textContent = (s && s.experiment) ? `${s.experiment.typeName} · ${s.experiment.name}` : '请选择当前实验任务';
+    }
 
     const rs = window.BT_PROMPT.ROLE_SPEC[roleOfScene()] || {};
     els.headAvatar.src = AV[rs.avatar] || AV.nurse;
+
+    renderNav();
 
     const isPost = s && s.phase === 'postop';
     els.day.classList.toggle('show', !!isPost);
@@ -1662,7 +1959,12 @@
       if (on) els.bridgeBadge.textContent = '已接入实验事件 ' + snap.stepCount;
     }
 
-    // 报告阶段最高优先级：旁听平台自己接口拿到的结构化成绩（不碰 token）
+    // 报告阶段最高优先级：客户端日志里原程序打印的逐步骤成绩（含错项）
+    if (sc && sc.phase === 'report' && state.clientEvidence && state.clientEvidence.score) {
+      fillClientScore(state.clientEvidence.score, state.clientEvidence.lifecycle);
+    }
+
+    // 其次：旁听平台自己接口拿到的结构化成绩（不碰 token）
     if (sc && sc.phase === 'report' && !state.scoreText && window.BT_BRIDGE && window.BT_BRIDGE.apiSnapshot) {
       const snap = window.BT_BRIDGE.apiSnapshot();
       if (snap && snap.scores.length) {
@@ -1727,6 +2029,10 @@
     els.scoreBox.classList.toggle('show', !!sc && sc.phase === 'report' && state.scoreOpen);
 
     let chips = sc ? sc.chips.slice() : ['我该做什么？'];
+    const realTasks = (state.game && state.game.dayTasks) || [];
+    if (realTasks.length) {
+      chips = realTasks.slice(0, 6).map((t) => `${t}要注意什么？`);
+    }
     if (sc && sc.phase === 'report') chips = ['读取本页成绩'].concat(chips, ['粘贴我的成绩']);
     els.chips.innerHTML = chips.map(c => `<button class="bt-chip" data-q="${c}">${c}</button>`).join('');
     els.chips.classList.toggle('bt-hidden', !sc);
@@ -1737,45 +2043,16 @@
     return map[roleKey] || '责任护士';
   }
 
-  function renderPicker() {
-    const groups = [
-      ['preop', '术前'],
-      ['intraop', '术中'],
-      ['postop', '术后'],
-      ['report', '个性化报告']
-    ];
-    const html = groups.map(([ph, label]) => {
-      const items = C.scenarios.filter(x => x.phase === ph).map(sc => `
-        <button class="bt-pick-item" data-sid="${sc.id}">
-          <span class="bt-pick-no">${sc.no}</span>
-          <span class="bt-pick-text">
-            <b>${sc.functionName}</b>
-            <i>${sc.taskName}</i>
-          </span>
-        </button>`).join('');
-      return `<div class="bt-pick-group"><div class="bt-pick-title">${label}</div>${items}</div>`;
-    }).join('');
-
+  function renderPicker(onlyPhase) {
+    /* 场景列表已经在三级导航里，这里不再重复一整套按钮，
+       只说明「现在为什么需要你选」以及选完会发生什么。 */
+    const hint = onlyPhase
+      ? `已识别到「${PFX[onlyPhase] || onlyPhase}阶段」，但还不能确定具体任务。在上方选一个场景，我按对应角色开始。`
+      : '还没有识别到当前实验场景。请在上方按「阶段 → 场景」选择，或启动原实验后等我自动跟随。';
     els.body.innerHTML = `<div class="bt-picker">
-      <div class="bt-picker-hint">没识别到当前场景。选一个，我按对应角色开始：</div>
-      ${html}
+      <div class="bt-picker-hint">${hint}</div>
+      <div class="bt-picker-hint">实验里切换任务时，场景会自动跟随；手动选过之后，点「跟随实验」可恢复自动识别。</div>
     </div>`;
-    els.body.querySelectorAll('.bt-pick-item').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const sc = C.byId[btn.dataset.sid];
-        if (!sc) return;
-        const cur = activeScene();
-        state.override = {
-          ...(state.scene || {}),
-          phase: sc.phase,
-          postopDay: sc.phase === 'postop' ? (cur && cur.postopDay) || 3 : null,
-          taskId: sc.id, taskName: sc.taskName, scenarioId: sc.id,
-          functionName: sc.functionName, mode: sc.mode,
-          patientId: C.patient.id, contextSource: 'manual', confidence: 'high', evidence: ['面板选择']
-        };
-        applyScene(state.override, false);
-      });
-    });
   }
 
   function renderThread(scroll) {
@@ -1820,7 +2097,7 @@
     }
 
     if (!activeScene() || !activeScene().scenarioId) {
-      renderPicker();
+      renderPicker(activeScene() && activeScene().phase);
       return;
     }
 
@@ -1847,32 +2124,157 @@
     return port;
   }
 
-  /* 客户端状态（来自本机代理读 Unity 日志）：页面识别不到时的第二来源 */
+  /* 客户端状态（本机代理读 Unity 日志）：页面识别不到时的第二来源
+     ---------------------------------------------------------------
+     原则：
+       1) 只有日志明确给出“当前任务”才设 taskId；只给到阶段就只到阶段。
+       2) 页面识别优先于客户端；客户端之间按新到旧覆盖。
+       3) 一旦出现考核信号，锁存 examLock，手动选择也不解除。 */
+  const PAGE_SOURCES = { page: 1, bridge: 1, api: 1 };
+
+  /* 客户端 Player.log 里原程序自己打印的逐步骤成绩。
+   * 平台 ItemsByUser 只有总分；分项只在客户端进度回包里，所以这里优先级最高。
+   * 只陈述日志里有的字段，不推断「哪一步做错了」以外的结论。 */
+  const ATTR_LABEL = {
+    'current-running': '本次实验 · 正在运行',
+    'current-last-run': '上一次运行 · 已结束（非本次实时）',
+    'history': '历史记录 · 更早的日志'
+  };
+  function formatClientScore(sd, lc) {
+    const L = [];
+    const attr = ATTR_LABEL[sd.attribution] || '客户端记录';
+    L.push(`【来源：客户端 Player.log · ${attr}】`);
+    const pvTxt = sd.pv != null ? `，进度标记 ${sd.pv}${sd.maxPV ? '/' + sd.maxPV : ''}` : '';
+    L.push(`分项 ${sd.totalItems} 项：已作答 ${sd.answeredItems != null ? sd.answeredItems : '—'} 项、未作答 ${sd.pendingItems != null ? sd.pendingItems : '—'} 项；累计 ${sd.totalScore} 分${pvTxt}${sd.isDone ? '；已完成' : '；未完成'}`);
+    const secs = Object.entries(sd.bySection || {});
+    if (secs.length) {
+      L.push('分章节：' + secs.map(([k, v]) =>
+        `${k} ${v.right}/${v.total} 正确${v.answered != null ? '（已作答 ' + v.answered + '）' : ''}，${Math.round(v.score * 10) / 10} 分`).join('；'));
+    }
+    const wrong = sd.wrongItems || [];
+    if (sd.noAttempts) {
+      L.push('错项：没有已作答记录。原程序对未作答项同样写 isRight=false、score=0，');
+      L.push('因此不能把这 ' + sd.totalItems + ' 项当成「答错」，也不能据此推断薄弱知识点。');
+    } else if (wrong.length) {
+      L.push('已作答且未得分项：');
+      for (const w of wrong.slice(0, 12)) L.push(`- ${w.sn}（${w.section}）：${w.feedback || '未得分'}`);
+    } else {
+      L.push('错项：已作答项中没有未得分记录。');
+    }
+    if (lc && lc.label) L.push(`客户端界面：${lc.label}${lc.live === false ? '（历史）' : ''}`);
+    L.push('说明：以上是原实验写入日志的分项记录；未作答项无法推断，日志没有的字段也无法推断。');
+    return L.join('\n');
+  }
+
+  function fillClientScore(sd, lc) {
+    if (state.scoreCleared || !sd || !sd.totalItems) return;
+    const sig = [sd.totalItems, sd.rightItems, sd.totalScore, sd.currentExpProgress, (sd.wrongItems || []).length, sd.answeredItems, sd.attribution].join('|');
+    if (state.scoreSource === 'client-log' && state.scoreSignature === sig) return;  // 去重
+    let txt = formatClientScore(sd, lc);
+    const wrongs = (state.game && state.game.commData || []).filter((x) => x && x.wrong);
+    if (wrongs.length && !sd.noAttempts && !(state.game && state.game.commAmbiguous)) {
+      txt += '\n\n**客户端错项原文**\n' + wrongs.slice(0, 12)
+        .map((x) => `- 第${x.sn ?? '?'}步：${x.wrong}`).join('\n');
+    }
+    state.scoreText = txt;
+    state.scoreSource = 'client-log';
+    state.scoreSignature = sig;
+    state.scoreOpen = true;
+    if (els.scoreInput) els.scoreInput.value = txt.slice(0, 2000);
+    if (els.scoreBox) els.scoreBox.classList.add('show');
+    T.log('score-source', {
+      from: 'client-log', items: sd.totalItems, attribution: sd.attribution,
+      answered: sd.answeredItems, wrong: (sd.wrongItems || []).length
+    });
+  }
+
+  let lastClientAt = 0;
+  function clearClientScene(why) {
+    state.clientScene = null;
+    state.clientTs = 0;
+    if (!state.override && state.scene && state.scene.contextSource !== 'manual') {
+      state.scene = null;
+      renderedKey = '';
+      T.log('scene', { from: 'client-clear', why });
+    }
+    renderScene();
+  }
+
   function onClientState(cs) {
+    /* 本机代理没开 / 请求失败：90 秒内没有成功过就解除客户端场景，
+       不能因为一次失败就清空，也不能一直挂着上一次的任务。 */
+    if (!cs || !cs.ok) {
+      if (state.clientSeenAt && Date.now() - state.clientSeenAt > 90000) {
+        clearClientScene('client-offline');
+      }
+      return;
+    }
     state.client = cs;
-    if (!cs || !cs.phase) return;
-    if (state.override) return;                       // 手动选择优先
+    state.clientSeenAt = Date.now();
+    lastClientAt = Date.now();
+
+    // 成绩与生命周期证据始终收下（带 attribution），即使实验已经退出
+    if (cs.scoreDetails || cs.lifecycle) {
+      state.clientEvidence = { score: cs.scoreDetails || null, lifecycle: cs.lifecycle || null };
+    }
+
+    /* 实验没在跑：agent 已确认没有活着的证据，此时 phase/taskId 被清空。
+       面板必须跟着解除，而不是继续展示上次的任务。 */
+    if (cs.stale) {
+      state.stale = { reason: cs.staleReason || '没有检测到正在运行的实验' };
+      state.lastUnity = cs.lastUnity || null;
+      const sc0 = activeScene();
+      if (sc0 && sc0.phase === 'report' && cs.scoreDetails) fillClientScore(cs.scoreDetails, cs.lifecycle);
+      const key = 'stale:' + (state.lastUnity && (state.lastUnity.taskId || state.lastUnity.phase) || '') + ':' + (state.lastUnity && state.lastUnity.ageSec);
+      if (state._staleKey !== key) {
+        state._staleKey = key;
+        clearClientScene('stale');
+      }
+      return;
+    }
+    if (state.stale) { state.stale = null; state.lastUnity = null; state._staleKey = ''; }
+
+    if (cs.ts) {
+      if (cs.ts === state.clientTs) return;   // 后台推送与面板轮询会重复，去重
+      state.clientTs = cs.ts;
+    }
+    if (cs.mode === 'exam') {
+      state.examLock = true;
+      // 页面已经先给出了场景时，也要把考核状态立刻贴到当前场景上（报告阶段除外）
+      if (state.scene && state.scene.phase !== 'report' && state.scene.mode !== 'exam') {
+        state.scene.mode = 'exam';
+        if (state.override) state.override.mode = 'exam';
+        if (els.panel) renderScene();
+      }
+    }
+    if (!cs.phase) { renderScene(); return; }
+    if (state.override) return;
     const cur = state.scene;
-    if (cur && cur.phase && cur.confidence !== 'none') return;  // 页面已识别
+    // Unity 测试副本的结构化事件来自原程序运行时状态，优先于页面 DOM 推断。
+    const unityAuthoritative = cs.contextSource === 'unity-event' && cs.confidence !== 'low';
+    if (!unityAuthoritative && cur && cur.phase && PAGE_SOURCES[cur.contextSource]) return;
 
-    const map = { preop: 'preop-history', intraop: 'intraop-communicate', postop: 'postop-psych', report: 'report-score' };
-    const sc = C.byId[map[cs.phase]];
-    if (!sc) return;
+    const sc = cs.taskId ? C.byId[cs.taskId] : null;
+    const taskKnown = !!(sc && cs.taskName);
 
-    const ev = (cs.evidence && cs.evidence[0]) ? String(cs.evidence[0]).slice(0, 60) : cs.phase;
     state.clientScene = {
       phase: cs.phase,
       postopDay: cs.postopDay || null,
-      taskId: sc.id, taskName: sc.taskName, scenarioId: sc.id,
-      functionName: sc.functionName, mode: cs.mode || 'study',
+      taskId: taskKnown ? cs.taskId : null,
+      taskName: taskKnown ? cs.taskName : null,
+      scenarioId: taskKnown ? cs.taskId : null,
+      functionName: taskKnown ? sc.functionName : null,
+      mode: (state.examLock && cs.phase !== 'report') ? 'exam' : (cs.mode || 'study'),
       patientId: C.patient.id,
       contextSource: cs.contextSource || 'client-log',
       confidence: cs.confidence || 'medium',
-      evidence: ['客户端：' + ev]
+      evidence: (cs.evidence || []).map(e => '客户端：' + String(e).slice(0, 60))
     };
     applyScene(state.clientScene, true);
-    toast('已从客户端识别：' + sc.functionName);
-    T.log('scene', { from: 'client', phase: cs.phase, conf: cs.confidence });
+    toast(taskKnown
+      ? ('已从客户端识别：' + cs.taskName)
+      : ('已从客户端识别：' + (PFX[cs.phase] || cs.phase) + '阶段（任务请手动选）'));
+    T.log('scene', { from: 'client', phase: cs.phase, task: cs.taskId || null, conf: cs.confidence, live: cs.live });
   }
 
   function onBg(msg) {
@@ -1903,11 +2305,75 @@
       const last = th[th.length - 1];
       if (last && last.streaming) {
         last.streaming = false;
-        last.text = last.text || ('（没连上本地服务：' + (msg.message || '未知错误') + '）\n请先运行 proxy/server.mjs，再重试。');
+        last.text = last.text || ('（没连上本地服务：' + (msg.message || '未知错误') + '）\n请先运行 node apps/model-gateway/server.mjs，再重试。');
       }
       T.log('error', { message: msg.message || '' });
       finishStream('error');
     }
+  }
+
+  /* —— TTS 语音播报 ——
+     默认用系统中文语音（WebView2/Chromium 内置）。若配置了 BT_TTS_URL，
+     改为请求外部 TTS 服务返回音频，便于替换成真正的语音模型。 */
+  let ttsOn = localStorage.getItem('bt_tts') !== '0';
+  function speak(text) {
+    if (!ttsOn || !text) return;
+    const clean = String(text).replace(/[*#`>]/g, '').slice(0, 300);
+    const url = window.BT_TTS_URL;
+    if (url) {
+      try {
+        const a = new Audio(url + (url.includes('?') ? '&' : '?') + 'text=' + encodeURIComponent(clean));
+        a.play().catch(() => { });
+        return;
+      } catch { }
+    }
+    if (!window.speechSynthesis) return;
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(clean);
+      u.lang = 'zh-CN';
+      u.rate = 1.05;
+      const v = (speechSynthesis.getVoices() || []).find((x) => /zh|Chinese/i.test(x.lang));
+      if (v) u.voice = v;
+      speechSynthesis.speak(u);
+    } catch { }
+  }
+
+  /* 与游戏同步：每 2 秒拉一次 /state，拿到字幕、今日任务、识别结果。
+     面板因此能显示「游戏里正在说什么」「今天要做哪几项」，而不是固定菜单。 */
+  let gameTimer = null;
+  function startGameSync() {
+    if (gameTimer) return;
+    const pull = async () => {
+      try {
+        const r = await fetch('http://127.0.0.1:8790/state', { cache: 'no-store' });
+        const cs = await r.json();
+        const u = cs.unity || {};
+        const next = {
+          subtitle: (u.subtitle || '').trim(),
+          dayTasks: String(u.dayTaskNames || '').split('|').filter(Boolean),
+          commData: Array.isArray(u.commDatas) ? u.commDatas : [],
+          commAmbiguous: u.commAmbiguous === true,
+          tipButtons: u.tipOptButtons || '',
+          selectedTasks: Array.isArray(u.selectedTasks) ? u.selectedTasks : [],
+          uiTexts: Array.isArray(u.uiTexts) ? u.uiTexts : [],
+          curTask: u.taskCurrentText || ((u.selectedTasks || []).join('、') || ''),
+          scen: cs.scenarioId || null,
+          conf: cs.confidence || null,
+          day: cs.postopDay || null,
+        };
+        const prev = state.game || {};
+        const changed = next.subtitle !== prev.subtitle
+          || next.curTask !== prev.curTask
+          || next.tipButtons !== prev.tipButtons
+          || next.commData.length !== (prev.commData || []).length
+          || next.dayTasks.join() !== (prev.dayTasks || []).join();
+        state.game = next;
+        if (changed) renderScene();
+      } catch { /* agent 没开就静默 */ }
+    };
+    pull();
+    gameTimer = setInterval(pull, 2000);
   }
 
   function finishStream(reason) {
@@ -1917,6 +2383,7 @@
       last.streaming = false;
       T.log('answer', { reason, chars: (last.text || '').length });
     }
+    if (last && last.role === 'assistant' && last.text) speak(last.text);
     state.busy = false;
     state.activeReqId = null;
     els.send.classList.remove('stop');
@@ -1928,14 +2395,29 @@
 
   function renderFooter() {
     const m = state.health.mode;
-    if (m === 'mock') { els.modeBadge.className = 'bt-badge mock'; els.modeBadge.textContent = '演示模式 · 未接入模型'; }
-    else if (m === 'live') { els.modeBadge.className = 'bt-badge live'; els.modeBadge.textContent = '已接入 ' + (state.health.model || '模型'); }
+    if (els.modeBadge) {
+      els.modeBadge.title = '点击切换语音播报';
+      els.modeBadge.onclick = () => {
+        ttsOn = !ttsOn;
+        localStorage.setItem('bt_tts', ttsOn ? '1' : '0');
+        if (!ttsOn && window.speechSynthesis) speechSynthesis.cancel();
+        renderFooter();
+      };
+    }
+    if (m === 'mock') { els.modeBadge.className = 'bt-badge mock'; els.modeBadge.textContent = '未接入模型 · 不会回答' + (ttsOn ? ' · 🔊' : ' · 🔇'); }
+    else if (m === 'live') { els.modeBadge.className = 'bt-badge live'; els.modeBadge.textContent = '已接入 ' + (state.health.model || '模型') + (ttsOn ? ' · 🔊' : ' · 🔇'); }
     else { els.modeBadge.className = 'bt-badge mock'; els.modeBadge.textContent = '未连接本地服务'; }
   }
 
   function send(text) {
     const s = activeScene();
     if (!s || !s.phase) { toast('请先选择当前实验场景'); T.log('block', { why: 'no-scene' }); return; }
+    /* 没有真实模型时不做任何本地规则回答：直接告诉学生为什么不能问 */
+    if (state.health && state.health.mode && state.health.mode !== 'live') {
+      toast('未接入真实模型：请在本地网关配置 API Key');
+      T.log('block', { why: 'no-live-model' });
+      return;
+    }
     if (state.busy) return;
     text = (text || '').trim();
     if (!text) return;
@@ -1954,7 +2436,10 @@
     T.log('ask', { q: text.slice(0, 120), chars: text.length });
 
     const history = th.filter(m => m.role && m.text).slice(-12).map(m => ({ role: m.role, content: m.text }));
-    const system = window.BT_PROMPT.buildSystemPrompt(s, { scoreText: state.scoreText });
+    /* 成绩只在报告场景或学生主动粘贴时进入上下文：
+       否则在术前/术中练习里带着一份含正确答案的错题记录，既无必要也容易泄题。 */
+    const scoreForPrompt = (s.phase === 'report' || state.scoreCleared) ? state.scoreText : '';
+    const system = window.BT_PROMPT.buildSystemPrompt(s, { scoreText: scoreForPrompt });
 
     const p = ensurePort();
     if (!p) { onBg({ type: 'error', message: '扩展后台未就绪' }); return; }
@@ -1970,12 +2455,39 @@
 
   /* ---------------- 场景切换 ---------------- */
   function applyScene(scene, fromAuto) {
+    /* 切换前先中断在跑的请求：否则旧请求的 chunk 会写进新场景的会话。
+       activeReqId 递增使迟到的消息被 onBg 的 id 校验丢弃。 */
+    if (state.busy) {
+      try { cancel(); } catch (e) { }
+      state.activeReqId = ++state.reqId;
+      state.busy = false;
+      state.streaming = false;
+      if (els.send) {
+        els.send.classList.remove('stop');
+        const sp = els.send.querySelector('span');
+        if (sp) sp.textContent = '发送';
+        els.send.disabled = false;
+      }
+    }
+    // 考核保护：一旦确认过考核，后续任何来源（含手动选择）都不能把它改回普通问答。
+    // 但「报告」是考后复盘，不是答题环节：进入报告不应把后续练习永久锁成考核。
+    if (scene && scene.mode === 'exam' && scene.phase !== 'report') state.examLock = true;
+    // 就地改，保证 state.override 与 state.scene 两个引用看到同一个 mode
+    if (scene && state.examLock && scene.phase && scene.phase !== 'report') scene.mode = 'exam';
+
     const prev = renderedKey;
     const prevDay = state.scene ? state.scene.postopDay : null;
     state.scene = scene;
+    if (fromAuto && !state.override && scene && scene.phase) state.navPhase = scene.phase;
     T.setScene(scene);
     const next = threadKey();
     renderedKey = next;
+
+    /* 实验自动切换任务时，如果学生并没有在输入，就把键盘交还给 Unity：
+       悬浮窗和游戏是两个窗口，抢焦点会让学生按 WASD/空格没反应。 */
+    if (fromAuto && EMBED && els.input && document.activeElement === els.input && !els.input.value.trim()) {
+      els.input.blur();
+    }
 
     if (prev === next && scene && scene.postopDay && prevDay && scene.postopDay !== prevDay) {
       const th = currentThread();
@@ -2114,6 +2626,36 @@
     if (!state.settingsOpen) return;
     els.setBody.innerHTML = '';
 
+    if (state.settingsTab === 'score') {
+      const cs = (state.clientEvidence && state.clientEvidence.score) || null;
+      if (!cs || !cs.totalItems) {
+        els.setBody.innerHTML = `
+          <div class="bt-field">
+            <label>还没有成绩数据</label>
+            <div class="hint">完成一次实验（或原程序写入 39 项评分）后，这里会显示总分、分类正确率与错项。</div>
+          </div>`;
+        return;
+      }
+      const rows = Object.entries(cs.bySection || {}).map(([k, v]) =>
+        `<div>${k}：<b>${v.right}/${v.total}</b> 正确${v.answered != null ? '（已作答 ' + v.answered + '）' : ''}，${v.score} 分</div>`).join('');
+      const wrong = (cs.wrongItems || []).slice(0, 10).map((w) =>
+        `<li><b>${w.sn}</b>${w.section ? ' · ' + w.section : ''}${w.feedback ? '：' + w.feedback : ''}</li>`).join('');
+      els.setBody.innerHTML = `
+        <div class="bt-field">
+          <label>${ATTR_LABEL[cs.attribution] || '客户端记录'} · 总分：<b>${cs.totalScore}</b></label>
+          <div class="hint">已作答 ${cs.answeredItems != null ? cs.answeredItems : '—'} / ${cs.totalItems} 项${cs.noAttempts ? ' · 尚无已作答记录' : ''} · 进度 PV ${cs.pv}${cs.maxPV ? '/' + cs.maxPV : ''}${cs.isDone ? ' · 已完成' : ''}${cs.isStudyModel ? ' · 学习模式' : ''}</div>
+        </div>
+        <div class="bt-field">
+          <label>分类得分</label>
+          <div style="font-size:12px;line-height:1.9">${rows || '无'}</div>
+        </div>
+        <div class="bt-field">
+          <label>错项（${cs.noAttempts ? 0 : (cs.wrongItems || []).length}）</label>
+          <ul class="bt-score-wrong">${cs.noAttempts ? '<li>未作答不等于错项：原程序对未作答项也写 isRight=false，不能据此判定对错。</li>' : (wrong || '<li>没有错项</li>')}</ul>
+        </div>`;
+      return;
+    }
+
     if (state.settingsTab === 'ui') {
       els.setBody.innerHTML = `
         <div class="bt-field">
@@ -2169,7 +2711,7 @@
     if (state.settingsTab === 'model') {
       const c = state.cfg;
       if (!c) {
-        els.setBody.innerHTML = '<div class="bt-field"><div class="hint">本地服务未启动，无法读取模型配置。先运行 node proxy/server.mjs。</div></div>';
+        els.setBody.innerHTML = '<div class="bt-field"><div class="hint">本地服务未启动，无法读取模型配置。先运行 node apps/model-gateway/server.mjs。</div></div>';
         return;
       }
       els.setBody.innerHTML = `
@@ -2195,7 +2737,7 @@
         <div class="bt-field">
           <label>API Key</label>
           <div class="hint">${c.hasKey ? '✅ 已配置（只存在本地服务，前端读不到）' : '⚠️ 未配置，当前为演示模式'}</div>
-          <div class="hint">写入方式：编辑 proxy/config.json 的 apiKey 字段，或设置环境变量 LLM_API_KEY 后重启服务。Key 不会经过浏览器。</div>
+          <div class="hint">写入方式：编辑 apps/model-gateway/config.json 的 apiKey 字段，或设置环境变量 LLM_API_KEY 后重启服务。Key 不会经过浏览器。</div>
         </div>
         <div class="bt-field"><div class="hint">当前状态：${c.mode === 'live' ? '真实模型' : '演示模式'}</div></div>
         <div style="display:flex;gap:8px;justify-content:flex-end">
@@ -2287,13 +2829,20 @@
       ensureGreeting();
       renderScene();
       renderThread();
-      setTimeout(() => els.input.focus(), 60);
+      /* 悬浮窗贴在 Unity 上面时，自动聚焦输入框会抢走游戏的键盘输入。
+         默认只在独立页面里自动聚焦；嵌入模式必须由学生点一下输入框。 */
+      if (!EMBED || state.prefs.autoFocus) setTimeout(() => els.input.focus(), 60);
       T.log('panel', { action: 'open' });
     }
   }
 
+  /* 通知外层悬浮窗改变真实尺寸（不是只藏内容） */
+  function setForm(m) { try { window.__BT_FORM = m; } catch (e) { } }
+
   function collapse() {
+    setForm('launcher');
     state.open = false; state.mini = false;
+    if (els.input) els.input.blur();
     els.panel.classList.add('bt-hidden');
     els.mini.classList.add('bt-hidden');
     els.launcher.classList.remove('bt-hidden');
@@ -2302,6 +2851,7 @@
   }
 
   function closeAll() {
+    setForm('mini');
     state.open = false; state.mini = true;
     els.panel.classList.add('bt-hidden');
     els.launcher.classList.add('bt-hidden');
@@ -2345,6 +2895,9 @@
       dot: root.querySelector('.bt-dot'),
       select: root.querySelector('.bt-scene-select'),
       hint: root.querySelector('.bt-scene-hint'),
+      phases: root.querySelector('.bt-phases'),
+      cards: root.querySelector('.bt-cards'),
+      current: root.querySelector('.bt-current'),
       day: root.querySelector('.bt-day'),
       daySel: root.querySelector('.bt-day-select'),
       body: root.querySelector('.bt-body'),
@@ -2370,35 +2923,66 @@
     root.querySelector('[data-act="settings"]').addEventListener('click', () => openSettings());
     root.querySelector('[data-act="set-close"]').addEventListener('click', closeSettings);
 
+    /* 悬浮窗一键收起/展开：页面只负责通知外层改窗口尺寸 */
+    const foldBtn = root.querySelector('[data-act="fold"]');
+    if (foldBtn) {
+      foldBtn.addEventListener('click', () => {
+        state.folded = !state.folded;
+        els.root.classList.toggle('bt-folded', state.folded);
+        foldBtn.textContent = state.folded ? '▸' : '▾';
+        foldBtn.title = state.folded
+          ? '展开智能面板（Ctrl+Alt+M 也可）'
+          : '收起为窄条（Ctrl+Alt+M 也可）';
+        setForm(state.folded ? 'mini' : 'panel');
+        T.log('panel', { action: state.folded ? 'fold' : 'unfold' });
+      });
+    }
+
     els.tabs.addEventListener('click', (e) => {
       const b = e.target.closest('.bt-tab');
       if (!b) return;
       state.settingsTab = b.dataset.tab;
       els.tabs.querySelectorAll('.bt-tab').forEach(x => x.classList.toggle('on', x === b));
       if (state.settingsTab === 'model' && !state.cfg) loadConfig();
+      if (state.settingsTab === 'score') {
+        fetch('http://127.0.0.1:8790/state', { cache: 'no-store' })
+          .then((r) => r.json())
+          .then((cs) => { state.clientEvidence = { score: cs.scoreDetails || null, lifecycle: cs.lifecycle || null }; renderSettings(); })
+          .catch(() => { });
+      }
       renderSettings();
+    });
+
+    els.phases && els.phases.addEventListener('click', (e) => {
+      const b = e.target.closest('.bt-phase');
+      if (!b || b.dataset.follow) return;   // 「跟随实验」按钮由 renderNav 单独绑定
+      const ph = b.dataset.phase;
+      if (!ph) return;
+      /* 只切换浏览的阶段，不替学生选具体场景：
+         之前点阶段会自动选该阶段第一个场景，属于「看起来自动、其实手动」。 */
+      state.navPhase = ph;
+      renderNav();
+    });
+
+    els.cards && els.cards.addEventListener('click', (e) => {
+      const b = e.target.closest('.bt-card');
+      if (!b) return;
+      els.select.value = b.dataset.scene;
+      els.select.dispatchEvent(new Event('change'));
     });
 
     els.select.addEventListener('change', () => {
       const v = els.select.value;
-      if (v === 'auto') {
-        state.override = null;
-        applyScene(window.BT_SCENE.detect(), true);
-        toast('已恢复自动识别');
-        return;
-      }
+      if (v === 'auto') { restoreAuto(); return; }
       const sc = C.byId[v];
       if (!sc) return;
       const cur = activeScene();
-      state.override = {
-        ...(state.scene || {}),
-        phase: sc.phase,
-        postopDay: sc.phase === 'postop' ? (cur && cur.postopDay) || 3 : null,
-        taskId: sc.id, taskName: sc.taskName, scenarioId: sc.id,
-        functionName: sc.functionName, mode: sc.mode,
-        patientId: C.patient.id, contextSource: 'manual', confidence: 'high', evidence: ['手动选择']
-      };
+      const day = sc.phase === 'postop' ? ((cur && cur.phase === 'postop' && cur.postopDay) || null) : null;
+      state.override = sceneFromScenario(sc.id, day);
+      state.navPhase = sc.phase;
+      saveManualScene(state.override);
       applyScene(state.override, false);
+      T.log('scene', { action: 'manual-pick', id: sc.id, day });
     });
 
     els.daySel.addEventListener('change', () => {
@@ -2406,16 +2990,13 @@
       const s = activeScene();
       if (!s) return;
       const next = { ...s, postopDay: v };
-      if (state.override) state.override = next; else state.scene = next;
+      if (state.override) { state.override = next; saveManualScene(next); } else state.scene = next;
       T.log('postop-day', { day: v });
-      renderScene();
-      const th = currentThread();
-      if (v && C.postopDays[v]) {
-        th.push({ type: 'divider', text: `时间线切换为 ${C.postopDays[v].label}` });
-        renderThread();
-      }
+      // 术后不同日期是不同病程：切日期 = 切会话上下文
+      applyScene(next, false);
     });
 
+    startGameSync();
     els.chips.addEventListener('click', (e) => {
       const btn = e.target.closest('.bt-chip');
       if (!btn) return;
@@ -2453,6 +3034,8 @@
 
     els.input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(els.input.value); }
+      /* Esc 退出输入：悬浮窗模式下把键盘还给游戏 */
+      if (e.key === 'Escape') { e.preventDefault(); els.input.blur(); }
     });
     els.input.addEventListener('input', autoGrow);
 
@@ -2460,11 +3043,14 @@
       const v = els.scoreInput.value.trim();
       if (!v) { toast('请先粘贴成绩或错项'); return; }
       state.scoreText = v;
+      state.scoreCleared = true;      // 学生自己粘贴/改过，不再被自动数据覆盖
       T.log('score', { chars: v.length });
       send('这是我的考核成绩/错项，请基于它帮我分析：\n' + v);
     });
     root.querySelector('[data-act="clear-score"]').addEventListener('click', () => {
       state.scoreText = '';
+      state.scoreCleared = true;
+      state.scoreSource = '';
       els.scoreInput.value = '';
       toast('已清空成绩信息');
     });
@@ -2480,7 +3066,15 @@
       els.panel.classList.remove('bt-hidden');
       els.launcher.classList.add('bt-hidden');
       els.mini.classList.add('bt-hidden');
+      setForm('panel');
       state.open = true;
+      /* 重启后恢复上次手动选择的场景（只恢复手动指定，不覆盖自动识别） */
+      const restored = restoreManualScene();
+      if (restored) {
+        state.override = restored;
+        state.scene = restored;
+        state.navPhase = restored.phase;
+      }
       ensureGreeting();
       renderScene();
       renderThread();
@@ -2503,21 +3097,35 @@
       el.classList.remove('bt-hidden');
     };
 
-    // 直接轮询本机客户端代理（内容脚本跨域访问环回地址，代理已允许 CORS）
+    // 客户端状态的两种取法：
+    //   1) 本机页面（悬浮窗、demo）直接轮询 8790；
+    //   2) 真实 https 站点上，浏览器把「公网页面 → 127.0.0.1」当作 Private Network Access
+    //      直接拦掉（实测 "blocked by CORS policy ... loopback address space"），
+    //      所以改由后台 service worker 拉取再推给面板（后台有 host_permissions，不受此限）。
     let lastClient = '';
-    const pollClient = async () => {
-      try {
-        const r = await fetch('http://127.0.0.1:8790/state', { cache: 'no-store' });
-        if (!r.ok) return;
-        const cs = await r.json();
-        const key = String(cs.phase) + '|' + String(cs.postopDay) + '|' + String(cs.confidence);
-        if (key === lastClient) return;
-        lastClient = key;
-        onClientState(cs);
-      } catch (e) { /* 代理没开 */ }
+    const applyClient = (cs) => {
+      /* 只要成功拿到状态就刷新“活着”的时间，哪怕内容没变；
+         否则 90 秒后会把一个正常但静止的实验误判成断线。 */
+      if (cs && cs.ok) state.clientSeenAt = Date.now();
+      const lu = cs.lastUnity || {};
+      const key = [cs.phase, cs.postopDay, cs.taskId, cs.confidence, cs.mode,
+        cs.stale ? 1 : 0, lu.taskId || lu.phase || '', lu.capturedAt || ''].join('|');
+      if (key === lastClient) return;
+      lastClient = key;
+      onClientState(cs);
     };
-    pollClient();
-    setInterval(pollClient, 4000);
+    const isLocalPage = /^(127\.0\.0\.1|localhost|\[::1\])$/.test(location.hostname);
+    if (isLocalPage) {
+      const pollClient = async () => {
+        try {
+          const r = await fetch('http://127.0.0.1:8790/state', { cache: 'no-store' });
+          if (!r.ok) return;
+          applyClient(await r.json());
+        } catch (e) { /* 代理没开 */ }
+      };
+      pollClient();
+      setInterval(pollClient, 4000);
+    }
 
     stopScene = window.BT_SCENE.start((scene) => {
       if (state.override) { state.scene = scene; return; }
@@ -2543,6 +3151,23 @@
       if (snap.active) els.bridgeBadge.textContent = '已接入实验事件 ' + snap.stepCount;
     }, 4000);
 
+    // 客户端状态到期失效：代理断线（而不是实验退出，退出由 stale 立刻处理）时，
+    // 不能让上一次的“术后第2天”一直挂着。90 秒没有成功拿到状态就退回页面识别。
+    const CLIENT_TTL = 90000;
+    setInterval(() => {
+      if (state.override) return;
+      const s = state.scene;
+      if (!s || (s.contextSource !== 'client-log' && s.contextSource !== 'unity-event')) return;
+      if (!state.clientSeenAt) return;
+      if (Date.now() - state.clientSeenAt < CLIENT_TTL) return;
+      state.clientScene = null;
+      state.scene = null;
+      renderedKey = '';
+      T.log('scene', { from: 'client-timeout', phase: s.phase });
+      renderScene();
+      toast('客户端状态已超时，回到页面自动识别');
+    }, 5000);
+
     T.subscribe(() => {
       if (els.traceCount) els.traceCount.textContent = T.all().length + ' 事件';
       if (state.settingsOpen && state.settingsTab === 'trace') renderSettings();
@@ -2560,7 +3185,25 @@
     });
   }
 
-  window.BT_UI = { mount, setClientState: onClientState };
+  function debug() {
+    return {
+      scene: activeScene(),
+      override: !!state.override,
+      examLock: state.examLock,
+      clientTs: state.clientTs,
+      clientPhase: state.client ? state.client.phase : null,
+      clientSource: state.client ? state.client.contextSource : null,
+      clientEvidence: state.clientEvidence
+        ? { hasScore: !!state.clientEvidence.score, lifecycle: state.clientEvidence.lifecycle && state.clientEvidence.lifecycle.label }
+        : null,
+      scoreSource: state.scoreSource,
+      scoreCleared: state.scoreCleared,
+      thread: threadKey(),
+      threads: Object.keys(state.threads)
+    };
+  }
+
+  window.BT_UI = { mount, setClientState: onClientState, debug };
 })();
 
 })();

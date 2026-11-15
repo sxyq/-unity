@@ -17,16 +17,20 @@
   const AV = { patient: asset('patient.svg'), nurse: asset('nurse.svg'), coach: asset('coach.svg') };
 
   const PFX = { preop: '术前', intraop: '术中', postop: '术后', report: '报告' };
-  const DEFAULT_PREFS = { theme: 'light', width: 392, fontScale: 100, opacity: 100, dock: 'right' };
+  const DEFAULT_PREFS = { theme: 'light', width: 392, fontScale: 100, opacity: 100, dock: 'right', autoFocus: false };
 
   const EMBED = !!window.__BT_EMBED__;
 
   const state = {
-    open: false, mini: false,
+    open: false, mini: false, folded: false,
     scene: null, override: null,
     examLock: false,            // 一旦确认为考核，任何手动选择都不能解除
     client: null, clientScene: null, clientTs: 0,
     clientEvidence: null,       // 客户端日志里的真实 UI 生命周期 / 逐步骤成绩
+    clientSeenAt: 0,            // 最后一次成功拿到客户端状态（用于判断断线）
+    stale: null,                // 客户端明确报告「实验没在跑」时的说明
+    lastUnity: null,            // 上次运行识别到的任务，只用于提示，不作当前任务
+    navPhase: null,             // 三级导航当前浏览的阶段（不影响实际场景）
     scoreSource: '', scoreCleared: false,
     health: { mode: 'unknown', model: '' },
     threads: {}, busy: false, scoreText: '', scoreOpen: false,
@@ -48,6 +52,38 @@
   }
   function savePrefs() {
     try { localStorage.setItem('bt_prefs', JSON.stringify(state.prefs)); } catch (e) {}
+  }
+
+  /* ---------------- 手动场景（可跨重启恢复） ----------------
+     之前只把 C.byId 里的原始配置塞进 state.override，缺 scenarioId，
+     重启后既没有对话也没有角色，还会显示成「仅识别到阶段」。 */
+  function sceneFromScenario(id, day) {
+    const sc = C.byId[id];
+    if (!sc) return null;
+    return {
+      phase: sc.phase,
+      postopDay: sc.phase === 'postop' ? (day || null) : null,
+      taskId: sc.id, taskName: sc.taskName, scenarioId: sc.id,
+      functionName: sc.functionName, mode: (state.examLock && sc.phase !== 'report') ? 'exam' : sc.mode,
+      patientId: C.patient.id, contextSource: 'manual', confidence: 'high',
+      evidence: ['手动选择']
+    };
+  }
+
+  function saveManualScene(s) {
+    try {
+      if (!s || !s.scenarioId) localStorage.removeItem('bt_scene_manual');
+      else localStorage.setItem('bt_scene_manual', JSON.stringify({ id: s.scenarioId, day: s.postopDay || null }));
+    } catch (e) { /* ignore */ }
+  }
+
+  function restoreManualScene() {
+    try {
+      const raw = localStorage.getItem('bt_scene_manual');
+      if (!raw) return null;
+      const v = JSON.parse(raw);
+      return v && v.id ? sceneFromScenario(v.id, v.day) : null;
+    } catch (e) { return null; }
   }
   function applyPrefs() {
     if (!els.panel) return;
@@ -156,61 +192,118 @@
   };
   const CONF_LABEL = { high: '高可信', medium: '中可信', low: '低可信', none: '无证据' };
 
-  /* 三级导航：阶段 → 场景 → 当前 Unity 任务
-     下拉框保留为权威取值来源，卡片点击后写回并触发 change，不破坏既有逻辑。 */
+  /* 三级导航：阶段 → 场景 → 当前 Unity 任务/子任务
+     规则：
+       - 阶段 pill 只切换「浏览哪一组场景」，不替学生选场景；
+       - 场景卡片 = 手动选择（会明确标注「手动」）；
+       - 自动识别成功时，阶段与卡片自动跟随，不需要学生再点一次。 */
   const PHASES = ['preop', 'intraop', 'postop', 'report'];
+  const SUBTASKS = {
+    'preop-history': ['入院记录', '辅助检查', '专科检查']
+  };
   function renderNav() {
     if (!els.phases || !els.cards) return;
     const s = activeScene() || {};
     const g = state.game || {};
-    let phase = s.phase || null;
-    if (!phase && g.scen) {
-      const byId = C.byId[g.scen];
-      phase = byId ? byId.phase : null;
-    }
-    if (!phase) phase = 'preop';
+    const autoPhase = s.phase || (g.lastUnity && g.lastUnity.phase) || null;
+    const phase = state.navPhase || autoPhase || 'preop';
 
     els.phases.innerHTML = PHASES.map((ph) =>
-      `<button class="bt-phase${ph === phase ? ' on' : ''}${s.phase && s.phase !== ph ? ' dim' : ''}" data-phase="${ph}">${PFX[ph]}</button>`
+      `<button class="bt-phase${ph === phase ? ' on' : ''}" data-phase="${ph}">${PFX[ph]}</button>`
     ).join('');
 
     const list = C.scenarios.filter((x) => x.phase === phase);
     els.cards.innerHTML = list.map((sc) =>
-      `<button class="bt-card${s.scenarioId === sc.id ? ' on' : ''}" data-scene="${sc.id}">
+      `<button class="bt-card${s.scenarioId === sc.id ? ' on' : ''}" data-scene="${sc.id}"${state.examLock ? ' data-lock="1"' : ''}>
          <b>${sc.no} ${sc.functionName}</b>
          <span>${sc.taskName}</span>
        </button>`
     ).join('') || '<div style="grid-column:1/-1;color:var(--bt-sub);font-size:12px">该阶段暂无智能场景</div>';
 
-    // 当前 Unity 任务（真实任务名，来自 observer）
-    const tasks = g.dayTasks || [];
-    if (tasks.length) {
-      els.current.classList.add('show');
-      els.current.innerHTML = `<b>当前实验任务</b>：<span class="sub">${tasks.slice(0, 3).join(' · ')}</span>`
-        + (tasks.length > 3 ? ` 等 ${tasks.length} 项` : '');
+    const parts = [];
+    if (state.stale) {
+      const lu = state.lastUnity;
+      const ago = lu && lu.ageSec != null ? formatAgo(lu.ageSec) : '';
+      parts.push(`<div class="bt-stale"><b>实验未运行</b>：${state.stale.reason || '没有检测到正在运行的实验'}`
+        + (lu && (lu.taskName || lu.phase)
+          ? `　上次识别到「${lu.taskName || PFX[lu.phase] || lu.phase}」${ago ? '（' + ago + '）' : ''}`
+          : '')
+        + '</div>');
+    }
+    const realTask = g.curTask || (g.selectedTasks && g.selectedTasks[0]) || '';
+    if (realTask) {
+      parts.push(`<div><b>当前实验任务</b>：<span class="sub">${realTask}</span>`
+        + (g.tipButtons ? `　<span class="bt-nav-note">病人菜单：${g.tipButtons.split('|').slice(0, 3).join(' / ')}</span>` : '')
+        + '</div>');
+    } else if (g.dayTasks && g.dayTasks.length) {
+      parts.push(`<div><b>今日任务</b>：<span class="sub">${g.dayTasks.slice(0, 3).join(' · ')}</span>`
+        + (g.dayTasks.length > 3 ? ` 等 ${g.dayTasks.length} 项` : '') + '</div>');
     } else if (g.subtitle) {
+      parts.push(`<div><b>游戏当前</b>：<span class="sub">${g.subtitle.slice(0, 26)}</span></div>`);
+    }
+    /* 第三层：子任务。只展示、不改写原任务顺序；点一下只是就这一页继续问，不重开会话。 */
+    const subs = s.scenarioId ? SUBTASKS[s.scenarioId] : null;
+    if (subs && subs.length) {
+      const cur = (g.selectedTasks || []).find((x) => subs.includes(x)) || (g.uiTexts || []).find((x) => subs.includes(x));
+      parts.push('<div class="bt-subtasks">'
+        + subs.map((x) => `<button class="bt-subtask${x === cur ? ' on' : ''}" data-sub="${x}">${x}</button>`).join('')
+        + '<span class="bt-nav-note">子任务切换不重开会话</span></div>');
+    }
+    const followHtml = state.override
+      ? '<button class="bt-follow show" data-follow="1" title="取消手动选择，回到实验自动识别">← 跟随实验</button>'
+      : '';
+    if (followHtml || parts.length) {
       els.current.classList.add('show');
-      els.current.innerHTML = `<b>游戏当前</b>：<span class="sub">${g.subtitle.slice(0, 26)}</span>`;
+      els.current.innerHTML = followHtml + parts.join('');
+      els.current.querySelectorAll('[data-sub]').forEach((b) => b.addEventListener('click', () => {
+        const sub = b.dataset.sub;
+        if (!activeScene() || !activeScene().scenarioId) { toast('请先选择场景'); return; }
+        send(`我当前在原实验「${sub}」这一页，请结合这一页继续问我。`);
+      }));
+      const fol = els.current.querySelector('[data-follow]');
+      if (fol) fol.addEventListener('click', () => restoreAuto());
     } else {
       els.current.classList.remove('show');
     }
   }
 
+  function formatAgo(sec) {
+    const s = Number(sec) || 0;
+    if (s < 90) return '刚刚';
+    if (s < 3600) return Math.round(s / 60) + ' 分钟前';
+    return Math.round(s / 3600) + ' 小时前';
+  }
+
+  function restoreAuto() {
+    state.override = null;
+    state.navPhase = null;
+    saveManualScene(null);
+    let next = null;
+    try { next = window.BT_SCENE.detect(); } catch (e) { next = null; }
+    if ((!next || !next.phase) && state.clientScene) next = state.clientScene;
+    applyScene(next, true);
+    toast('已恢复自动识别');
+    T.log('scene', { action: 'auto-restore' });
+  }
+
   function renderScene() {
     const s = activeScene();
-    const conf = state.override ? 'medium' : (s && s.phase ? s.confidence : 'none');
-    els.dot.className = 'bt-dot ' + (s && s.phase ? conf : 'none');
+    const conf = state.stale ? 'none' : (state.override ? 'medium' : (s && s.phase ? s.confidence : 'none'));
+    els.dot.className = 'bt-dot ' + (s && s.phase && !state.stale ? conf : 'none');
 
-    if (!s || !s.phase) {
+    if (state.stale && !state.override) {
+      // 实验没在跑：不再显示上一次的任务为「当前」，详细的上次记录放在导航区一行
+      els.hint.textContent = '实验未运行 · 自动识别已停用';
+    } else if (!s || !s.phase) {
       // 客户端日志能证明「实验正在跑、当前是哪个 UI」，但证明不了业务阶段。
       // 如实显示运行证据，仍然要求手动选任务，不拿界面名猜场景。
       const lc = state.clientEvidence && state.clientEvidence.lifecycle;
       const subTxt = (state.game && state.game.subtitle) ? `　「${state.game.subtitle.slice(0, 20)}」` : '';
-      els.hint.textContent = (lc
+      els.hint.textContent = (lc && lc.live
         ? `客户端已运行 · ${lc.label} · 任务请手动选`
-        : '未识别，请手动选择') + subTxt;
+        : '未识别，请在下方选择场景') + subTxt;
     } else if (state.override) {
-      els.hint.textContent = '手动指定' + (state.examLock ? ' · 考核保护中' : '');
+      els.hint.textContent = '手动指定' + (state.examLock ? ' · 考核保护中' : '') + (state.stale ? ' · 实验未运行' : '');
     } else {
       const src = SOURCE_LABEL[s.contextSource] || '自动识别';
       const sub = (state.game && state.game.subtitle) ? `　「${state.game.subtitle.slice(0, 22)}」` : '';
@@ -341,48 +434,15 @@
   }
 
   function renderPicker(onlyPhase) {
-    const groups = [
-      ['preop', '术前'],
-      ['intraop', '术中'],
-      ['postop', '术后'],
-      ['report', '个性化报告']
-    ].filter(([ph]) => !onlyPhase || ph === onlyPhase);
-    const html = groups.map(([ph, label]) => {
-      const items = C.scenarios.filter(x => x.phase === ph).map(sc => `
-        <button class="bt-pick-item" data-sid="${sc.id}">
-          <span class="bt-pick-no">${sc.no}</span>
-          <span class="bt-pick-text">
-            <b>${sc.functionName}</b>
-            <i>${sc.taskName}</i>
-          </span>
-        </button>`).join('');
-      return `<div class="bt-pick-group"><div class="bt-pick-title">${label}</div>${items}</div>`;
-    }).join('');
-
+    /* 场景列表已经在三级导航里，这里不再重复一整套按钮，
+       只说明「现在为什么需要你选」以及选完会发生什么。 */
     const hint = onlyPhase
-      ? `已识别到「${PFX[onlyPhase] || onlyPhase}阶段」，但日志只给到阶段。选一个具体任务，我按对应角色开始：`
-      : '没识别到当前场景。选一个，我按对应角色开始：';
-
+      ? `已识别到「${PFX[onlyPhase] || onlyPhase}阶段」，但还不能确定具体任务。在上方选一个场景，我按对应角色开始。`
+      : '还没有识别到当前实验场景。请在上方按「阶段 → 场景」选择，或启动原实验后等我自动跟随。';
     els.body.innerHTML = `<div class="bt-picker">
-      <div class="bt-picker-hint">${hint.replace('选一个具体任务，我按对应角色开始：', '点上方场景卡片即可开始。').replace('选一个，我按对应角色开始：', '点上方卡片选一个场景。')}</div>
+      <div class="bt-picker-hint">${hint}</div>
+      <div class="bt-picker-hint">实验里切换任务时，场景会自动跟随；手动选过之后，点「跟随实验」可恢复自动识别。</div>
     </div>`;
-    els.body.querySelectorAll('.bt-pick-item').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const sc = C.byId[btn.dataset.sid];
-        if (!sc) return;
-        const cur = activeScene();
-        state.override = {
-          ...(state.scene || {}),
-          phase: sc.phase,
-          // 术后日期不默认填 3：不知道就是不知道，由学生自己选
-          postopDay: sc.phase === 'postop' ? ((cur && cur.phase === 'postop' && cur.postopDay) || null) : null,
-          taskId: sc.id, taskName: sc.taskName, scenarioId: sc.id,
-          functionName: sc.functionName, mode: sc.mode,
-          patientId: C.patient.id, contextSource: 'manual', confidence: 'high', evidence: ['面板选择']
-        };
-        applyScene(state.override, false);
-      });
-    });
   }
 
   function renderThread(scroll) {
@@ -465,35 +525,45 @@
   /* 客户端 Player.log 里原程序自己打印的逐步骤成绩。
    * 平台 ItemsByUser 只有总分；分项只在客户端进度回包里，所以这里优先级最高。
    * 只陈述日志里有的字段，不推断「哪一步做错了」以外的结论。 */
+  const ATTR_LABEL = {
+    'current-running': '本次实验 · 正在运行',
+    'current-last-run': '上一次运行 · 已结束（非本次实时）',
+    'history': '历史记录 · 更早的日志'
+  };
   function formatClientScore(sd, lc) {
     const L = [];
-    L.push('【来源：客户端 Player.log · 原程序打印的逐步骤进度记录】');
-    L.push(`分项 ${sd.totalItems} 项，正确 ${sd.rightItems} 项，累计 ${sd.totalScore} 分；进度标记 ${sd.currentExpProgress}${sd.isDone ? '（已完成）' : '（未完成）'}`);
+    const attr = ATTR_LABEL[sd.attribution] || '客户端记录';
+    L.push(`【来源：客户端 Player.log · ${attr}】`);
+    const pvTxt = sd.pv != null ? `，进度标记 ${sd.pv}${sd.maxPV ? '/' + sd.maxPV : ''}` : '';
+    L.push(`分项 ${sd.totalItems} 项：已作答 ${sd.answeredItems != null ? sd.answeredItems : '—'} 项、未作答 ${sd.pendingItems != null ? sd.pendingItems : '—'} 项；累计 ${sd.totalScore} 分${pvTxt}${sd.isDone ? '；已完成' : '；未完成'}`);
     const secs = Object.entries(sd.bySection || {});
     if (secs.length) {
       L.push('分章节：' + secs.map(([k, v]) =>
-        `${k} ${v.right}/${v.total}，${Math.round(v.score * 10) / 10} 分`).join('；'));
+        `${k} ${v.right}/${v.total} 正确${v.answered != null ? '（已作答 ' + v.answered + '）' : ''}，${Math.round(v.score * 10) / 10} 分`).join('；'));
     }
     const wrong = sd.wrongItems || [];
-    if (wrong.length) {
-      L.push('未得分／未完成项：');
-      for (const w of wrong.slice(0, 10)) L.push(`- ${w.sn}（${w.section}）：${w.feedback || '未完成'}`);
+    if (sd.noAttempts) {
+      L.push('错项：没有已作答记录。原程序对未作答项同样写 isRight=false、score=0，');
+      L.push('因此不能把这 ' + sd.totalItems + ' 项当成「答错」，也不能据此推断薄弱知识点。');
+    } else if (wrong.length) {
+      L.push('已作答且未得分项：');
+      for (const w of wrong.slice(0, 12)) L.push(`- ${w.sn}（${w.section}）：${w.feedback || '未得分'}`);
     } else {
-      L.push('未得分／未完成项：日志里没有记录到。');
+      L.push('错项：已作答项中没有未得分记录。');
     }
-    if (lc && lc.label) L.push(`客户端界面：${lc.label}`);
-    L.push('说明：以上是原实验写入日志的分项记录，不代表本次实时作答；日志未记录的步骤无法推断。');
+    if (lc && lc.label) L.push(`客户端界面：${lc.label}${lc.live === false ? '（历史）' : ''}`);
+    L.push('说明：以上是原实验写入日志的分项记录；未作答项无法推断，日志没有的字段也无法推断。');
     return L.join('\n');
   }
 
   function fillClientScore(sd, lc) {
     if (state.scoreCleared || !sd || !sd.totalItems) return;
-    const sig = [sd.totalItems, sd.rightItems, sd.totalScore, sd.currentExpProgress, (sd.wrongItems || []).length].join('|');
+    const sig = [sd.totalItems, sd.rightItems, sd.totalScore, sd.currentExpProgress, (sd.wrongItems || []).length, sd.answeredItems, sd.attribution].join('|');
     if (state.scoreSource === 'client-log' && state.scoreSignature === sig) return;  // 去重
     let txt = formatClientScore(sd, lc);
     const wrongs = (state.game && state.game.commData || []).filter((x) => x && x.wrong);
-    if (wrongs.length) {
-      txt += '\n\n**本次真实错项**\n' + wrongs.slice(0, 12)
+    if (wrongs.length && !sd.noAttempts && !(state.game && state.game.commAmbiguous)) {
+      txt += '\n\n**客户端错项原文**\n' + wrongs.slice(0, 12)
         .map((x) => `- 第${x.sn ?? '?'}步：${x.wrong}`).join('\n');
     }
     state.scoreText = txt;
@@ -503,47 +573,71 @@
     if (els.scoreInput) els.scoreInput.value = txt.slice(0, 2000);
     if (els.scoreBox) els.scoreBox.classList.add('show');
     T.log('score-source', {
-      from: 'client-log', items: sd.totalItems,
-      wrong: (sd.wrongItems || []).length
+      from: 'client-log', items: sd.totalItems, attribution: sd.attribution,
+      answered: sd.answeredItems, wrong: (sd.wrongItems || []).length
     });
   }
 
   let lastClientAt = 0;
-  function onClientState(cs) {
-    state.client = cs;
-    lastClientAt = Date.now();
-    // 真实实验本体日志里没有「术前/术中/术后」阶段词，但会打印 UI 生命周期
-    // 和整份逐步骤成绩。这些证据与 phase 无关，必须单独收下。
-    if (!cs || !cs.ok) {
-      // 客户端没在跑：解除上一轮的任务展示，避免界面继续显示过期任务
-      if (Date.now() - lastClientAt > 90000) {
-        state.clientEvidence = null;
-        if (!state.override && state.scene && state.scene.contextSource !== 'manual') {
-          state.scene = null;
-          renderedKey = '';
-          renderScene();
-        }
-      }
+  function clearClientScene(why) {
+    state.clientScene = null;
+    state.clientTs = 0;
+    if (!state.override && state.scene && state.scene.contextSource !== 'manual') {
+      state.scene = null;
+      renderedKey = '';
+      T.log('scene', { from: 'client-clear', why });
     }
-    if (cs && cs.ok && (cs.scoreDetails || cs.lifecycle)) {
+    renderScene();
+  }
+
+  function onClientState(cs) {
+    /* 本机代理没开 / 请求失败：90 秒内没有成功过就解除客户端场景，
+       不能因为一次失败就清空，也不能一直挂着上一次的任务。 */
+    if (!cs || !cs.ok) {
+      if (state.clientSeenAt && Date.now() - state.clientSeenAt > 90000) {
+        clearClientScene('client-offline');
+      }
+      return;
+    }
+    state.client = cs;
+    state.clientSeenAt = Date.now();
+    lastClientAt = Date.now();
+
+    // 成绩与生命周期证据始终收下（带 attribution），即使实验已经退出
+    if (cs.scoreDetails || cs.lifecycle) {
       state.clientEvidence = { score: cs.scoreDetails || null, lifecycle: cs.lifecycle || null };
+    }
+
+    /* 实验没在跑：agent 已确认没有活着的证据，此时 phase/taskId 被清空。
+       面板必须跟着解除，而不是继续展示上次的任务。 */
+    if (cs.stale) {
+      state.stale = { reason: cs.staleReason || '没有检测到正在运行的实验' };
+      state.lastUnity = cs.lastUnity || null;
       const sc0 = activeScene();
       if (sc0 && sc0.phase === 'report' && cs.scoreDetails) fillClientScore(cs.scoreDetails, cs.lifecycle);
+      const key = 'stale:' + (state.lastUnity && (state.lastUnity.taskId || state.lastUnity.phase) || '') + ':' + (state.lastUnity && state.lastUnity.ageSec);
+      if (state._staleKey !== key) {
+        state._staleKey = key;
+        clearClientScene('stale');
+      }
+      return;
     }
-    if (!cs || !cs.ok || !cs.phase) return;
+    if (state.stale) { state.stale = null; state.lastUnity = null; state._staleKey = ''; }
+
     if (cs.ts) {
       if (cs.ts === state.clientTs) return;   // 后台推送与面板轮询会重复，去重
       state.clientTs = cs.ts;
     }
     if (cs.mode === 'exam') {
       state.examLock = true;
-      // 页面已经先给出了场景时，也要把考核状态立刻贴到当前场景上
-      if (state.scene && state.scene.mode !== 'exam') {
+      // 页面已经先给出了场景时，也要把考核状态立刻贴到当前场景上（报告阶段除外）
+      if (state.scene && state.scene.phase !== 'report' && state.scene.mode !== 'exam') {
         state.scene.mode = 'exam';
         if (state.override) state.override.mode = 'exam';
         if (els.panel) renderScene();
       }
     }
+    if (!cs.phase) { renderScene(); return; }
     if (state.override) return;
     const cur = state.scene;
     // Unity 测试副本的结构化事件来自原程序运行时状态，优先于页面 DOM 推断。
@@ -560,7 +654,7 @@
       taskName: taskKnown ? cs.taskName : null,
       scenarioId: taskKnown ? cs.taskId : null,
       functionName: taskKnown ? sc.functionName : null,
-      mode: state.examLock ? 'exam' : (cs.mode || 'study'),
+      mode: (state.examLock && cs.phase !== 'report') ? 'exam' : (cs.mode || 'study'),
       patientId: C.patient.id,
       contextSource: cs.contextSource || 'client-log',
       confidence: cs.confidence || 'medium',
@@ -601,7 +695,7 @@
       const last = th[th.length - 1];
       if (last && last.streaming) {
         last.streaming = false;
-        last.text = last.text || ('（没连上本地服务：' + (msg.message || '未知错误') + '）\n请先运行 proxy/server.mjs，再重试。');
+        last.text = last.text || ('（没连上本地服务：' + (msg.message || '未知错误') + '）\n请先运行 node apps/model-gateway/server.mjs，再重试。');
       }
       T.log('error', { message: msg.message || '' });
       finishStream('error');
@@ -649,13 +743,21 @@
           subtitle: (u.subtitle || '').trim(),
           dayTasks: String(u.dayTaskNames || '').split('|').filter(Boolean),
           commData: Array.isArray(u.commDatas) ? u.commDatas : [],
+          commAmbiguous: u.commAmbiguous === true,
           tipButtons: u.tipOptButtons || '',
+          selectedTasks: Array.isArray(u.selectedTasks) ? u.selectedTasks : [],
+          uiTexts: Array.isArray(u.uiTexts) ? u.uiTexts : [],
+          curTask: u.taskCurrentText || ((u.selectedTasks || []).join('、') || ''),
           scen: cs.scenarioId || null,
           conf: cs.confidence || null,
           day: cs.postopDay || null,
         };
         const prev = state.game || {};
-        const changed = next.subtitle !== prev.subtitle || next.dayTasks.join() !== (prev.dayTasks || []).join();
+        const changed = next.subtitle !== prev.subtitle
+          || next.curTask !== prev.curTask
+          || next.tipButtons !== prev.tipButtons
+          || next.commData.length !== (prev.commData || []).length
+          || next.dayTasks.join() !== (prev.dayTasks || []).join();
         state.game = next;
         if (changed) renderScene();
       } catch { /* agent 没开就静默 */ }
@@ -724,7 +826,10 @@
     T.log('ask', { q: text.slice(0, 120), chars: text.length });
 
     const history = th.filter(m => m.role && m.text).slice(-12).map(m => ({ role: m.role, content: m.text }));
-    const system = window.BT_PROMPT.buildSystemPrompt(s, { scoreText: state.scoreText });
+    /* 成绩只在报告场景或学生主动粘贴时进入上下文：
+       否则在术前/术中练习里带着一份含正确答案的错题记录，既无必要也容易泄题。 */
+    const scoreForPrompt = (s.phase === 'report' || state.scoreCleared) ? state.scoreText : '';
+    const system = window.BT_PROMPT.buildSystemPrompt(s, { scoreText: scoreForPrompt });
 
     const p = ensurePort();
     if (!p) { onBg({ type: 'error', message: '扩展后台未就绪' }); return; }
@@ -754,17 +859,25 @@
         els.send.disabled = false;
       }
     }
-    // 考核保护：一旦确认过考核，后续任何来源（含手动选择）都不能把它改回普通问答
-    if (scene && (scene.mode === 'exam' || scene.phase === 'report')) state.examLock = true;
+    // 考核保护：一旦确认过考核，后续任何来源（含手动选择）都不能把它改回普通问答。
+    // 但「报告」是考后复盘，不是答题环节：进入报告不应把后续练习永久锁成考核。
+    if (scene && scene.mode === 'exam' && scene.phase !== 'report') state.examLock = true;
     // 就地改，保证 state.override 与 state.scene 两个引用看到同一个 mode
-    if (scene && state.examLock && scene.phase) scene.mode = 'exam';
+    if (scene && state.examLock && scene.phase && scene.phase !== 'report') scene.mode = 'exam';
 
     const prev = renderedKey;
     const prevDay = state.scene ? state.scene.postopDay : null;
     state.scene = scene;
+    if (fromAuto && !state.override && scene && scene.phase) state.navPhase = scene.phase;
     T.setScene(scene);
     const next = threadKey();
     renderedKey = next;
+
+    /* 实验自动切换任务时，如果学生并没有在输入，就把键盘交还给 Unity：
+       悬浮窗和游戏是两个窗口，抢焦点会让学生按 WASD/空格没反应。 */
+    if (fromAuto && EMBED && els.input && document.activeElement === els.input && !els.input.value.trim()) {
+      els.input.blur();
+    }
 
     if (prev === next && scene && scene.postopDay && prevDay && scene.postopDay !== prevDay) {
       const th = currentThread();
@@ -914,21 +1027,21 @@
         return;
       }
       const rows = Object.entries(cs.bySection || {}).map(([k, v]) =>
-        `<div>${k}：<b>${v.right}/${v.total}</b> 正确，${v.score} 分</div>`).join('');
+        `<div>${k}：<b>${v.right}/${v.total}</b> 正确${v.answered != null ? '（已作答 ' + v.answered + '）' : ''}，${v.score} 分</div>`).join('');
       const wrong = (cs.wrongItems || []).slice(0, 10).map((w) =>
         `<li><b>${w.sn}</b>${w.section ? ' · ' + w.section : ''}${w.feedback ? '：' + w.feedback : ''}</li>`).join('');
       els.setBody.innerHTML = `
         <div class="bt-field">
-          <label>总分：<b>${cs.totalScore}</b> / 正确 ${cs.rightItems}/${cs.totalItems}</label>
-          <div class="hint">进度 PV ${cs.pv}/${cs.maxPV}${cs.isDone ? ' · 已完成' : ''}${cs.isStudyModel ? ' · 学习模式' : ''}</div>
+          <label>${ATTR_LABEL[cs.attribution] || '客户端记录'} · 总分：<b>${cs.totalScore}</b></label>
+          <div class="hint">已作答 ${cs.answeredItems != null ? cs.answeredItems : '—'} / ${cs.totalItems} 项${cs.noAttempts ? ' · 尚无已作答记录' : ''} · 进度 PV ${cs.pv}${cs.maxPV ? '/' + cs.maxPV : ''}${cs.isDone ? ' · 已完成' : ''}${cs.isStudyModel ? ' · 学习模式' : ''}</div>
         </div>
         <div class="bt-field">
           <label>分类得分</label>
           <div style="font-size:12px;line-height:1.9">${rows || '无'}</div>
         </div>
         <div class="bt-field">
-          <label>错项（${(cs.wrongItems || []).length}）</label>
-          <ul class="bt-score-wrong">${wrong || '<li>没有错项</li>'}</ul>
+          <label>错项（${cs.noAttempts ? 0 : (cs.wrongItems || []).length}）</label>
+          <ul class="bt-score-wrong">${cs.noAttempts ? '<li>未作答不等于错项：原程序对未作答项也写 isRight=false，不能据此判定对错。</li>' : (wrong || '<li>没有错项</li>')}</ul>
         </div>`;
       return;
     }
@@ -988,7 +1101,7 @@
     if (state.settingsTab === 'model') {
       const c = state.cfg;
       if (!c) {
-        els.setBody.innerHTML = '<div class="bt-field"><div class="hint">本地服务未启动，无法读取模型配置。先运行 node proxy/server.mjs。</div></div>';
+        els.setBody.innerHTML = '<div class="bt-field"><div class="hint">本地服务未启动，无法读取模型配置。先运行 node apps/model-gateway/server.mjs。</div></div>';
         return;
       }
       els.setBody.innerHTML = `
@@ -1014,7 +1127,7 @@
         <div class="bt-field">
           <label>API Key</label>
           <div class="hint">${c.hasKey ? '✅ 已配置（只存在本地服务，前端读不到）' : '⚠️ 未配置，当前为演示模式'}</div>
-          <div class="hint">写入方式：编辑 proxy/config.json 的 apiKey 字段，或设置环境变量 LLM_API_KEY 后重启服务。Key 不会经过浏览器。</div>
+          <div class="hint">写入方式：编辑 apps/model-gateway/config.json 的 apiKey 字段，或设置环境变量 LLM_API_KEY 后重启服务。Key 不会经过浏览器。</div>
         </div>
         <div class="bt-field"><div class="hint">当前状态：${c.mode === 'live' ? '真实模型' : '演示模式'}</div></div>
         <div style="display:flex;gap:8px;justify-content:flex-end">
@@ -1106,7 +1219,9 @@
       ensureGreeting();
       renderScene();
       renderThread();
-      setTimeout(() => els.input.focus(), 60);
+      /* 悬浮窗贴在 Unity 上面时，自动聚焦输入框会抢走游戏的键盘输入。
+         默认只在独立页面里自动聚焦；嵌入模式必须由学生点一下输入框。 */
+      if (!EMBED || state.prefs.autoFocus) setTimeout(() => els.input.focus(), 60);
       T.log('panel', { action: 'open' });
     }
   }
@@ -1117,6 +1232,7 @@
   function collapse() {
     setForm('launcher');
     state.open = false; state.mini = false;
+    if (els.input) els.input.blur();
     els.panel.classList.add('bt-hidden');
     els.mini.classList.add('bt-hidden');
     els.launcher.classList.remove('bt-hidden');
@@ -1197,6 +1313,21 @@
     root.querySelector('[data-act="settings"]').addEventListener('click', () => openSettings());
     root.querySelector('[data-act="set-close"]').addEventListener('click', closeSettings);
 
+    /* 悬浮窗一键收起/展开：页面只负责通知外层改窗口尺寸 */
+    const foldBtn = root.querySelector('[data-act="fold"]');
+    if (foldBtn) {
+      foldBtn.addEventListener('click', () => {
+        state.folded = !state.folded;
+        els.root.classList.toggle('bt-folded', state.folded);
+        foldBtn.textContent = state.folded ? '▸' : '▾';
+        foldBtn.title = state.folded
+          ? '展开智能面板（Ctrl+Alt+M 也可）'
+          : '收起为窄条（Ctrl+Alt+M 也可）';
+        setForm(state.folded ? 'mini' : 'panel');
+        T.log('panel', { action: state.folded ? 'fold' : 'unfold' });
+      });
+    }
+
     els.tabs.addEventListener('click', (e) => {
       const b = e.target.closest('.bt-tab');
       if (!b) return;
@@ -1214,13 +1345,13 @@
 
     els.phases && els.phases.addEventListener('click', (e) => {
       const b = e.target.closest('.bt-phase');
-      if (!b) return;
+      if (!b || b.dataset.follow) return;   // 「跟随实验」按钮由 renderNav 单独绑定
       const ph = b.dataset.phase;
-      const first = C.scenarios.find((x) => x.phase === ph);
-      if (first) {
-        els.select.value = first.id;
-        els.select.dispatchEvent(new Event('change'));
-      }
+      if (!ph) return;
+      /* 只切换浏览的阶段，不替学生选具体场景：
+         之前点阶段会自动选该阶段第一个场景，属于「看起来自动、其实手动」。 */
+      state.navPhase = ph;
+      renderNav();
     });
 
     els.cards && els.cards.addEventListener('click', (e) => {
@@ -1232,24 +1363,16 @@
 
     els.select.addEventListener('change', () => {
       const v = els.select.value;
-      if (v === 'auto') {
-        state.override = null;
-        applyScene(window.BT_SCENE.detect(), true);
-        toast('已恢复自动识别');
-        return;
-      }
+      if (v === 'auto') { restoreAuto(); return; }
       const sc = C.byId[v];
       if (!sc) return;
       const cur = activeScene();
-      state.override = {
-        ...(state.scene || {}),
-        phase: sc.phase,
-        postopDay: sc.phase === 'postop' ? ((cur && cur.phase === 'postop' && cur.postopDay) || null) : null,
-        taskId: sc.id, taskName: sc.taskName, scenarioId: sc.id,
-        functionName: sc.functionName, mode: state.examLock ? 'exam' : sc.mode,
-        patientId: C.patient.id, contextSource: 'manual', confidence: 'high', evidence: ['手动选择']
-      };
+      const day = sc.phase === 'postop' ? ((cur && cur.phase === 'postop' && cur.postopDay) || null) : null;
+      state.override = sceneFromScenario(sc.id, day);
+      state.navPhase = sc.phase;
+      saveManualScene(state.override);
       applyScene(state.override, false);
+      T.log('scene', { action: 'manual-pick', id: sc.id, day });
     });
 
     els.daySel.addEventListener('change', () => {
@@ -1257,7 +1380,7 @@
       const s = activeScene();
       if (!s) return;
       const next = { ...s, postopDay: v };
-      if (state.override) state.override = next; else state.scene = next;
+      if (state.override) { state.override = next; saveManualScene(next); } else state.scene = next;
       T.log('postop-day', { day: v });
       // 术后不同日期是不同病程：切日期 = 切会话上下文
       applyScene(next, false);
@@ -1301,6 +1424,8 @@
 
     els.input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(els.input.value); }
+      /* Esc 退出输入：悬浮窗模式下把键盘还给游戏 */
+      if (e.key === 'Escape') { e.preventDefault(); els.input.blur(); }
     });
     els.input.addEventListener('input', autoGrow);
 
@@ -1334,13 +1459,12 @@
       setForm('panel');
       state.open = true;
       /* 重启后恢复上次手动选择的场景（只恢复手动指定，不覆盖自动识别） */
-      try {
-        const savedScene = localStorage.getItem('bt_scene_manual');
-        if (savedScene && C.byId[savedScene]) {
-          state.override = C.byId[savedScene];
-          state.scene = state.override;
-        }
-      } catch (e) { }
+      const restored = restoreManualScene();
+      if (restored) {
+        state.override = restored;
+        state.scene = restored;
+        state.navPhase = restored.phase;
+      }
       ensureGreeting();
       renderScene();
       renderThread();
@@ -1370,7 +1494,12 @@
     //      所以改由后台 service worker 拉取再推给面板（后台有 host_permissions，不受此限）。
     let lastClient = '';
     const applyClient = (cs) => {
-      const key = [cs.phase, cs.postopDay, cs.taskId, cs.confidence, cs.mode].join('|');
+      /* 只要成功拿到状态就刷新“活着”的时间，哪怕内容没变；
+         否则 90 秒后会把一个正常但静止的实验误判成断线。 */
+      if (cs && cs.ok) state.clientSeenAt = Date.now();
+      const lu = cs.lastUnity || {};
+      const key = [cs.phase, cs.postopDay, cs.taskId, cs.confidence, cs.mode,
+        cs.stale ? 1 : 0, lu.taskId || lu.phase || '', lu.capturedAt || ''].join('|');
       if (key === lastClient) return;
       lastClient = key;
       onClientState(cs);
@@ -1412,20 +1541,21 @@
       if (snap.active) els.bridgeBadge.textContent = '已接入实验事件 ' + snap.stepCount;
     }, 4000);
 
-    // 客户端状态到期失效：实验结束/日志不再更新时，不能让上一次的"术后第2天"一直挂着。
-    // 30 秒没有新的客户端状态，就退回页面识别（识别不到即"未识别"）。
-    const CLIENT_TTL = 30000;
+    // 客户端状态到期失效：代理断线（而不是实验退出，退出由 stale 立刻处理）时，
+    // 不能让上一次的“术后第2天”一直挂着。90 秒没有成功拿到状态就退回页面识别。
+    const CLIENT_TTL = 90000;
     setInterval(() => {
       if (state.override) return;
       const s = state.scene;
-      if (!s || s.contextSource !== 'client-log') return;
-      if (Date.now() - state.clientTs < CLIENT_TTL) return;
+      if (!s || (s.contextSource !== 'client-log' && s.contextSource !== 'unity-event')) return;
+      if (!state.clientSeenAt) return;
+      if (Date.now() - state.clientSeenAt < CLIENT_TTL) return;
       state.clientScene = null;
-      T.log('scene', { from: 'client-stale', phase: s.phase, ageMs: Date.now() - state.clientTs });
-      let next = null;
-      try { next = window.BT_SCENE.detect(); } catch (e) { next = null; }
-      applyScene(next, true);
-      toast('客户端状态已超时，回到自动识别');
+      state.scene = null;
+      renderedKey = '';
+      T.log('scene', { from: 'client-timeout', phase: s.phase });
+      renderScene();
+      toast('客户端状态已超时，回到页面自动识别');
     }, 5000);
 
     T.subscribe(() => {

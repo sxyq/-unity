@@ -40,6 +40,9 @@ const PORT = Number(process.env.PORT || 8790);
 const IS_WIN = process.platform === 'win32';
 const RECENT_MS = Number(process.env.RECENT_MS || 5 * 60 * 1000);
 const STALE_MS = Number(process.env.STALE_MS || 60 * 60 * 1000);
+/* 「当前」比「最近」严得多：实验进程已经退出时，日志在 60 秒内写过也不算活着，
+   否则崩溃/退出后的最后一条 GQY_STATE 会被当成当前任务。 */
+const ACTIVE_MS = Number(process.env.ACTIVE_MS || 60 * 1000);
 
 /* ---------------- 日志位置 ---------------- */
 function defaultLogDirs() {
@@ -454,7 +457,7 @@ function mapUnityEvent(ev) {
      只要出现这两组，就确定学生在做「压力性损伤」观察 → 08 并发症观察。 */
   const exLists = [ev.examList1, ev.examList2, ev.examList3].filter(Boolean).join('|');
   if (exLists && /骶尾部|枕骨粗隆|足跟部|1期|2期|3期/.test(exLists) && phase !== 'report') {
-    phase = 'postop'; taskId = 'postop-complication'; taskName = '并发症观察（压力性损伤）';
+    phase = 'postop'; taskId = 'postop-complication'; taskName = '并发症观察';
     why = '术后评估选项组：压疮分期/好发部位';
   }
 
@@ -533,10 +536,19 @@ function mapUnityEvent(ev) {
       isFirstDay: String(ev.isFirstDay) === 'true',
       isStudyModel: mode === 'study',
       isGetProgressSuccess: String(ev.isGetProgressSuccess) === 'true',
-      tractionWeight: ev.tractionWeight != null ? Number(ev.tractionWeight) : null,
+      tractionWeight: (() => {
+        const w = Number(ev.tractionWeight);
+        return Number.isFinite(w) && w > 0 ? w : null;   // 0 表示还没设重量，不能当实测值
+      })(),
       totalScore: ev.totalScore != null ? Number(ev.totalScore) : null,
       scoreDatas: ev.scoreDatas || null,
       commDatas: parseComm(ev.commDatas),
+      /* 若整份记录都是 0 分，就无法区分「答错」与「未作答」。
+         上层必须据此禁止把全部条目当错项。 */
+      commAmbiguous: (() => {
+        const c = parseComm(ev.commDatas);
+        return c ? c.every((x) => !x.score) : null;
+      })(),
       typeScores: ev.typeScores || null
     }
   };
@@ -550,6 +562,9 @@ function mapUnityEvent(ev) {
 function parseProgress(text) {
   if (!text) return null;
   const marker = 'progress requestBody:';
+  /* 判断这份进度属于「本次启动的会话」还是「更早的记录」：
+     Unity 每次启动都会写 Initialize engine version，以最后一个为界。 */
+  const sessionAt = Math.max(text.lastIndexOf('Initialize engine version'), -1);
   let from = 0, found = null;
   for (;;) {
     const i = text.indexOf(marker, from);
@@ -574,7 +589,7 @@ function parseProgress(text) {
       try {
         const outer = JSON.parse(text.slice(start, end));
         let inner = typeof outer.data === 'string' ? JSON.parse(outer.data) : outer.data;
-        if (inner && Array.isArray(inner.ScoreDatas)) found = { outer, inner };
+        if (inner && Array.isArray(inner.ScoreDatas)) found = { outer, inner, at: start, inSession: start > sessionAt };
       } catch (e) { /* 半截块，忽略 */ }
       from = end;
     } else break;
@@ -582,34 +597,55 @@ function parseProgress(text) {
   if (!found) return null;
 
   const { inner, outer } = found;
-  const items = inner.ScoreDatas.map((s) => ({
-    sn: String(s.SN || ''),
-    section: String(s.section || ''),
-    score: Number(s.score) || 0,
-    right: s.isRight === true,
-    feedback: String(s.feedbackInfo || '').slice(0, 160),
-    time: Number(s.time) || 0
-  })).filter((x) => x.sn);
+  /* 原程序把 39 项全部写进 ScoreDatas，未作答项同样 isRight=false、score=0、time=0，
+     并且 feedbackInfo 里也带「选择错误」。若不分「已作答 / 未作答」，
+     会把整份题库误报成「39 个错项」，进而让模型编造薄弱点。
+     判定：有分数、有用时、或明确判对 → 已作答；三者皆无 → 未作答。 */
+  const items = inner.ScoreDatas.map((s) => {
+    const time = Number(s.time) || 0;
+    const score = Number(s.score) || 0;
+    const right = s.isRight === true;
+    const answered = right || time > 0 || score > 0;
+    return {
+      sn: String(s.SN || ''),
+      section: String(s.section || ''),
+      score,
+      right,
+      answered,
+      feedback: String(s.feedbackInfo || '').slice(0, 160),
+      time
+    };
+  }).filter((x) => x.sn);
 
   const bySection = {};
   for (const it of items) {
     const k = it.section || '未分章节';
-    if (!bySection[k]) bySection[k] = { total: 0, right: 0, score: 0 };
+    if (!bySection[k]) bySection[k] = { total: 0, right: 0, score: 0, answered: 0 };
     bySection[k].total++;
     if (it.right) bySection[k].right++;
+    if (it.answered) bySection[k].answered++;
     bySection[k].score += it.score;
   }
-  const wrong = items.filter((x) => !x.right).map((x) => ({ sn: x.sn, section: x.section, feedback: x.feedback }));
+  const answeredItems = items.filter((x) => x.answered);
+  const wrong = answeredItems.filter((x) => !x.right)
+    .map((x) => ({ sn: x.sn, section: x.section, feedback: x.feedback }));
 
   return {
     source: 'client-log',
+    /* attribution（归属）在 buildState 里按「进程是否还在跑」细化为
+       current-running / current-last-run / history，未细化前先给会话级结论。 */
+    attribution: found.inSession ? 'current-session' : 'history',
+    capturedAt: null,
     currentExpProgress: Number(inner.currentExpProgress) || 0,
     isDone: inner.isDone === true,
     isStudyModel: inner.isStudyModel === true,
     pv: Number(outer.pv) || 0,
     maxPV: Number(outer.maxPV) || 0,
     totalItems: items.length,
+    answeredItems: answeredItems.length,
+    pendingItems: items.length - answeredItems.length,
     rightItems: items.filter((x) => x.right).length,
+    noAttempts: answeredItems.length === 0,
     totalScore: Math.round(items.reduce((a, b) => a + b.score, 0) * 10) / 10,
     bySection,
     wrongItems: wrong,
@@ -797,7 +833,8 @@ async function buildState() {
   const procs = await listProcs();
   // 实验本体进程还在 = 会话仍在继续；Unity 静默时日志可能几分钟不更新，
   // 不能因此把真实状态判成「历史」，否则面板 30 秒后就过期了。
-  const gameRunning = procs.some((p) => /HLF10631030|MCLocalLauncher/i.test(p.name));
+  const gameRunning = procs.some((p) => /HLF10631030/i.test(p.name));
+  const launcherRunning = procs.some((p) => /MCLocalLauncher/i.test(p.name));
   let best = null;
   let progressBest = null;
   let lifecycleBest = null;
@@ -811,12 +848,25 @@ async function buildState() {
     const ageMs = now - meta.mtime;
     // 只把「本实验的两份日志」视为可延续的会话，别的游戏日志不因进程同名被带活
     const isOurLog = /Mengoo|MCLocalLauncher|HLF10631030/i.test([meta.company, meta.product].join('/'));
-    const live = ageMs <= RECENT_MS || (isOurLog && gameRunning);
+    const fresh = ageMs <= ACTIVE_MS;
+    /* 实验进程还在 → 日志静默也仍然算活（加载/看视频/答题都可能几十秒不写日志）；
+       进程没了 → 只有 60 秒内的写入才算活，避免把退出前的状态当成当前。 */
+    const procForLog = /HLF10631030/i.test(meta.product || '') ? gameRunning : launcherRunning;
+    const live = isOurLog ? (fresh || procForLog) : (ageMs <= RECENT_MS);
 
     // 真实实验本体日志里的两种额外证据：UI 生命周期、逐步骤成绩
     const text = readText(meta.file);
     const lc = parseLifecycle(lines);
     const pd = parseProgress(text);
+    if (pd) {
+      pd.capturedAt = new Date(meta.mtime).toISOString();
+      pd.file = meta.file;
+      pd.sessionLive = live;
+      /* 归属三态：正在运行 / 上次运行（已退出）/ 历史记录。
+         这份字段会直接进入提示词与面板，学生看到的结论必须跟它一致。 */
+      pd.attribution = live ? 'current-running'
+        : (pd.attribution === 'current-session' ? 'current-last-run' : 'history');
+    }
     const ue = parseUnityEvent(text);
     const lastLc = lc.length ? lc[lc.length - 1] : null;
 
@@ -846,7 +896,10 @@ async function buildState() {
     }
     if (ue) {
       const ueRank = (live ? 20000 : 0) + text.length % 1000;
-      if (!unityBest || ueRank > unityBest.rank) unityBest = { rank: ueRank, value: ue, live };
+      const ueAge = now - meta.mtime;
+      if (!unityBest || ueRank > unityBest.rank) {
+        unityBest = { rank: ueRank, value: ue, live, ageMs: ueAge, capturedAt: new Date(meta.mtime).toISOString() };
+      }
     }
 
     if (!p.phase) continue;
@@ -898,26 +951,58 @@ async function buildState() {
   // Unity 测试副本的结构化事件优先级最高：它直接来自原程序运行时状态，
   // 比日志正则、窗口标题都可靠。没有事件时退回上面的只读证据。
   const uni = unityBest ? mapUnityEvent(unityBest.value) : null;
+  let lastUnity = null;
+  let unityStale = false;
+  /* 关键：只有「活着的」Unity 事件才能当当前任务。
+     实验已退出时日志里仍留着最后一条 GQY_STATE，若照用，面板会在实验关闭后
+     继续显示「术前谈话」并把它当作自动识别结果——这属于伪造当前状态。 */
   if (uni) {
-    source = uni.contextSource;                 // 即使没映射到任务，也如实标注事件来源
-    evidence = uni.evidence.slice();
-    if (uni.phase) {
-      phase = uni.phase;
-      postopDay = uni.postopDay;
-      taskId = uni.taskId;
-      taskName = uni.taskName;
-      confidence = unityBest.live ? uni.confidence : 'low';
+    if (!unityBest.live) {
+      unityStale = true;
+      if (uni.phase || uni.taskId) {
+        lastUnity = {
+          phase: uni.phase || null,
+          taskId: uni.taskId || null,
+          taskName: uni.taskName || null,
+          capturedAt: unityBest.capturedAt,
+          ageSec: Math.round(unityBest.ageMs / 1000)
+        };
+      }
+      confidence = 'low';
     } else {
-      confidence = 'low';                       // 只有运行事件，不能证明业务阶段
+      source = uni.contextSource;                 // 即使没映射到任务，也如实标注事件来源
+      evidence = uni.evidence.slice();
+      if (uni.phase) {
+        phase = uni.phase;
+        postopDay = uni.postopDay;
+        taskId = uni.taskId;
+        taskName = uni.taskName;
+        confidence = uni.confidence;
+      } else {
+        confidence = 'low';                       // 只有运行事件，不能证明业务阶段
+      }
+      if (uni.mode === 'exam') examMode = true;
     }
-    if (uni.mode === 'exam') examMode = true;
+  }
+
+  /* 如果没有任何「活着」的证据（进程不在、日志也不新鲜），就不输出当前阶段/任务。
+     历史证据单独放在 lifecycle / scoreDetails / lastUnity 里，并带归属与时间。 */
+  const anyLive = !!(best && best.live)
+    || !!(lifecycleBest && lifecycleBest.live)
+    || !!(progressBest && progressBest.live)
+    || !!(unityBest && unityBest.live);
+  if (!anyLive) {
+    phase = null; taskId = null; taskName = null; postopDay = null;
+    source = null; confidence = 'none'; evidence = []; examMode = false;
   }
 
   return {
     ok: true,
     phase,
-    functionName: uni && uni.taskId ? uni.functionName : null,
-    unity: uni ? uni.unity : null,
+    functionName: uni && !unityStale && uni.taskId ? uni.functionName : null,
+    unity: uni && !unityStale ? uni.unity : null,
+    lastUnity,
+    unityAgeSec: unityBest ? Math.round(unityBest.ageMs / 1000) : null,
     postopDay: phase === 'postop' ? postopDay : null,
     taskId,
     taskName,
@@ -927,6 +1012,13 @@ async function buildState() {
     confidence,
     evidence: evidence.filter(Boolean).slice(0, 4),
     stepCode: best ? best.stepCode : null,
+    stale: !anyLive,
+    staleReason: anyLive ? null
+      : (gameRunning ? '实验进程在运行，但还没有读到场景状态'
+        : (lastUnity ? '实验已退出，最后一条 Unity 状态为上次运行'
+          : (unityStale ? '实验已退出，上次运行没有留下可识别的场景状态'
+            : '没有正在运行的实验进程或新鲜日志'))),
+    gameRunning,
     // 真实客户端证据：只描述「运行到哪一步 UI」与「原程序自己打印的分项成绩」，
     // 不据此推断业务阶段/任务（phase、taskId 仍只由明确标记产生）。
     lifecycle: lifecycleBest ? {
