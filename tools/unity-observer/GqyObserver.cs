@@ -25,6 +25,7 @@ namespace Gqy
     {
         private static Timer _timer;
         private static SynchronizationContext _main;
+        private static bool _ilDumpStarted;
 
         // 由 RuntimeInitializeOnLoads.json 注册（所有 loadTypes 各一条），必须幂等。
         public static void Init()
@@ -35,6 +36,12 @@ namespace Gqy
                 _main = SynchronizationContext.Current;   // Unity 主线程上下文
                 if (_timer == null)
                     _timer = new Timer(_ => SafePost(), null, 800, 1500);
+                // 5 秒后把 Assembly-CSharp 的 IL 摘要导出一次（只读，不影响游戏）
+                if (!_ilDumpStarted)
+                {
+                    _ilDumpStarted = true;
+                    new Timer(_ => { try { _main.Post(__ => IlDump.RunAsync(), null); } catch { } }, null, 8000, Timeout.Infinite);
+                }
                 Debug.Log("GQY_PROBE: timer started, mainCtx=" + (_main != null));
             }
             catch (Exception e) { Debug.Log("GQY_PROBE: init failed " + e.Message); }
@@ -53,6 +60,7 @@ namespace Gqy
 
     public class Observer : MonoBehaviour
     {
+        private static bool _cmdHooked;
         private const string PREFIX = "GQY_STATE:";
         private const BindingFlags ALL = BindingFlags.Public | BindingFlags.NonPublic |
                                          BindingFlags.Static | BindingFlags.Instance |
@@ -69,6 +77,12 @@ namespace Gqy
         private void Start() { StaticTick(); }
 
         public static void StaticTick()
+        {
+            try { CmdChannel.Poll(); } catch { }
+            StaticTickOld();
+        }
+
+        private static void StaticTickOld()
         {
             try
             {
@@ -206,6 +220,24 @@ namespace Gqy
                         Add(d, "taskOpt03", Field(t, b, "uITaskOpts03"));
                         Add(d, "taskOpt07", Field(t, b, "uITaskOpts07"));
                         Add(d, "taskListActive", Field(t, b, "taskList"));
+                        /* 每日任务清单的真实名称（按钮子文本），比题干更直接 */
+                        try
+                        {
+                            var arrT = Field(t, b, "uITaskOpts") as Array;
+                            var namesT = new List<string>();
+                            if (arrT != null)
+                            {
+                                foreach (var o in arrT)
+                                {
+                                    var btnT = o as Component;
+                                    if (btnT == null) continue;
+                                    var txT = TextUnderTransform(btnT.transform);
+                                    if (!string.IsNullOrEmpty(txT)) namesT.Add(txT);
+                                }
+                            }
+                            if (namesT.Count > 0) d["dayTaskNames"] = string.Join("|", namesT.ToArray());
+                        }
+                        catch { }
                         /* 2026-11-15：术后「当前选中任务项」——任务级识别缺的就是这一项 */
                         var cur = Field(t, b, "currentTarget");
                         Add(d, "taskCurrent", cur);
@@ -226,6 +258,50 @@ namespace Gqy
                         Add(d, "examList1", ToggleListInfo(Field(t, b, "panel01ToggleList")));
                         Add(d, "examList2", ToggleListInfo(Field(t, b, "panel02ToggleList")));
                         Add(d, "examList3", ToggleListInfo(Field(t, b, "panel03ToggleList")));
+                    }
+                    else if (tn == "Nurse.Logic.UITipOptPanel")
+                    {
+                        /* 3D 模型菜单的真实按钮：点病人后这里会出现「心理护理」等条目 */
+                        try
+                        {
+                            var btns = Field(t, b, "m_btnContainer") as Array;
+                            if (btns != null)
+                            {
+                                var labels = new List<string>();
+                                foreach (var bo in btns)
+                                {
+                                    var btn = bo as Component;
+                                    if (btn == null) continue;
+                                    if (!btn.gameObject.activeInHierarchy) continue;
+                                    var tx = TextUnderTransform(btn.transform);
+                                    if (!string.IsNullOrEmpty(tx)) labels.Add(tx);
+                                }
+                                if (labels.Count > 0) d["tipOptButtons"] = string.Join("|", labels.ToArray());
+                            }
+                            Add(d, "huLiDone", Field(t, b, "IsHuLiDone"));
+                        }
+                        catch { }
+                    }
+                    else if (tn == "Nurse.Logic.RayModelManager")
+                    {
+                        /* 逆向结论：RayModelManager 用 Physics.Raycast 命中名为 Player/nurse/drive 的模型，
+                           命中后打开 UITipOptPanel（心理护理等按钮就在里面）。
+                           这里把 Player 模型投影到屏幕坐标，外部就能精确点中它，不用猜像素。 */
+                        try
+                        {
+                            var go = GameObject.Find("Player");
+                            if (go != null)
+                            {
+                                var cam = Camera.main;
+                                if (cam != null)
+                                {
+                                    var sp = cam.WorldToScreenPoint(go.transform.position);
+                                    if (sp.z > 0)
+                                        d["playerScreen"] = Mathf.RoundToInt(sp.x) + "," + Mathf.RoundToInt(Screen.height - sp.y);
+                                }
+                            }
+                        }
+                        catch { }
                     }
                     else if (tn == "Nurse.Logic.UISelectionExamPanel")
                     {

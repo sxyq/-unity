@@ -395,6 +395,22 @@ function mapUnityEvent(ev) {
       break;
     }
   }
+  /* 3D 模型菜单（UITipOptPanel）上真实可见的按钮：逆向确认「心理护理」就在这个菜单里，
+     点病人模型才会出现。按钮文字是运行时可读的真值，不需要再靠题干反推。 */
+  const tipBtns = String(ev.tipOptButtons || '');
+  if (tipBtns) {
+    if (/心理护理/.test(tipBtns)) {
+      phase = 'postop'; taskId = 'postop-psych'; taskName = '术后心理护理';
+      why = '3D 病人菜单按钮：心理护理';
+    } else if (/术前谈话/.test(tipBtns)) {
+      phase = 'preop'; taskId = 'preop-talk'; taskName = '术前沟通与疑问交流';
+      why = '3D 菜单按钮：术前谈话';
+    } else if (/入院记录/.test(tipBtns)) {
+      phase = 'preop'; taskId = 'preop-history'; taskName = '病史采集与症状问诊';
+      why = '3D 菜单按钮：入院记录';
+    }
+  }
+
   /* 术后考核面板里按天分的 ToggleList（panel01/02/03ToggleList），
      每项写成「序号:名称:是否选中」，isOn=1 的那项就是学生此刻在做的观察项。
      实测 currentTarget 指的是天数按钮组，靠不住；这条才是任务级来源。 */
@@ -455,6 +471,9 @@ function mapUnityEvent(ev) {
       taskCurrentText: ev.taskCurrentText || null,
       sence3Order: ev.sence3Order != null ? Number(ev.sence3Order) : null,
       examQuestion: ev.examQuestion || null,
+      tipOptButtons: ev.tipOptButtons || null,
+      dayTaskNames: ev.dayTaskNames || null,
+      huLiDone: String(ev.huLiDone) === 'true',
       quizOn,
       dayTime: Number.isFinite(dt) ? dt : null,
       isFirstDay: String(ev.isFirstDay) === 'true',
