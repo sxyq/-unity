@@ -45,7 +45,7 @@ const confirmed = await send('Runtime.evaluate', {
   returnByValue: true
 });
 console.log('confirm:', confirmed.result.value);
-for (let i = 0; i < 45; i++) { await new Promise(r => setTimeout(r, 1000)); if (launchReq || consoleUrl) break; }
+for (let i = 0; i < 100; i++) { await new Promise(r => setTimeout(r, 1000)); if (launchReq || consoleUrl) break; }
 
 let url = null;
 if (launchReq) {
