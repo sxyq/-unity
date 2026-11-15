@@ -1037,7 +1037,11 @@
     }
   }
 
+  /* 通知外层悬浮窗改变真实尺寸（不是只藏内容） */
+  function setForm(m) { try { window.__BT_FORM = m; } catch (e) { } }
+
   function collapse() {
+    setForm('launcher');
     state.open = false; state.mini = false;
     els.panel.classList.add('bt-hidden');
     els.mini.classList.add('bt-hidden');
@@ -1047,6 +1051,7 @@
   }
 
   function closeAll() {
+    setForm('mini');
     state.open = false; state.mini = true;
     els.panel.classList.add('bt-hidden');
     els.launcher.classList.add('bt-hidden');
@@ -1231,6 +1236,7 @@
       els.panel.classList.remove('bt-hidden');
       els.launcher.classList.add('bt-hidden');
       els.mini.classList.add('bt-hidden');
+      setForm('panel');
       state.open = true;
       ensureGreeting();
       renderScene();
