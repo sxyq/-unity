@@ -241,12 +241,20 @@ namespace GouQianYinOverlay
 
             var targetRect = Rectangle.FromLTRB(r.Left, r.Top, r.Right, r.Bottom);
 
-            /* 贴在实验窗口内部的右侧，随窗口移动/缩放一起走 */
-            const int inset = 18;
-            int w = Math.Min(Width, Math.Max(360, targetRect.Width / 4));
-            int h2 = Math.Min(820, Math.Max(420, targetRect.Height - 140));
-            int x = targetRect.Right - w - inset;
-            int y = targetRect.Top + 64;
+            /* 实验已窗口化：优先贴在窗口**外侧右边**，完全不遮挡实验 UI；
+               屏幕放不下时才回退到窗口内部右下角。 */
+            const int inset = 16;
+            var screen = Screen.FromRectangle(targetRect).WorkingArea;
+            int w = Math.Min(Width, 480);
+            int h2 = Math.Min(820, Math.Max(420, targetRect.Height));
+            int x = targetRect.Right + inset;
+            int y = targetRect.Top;
+            if (x + w > screen.Right)
+            {
+                // 右边放不下 → 贴窗口内部右下（此时才可能遮挡，用 Ctrl+Alt+T 穿透）
+                x = targetRect.Right - w - inset;
+                y = targetRect.Bottom - h2 - inset;
+            }
 
             if (Size.Width != w) Width = w;
             if (Height != h2) Height = h2;
