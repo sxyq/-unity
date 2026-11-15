@@ -39,6 +39,11 @@ namespace GouQianYinOverlay
         [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
         [DllImport("user32.dll")] public static extern int GetWindowLong(IntPtr h, int idx);
         [DllImport("user32.dll")] public static extern int SetWindowLong(IntPtr h, int idx, int val);
+        [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr h, IntPtr after, int x, int y, int cx, int cy, uint flags);
+        public static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
+        public const uint SWP_NOSIZE = 0x0001;
+        public const uint SWP_NOMOVE = 0x0002;
+        public const uint SWP_NOACTIVATE = 0x0010;
 
         public const int GWL_EXSTYLE = -20;
         public const int WS_EX_TRANSPARENT = 0x20;
@@ -246,6 +251,11 @@ namespace GouQianYinOverlay
             if (Size.Width != w) Width = w;
             if (Height != h2) Height = h2;
             if (Location.X != x || Location.Y != y) Location = new Point(x, y);
+
+            /* Unity 会在获得焦点时把自己重新置顶，把面板压到后面。
+               每次跟随都把自己重新压回最上层，保证面板始终可见。 */
+            Native.SetWindowPos(Handle, Native.HWND_TOPMOST, 0, 0, 0, 0,
+                Native.SWP_NOMOVE | Native.SWP_NOSIZE | Native.SWP_NOACTIVATE);
 
             Text = "骨牵引智能交互 · 绑定实验窗口"
                  + (pinned ? "" : " · 位置已固定");

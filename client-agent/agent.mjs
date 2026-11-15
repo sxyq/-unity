@@ -411,6 +411,15 @@ function mapUnityEvent(ev) {
     }
   }
 
+  /* 术后综合评估面板（UISelectionOtherExamPanel）的选项组本身就是任务特征：
+     examList2 是压疮分期（1期..5期）、examList3 是压疮好发部位（骶尾部/足跟…），
+     只要出现这两组，就确定学生在做「压力性损伤」观察 → 08 并发症观察。 */
+  const exLists = [ev.examList1, ev.examList2, ev.examList3].filter(Boolean).join('|');
+  if (exLists && /骶尾部|枕骨粗隆|足跟部|1期|2期|3期/.test(exLists) && phase !== 'report') {
+    phase = 'postop'; taskId = 'postop-complication'; taskName = '并发症观察（压力性损伤）';
+    why = '术后评估选项组：压疮分期/好发部位';
+  }
+
   /* 术后考核面板里按天分的 ToggleList（panel01/02/03ToggleList），
      每项写成「序号:名称:是否选中」，isOn=1 的那项就是学生此刻在做的观察项。
      实测 currentTarget 指的是天数按钮组，靠不住；这条才是任务级来源。 */
