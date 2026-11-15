@@ -137,6 +137,13 @@ GQY_STATE:{"scene":"NurseMain","panels":["…/UISelectPanel", "…/UIFunctionPan
 映射（`入院记录/辅助检查/专科检查→preop-history`、`术前谈话→preop-talk`、`术前准备→preop` 阶段），
 `UISampleBingLiPanel` 面板规则同步补齐。
 
+**端到端自动切换验证（01 场景，真机完成）**：点热点「1.入院记录」→
+`/state` 返回 `scenarioId:"preop-history"`、`taskName:"病史采集与症状问诊"`、
+`confidence:"high"`、`contextSource:"unity-event"`、evidence「当前选中任务：入院记录」→
+面板 demo 页自动切到 **「智能病史问诊」**（下拉选中 01，提示行「Unity 原生事件 · 高可信」，
+患者角色王道阔开场「您好，我是 3 床王国强…」+ 问诊快捷问题就绪）。
+此前所有会话缺失的「学生点进任务后面板自动切换」验证项，本轮以真实数据闭环完成。
+
 ### 考核锁实测（按设计工作，不绕过）
 
 点击「退出病历」弹出：**「提示：有考核点未做完，请完成后退出。」**（单「确定」按钮，仅确认不放行）。
