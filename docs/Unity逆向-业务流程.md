@@ -100,3 +100,56 @@ SetXLHLDialoog03 → "xlhl-hs02"
 - `playerScreen`：病人模型屏幕坐标（供精确定位）
 
 agent 已接入：`tipOptButtons` 含「心理护理」→ `postop-psych`（高可信）。
+
+---
+
+## 7. 心理护理（场景 06）实测闭环 —— 2026-11-15 夜
+
+### 7.1 卡点与解法
+
+之前点病人没反应，不是坐标不对，而是 **`RayModelManager.isCloseRaycast = True`**：
+此时射线交互被游戏自己关掉了（通常在有模态面板/未到交互时机时为 true）。
+
+指令通道实测：
+
+```
+inst|Nurse.Logic.RayModelManager|isCloseRaycast        → True
+call|Nurse.Logic.RayModelManager|set_IsCloseRaycast|false → ok void
+```
+
+关掉后点病人模型（`modelPos[0]` 屏幕坐标 `1018,550`，或头部 `747,284`）：
+
+```
+GQY_STATE.tipOptButtons = "心理护理"
+panels += Resources/Prefabs/UI/TopTipItem/UITipOptPanel
+/state → scenarioId=postop-psych, task=术后心理护理, confidence=high
+        evidence=["3D 病人菜单按钮：心理护理"]
+```
+
+点菜单里的「心理护理」（`buttons|Nurse.Logic.UITipOptPanel` → `心理护理@644,170`）
+或直接调用同一方法：
+
+```
+call|Nurse.Logic.UITipOptPanel|SetXLHLDialoog01
+→ panels += UIDialoogConentPanel
+→ uiTexts: ["跳过","您的手术很顺利，","心理护理",…]
+→ /state 仍为 postop-psych / high
+```
+
+### 7.2 为什么必须点病人，而不是任务栏
+
+术后左栏 10 项是**并发症观察任务**（牵引有效性/疼痛/神经/血供/血栓/出血/针道/压伤/肺部感染/排泄），
+心理护理不在其中。它在 **3D 病人菜单**里，且是推进术后天数的前置条件
+（未完成时点「第三天」会提示「心理护理未完成。」）。
+
+### 7.3 状态字段
+
+- `tipOptButtons`：菜单上真实可见的按钮文字（运行时反射读 Button 子 Text）
+- `huLiDone`：UITipOptPanel.IsHuLiDone
+- agent 规则：`tipOptButtons` 含「心理护理」→ `postop-psych`（high）
+
+### 7.4 仍未完成
+
+- 09/10：需要学生真实做完整个实验（39 道题）才会弹出
+  `UIComprehensivePerformanceRecordPanel`；**不会伪造答题或分数**去触发。
+- 07/08 的「多选题第二问」等后续题，题干会变，agent 按题干关键词映射即可，未逐题记录。
