@@ -134,7 +134,7 @@ async function main() {
       const pick = opts.length >= 2 ? opts[tryIdx % opts.length] : null;
       if (pick) click(pick.x, pick.y);
       else { const f = FIXED[tryIdx % FIXED.length]; click(f[0], f[1]); }
-      sleepSync(700);
+      sleepSync(1400);   // 选项选中态渲染需要时间，太短会导致空提交
       if (ok) click(ok.x, ok.y);
       else {
         // 选中后「提交」才会出现，位置固定在右上
