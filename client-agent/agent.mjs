@@ -352,6 +352,10 @@ function mapUnityEvent(ev) {
   const selected = strArray(ev.selectedTasks);
   let phase = null, taskId = null, taskName = null, why = '';
 
+  /* 兜底：原程序的病房场景名本身就对应阶段（实测）
+     ChildSence01=术前病房 / ChildSence02=术前谈话与病历 / ChildSence03=术后病房 */
+  const SENCE_PHASE = { ChildSence01: 'preop', ChildSence02: 'preop', ChildSence03: 'postop', MainSence02: 'intraop' };
+
   for (const r of UNITY_PANEL_RULES) {
     if (!r.re.test(panels)) continue;
     phase = r.phase; taskId = r.taskId; taskName = r.taskName || null; why = r.why;
@@ -496,6 +500,12 @@ function mapUnityEvent(ev) {
   if (quizOn) why = (why ? why + '；' : '') + '原系统答题测试进行中（考核保护）';
 
   const mode = quizOn ? 'exam' : (String(ev.isStudyModel) === 'false' ? 'exam' : 'study');
+
+  /* 兜底：任务名/关键词都判不出时，用原程序病房场景名定位阶段（实测映射） */
+  if (!phase) {
+    const bySence = { ChildSence01: 'preop', ChildSence02: 'preop', ChildSence03: 'postop', MainSence02: 'intraop' }[String(ev.senceState || '')];
+    if (bySence) { phase = bySence; why = (why ? why + '；' : '') + '原程序场景 ' + ev.senceState; }
+  }
   return {
     phase,
     postopDay: phase === 'postop' ? postopDay : null,

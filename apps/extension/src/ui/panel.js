@@ -364,8 +364,7 @@
       : '没识别到当前场景。选一个，我按对应角色开始：';
 
     els.body.innerHTML = `<div class="bt-picker">
-      <div class="bt-picker-hint">${hint}</div>
-      ${html}
+      <div class="bt-picker-hint">${hint.replace('选一个具体任务，我按对应角色开始：', '点上方场景卡片即可开始。').replace('选一个，我按对应角色开始：', '点上方卡片选一个场景。')}</div>
     </div>`;
     els.body.querySelectorAll('.bt-pick-item').forEach(btn => {
       btn.addEventListener('click', () => {
