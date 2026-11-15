@@ -89,6 +89,24 @@
     L.push(`阶段：${({ preop: '术前', intraop: '术中', postop: '术后', report: '报告' })[scene.phase] || '未知'}` +
       (scene.postopDay ? `（术后第 ${scene.postopDay} 天）` : ''));
     L.push(`模式：${isExam ? '考核' : '学习'}`);
+
+    /* 原实验实测参数：只列真实读到的，模型不得编造未列出的数值 */
+    const u = (scene && scene.unity) || {};
+    const live = [];
+    if (u.tractionWeight != null && Number.isFinite(Number(u.tractionWeight))) {
+      live.push(`- 牵引重量：${Number(u.tractionWeight)} kg（原实验装置实测）`);
+    }
+    if (u.dayTime != null) live.push(`- 原程序术后天数 dayTime：${u.dayTime}`);
+    if (Array.isArray(u.selectedTasks) && u.selectedTasks.length) {
+      live.push(`- 当前选中任务：${u.selectedTasks.join('、')}`);
+    }
+    if (u.dayTaskNames) live.push(`- 今日任务清单：${String(u.dayTaskNames).split('|').filter(Boolean).join('、')}`);
+    if (u.tipOptButtons) live.push(`- 患者交互菜单：${u.tipOptButtons}`);
+    if (live.length) {
+      L.push('## 当前实验实测参数（只可引用以下数据，不得编造其他数值）');
+      L.push(live.join('\n'));
+      L.push('');
+    }
     L.push(timelineBlock(scene));
     L.push('## 本病例已提供的事实（唯一可用的事实来源）');
     L.push(factsBlock());

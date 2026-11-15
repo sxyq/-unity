@@ -34,6 +34,12 @@
             <span class="bt-scene-hint">识别中…</span>
           </div>
 
+          <div class="bt-nav">
+            <div class="bt-phases"></div>
+            <div class="bt-cards"></div>
+            <div class="bt-current"></div>
+          </div>
+
           <div class="bt-day">
             <span>时间线：</span>
             <select class="bt-day-select"></select>

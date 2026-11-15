@@ -192,6 +192,53 @@
 }
 .bt-scene-hint { color: var(--bt-sub); font-size: calc(var(--bt-fs) - 3px); white-space: nowrap; }
 
+/* 三级导航：阶段 pill + 场景卡片 + 当前任务 */
+.bt-nav {
+  flex: 0 0 auto;
+  padding: 8px 10px 6px;
+  background: var(--bt-card);
+  border-bottom: 1px solid var(--bt-line);
+}
+.bt-phases { display: flex; gap: 4px; margin-bottom: 7px; }
+.bt-phase {
+  flex: 1 1 0; height: 26px;
+  border: 1px solid var(--bt-line); border-radius: 13px;
+  background: transparent; color: var(--bt-sub);
+  font-size: calc(var(--bt-fs) - 2px); font-family: inherit;
+  cursor: pointer; transition: all .15s;
+  white-space: nowrap;
+}
+.bt-phase:hover { border-color: var(--bt-accent); color: var(--bt-ink); }
+.bt-phase.on {
+  background: var(--bt-accent); border-color: var(--bt-accent);
+  color: #fff; font-weight: 600;
+}
+.bt-phase.dim { opacity: .45; }
+.bt-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.bt-card {
+  text-align: left; padding: 6px 8px;
+  border: 1px solid var(--bt-line); border-radius: 8px;
+  background: var(--bt-bg); color: var(--bt-ink);
+  font-size: calc(var(--bt-fs) - 2px); font-family: inherit;
+  cursor: pointer; line-height: 1.35; transition: all .15s;
+}
+.bt-card:hover { border-color: var(--bt-accent); }
+.bt-card.on {
+  border-color: var(--bt-accent);
+  background: color-mix(in srgb, var(--bt-accent) 10%, var(--bt-bg));
+  box-shadow: inset 0 0 0 1px var(--bt-accent);
+}
+.bt-card b { display: block; font-weight: 600; font-size: calc(var(--bt-fs) - 1px); }
+.bt-card span { color: var(--bt-sub); font-size: calc(var(--bt-fs) - 4px); }
+.bt-current {
+  margin-top: 6px; font-size: calc(var(--bt-fs) - 3px);
+  color: var(--bt-sub); line-height: 1.5;
+  display: none;
+}
+.bt-current.show { display: block; }
+.bt-current b { color: var(--bt-ink); font-weight: 600; }
+.bt-current .sub { color: var(--bt-accent); }
+
 .bt-day {
   display: none;
   align-items: center; gap: 4px;

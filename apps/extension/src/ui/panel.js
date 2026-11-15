@@ -156,6 +156,46 @@
   };
   const CONF_LABEL = { high: '高可信', medium: '中可信', low: '低可信', none: '无证据' };
 
+  /* 三级导航：阶段 → 场景 → 当前 Unity 任务
+     下拉框保留为权威取值来源，卡片点击后写回并触发 change，不破坏既有逻辑。 */
+  const PHASES = ['preop', 'intraop', 'postop', 'report'];
+  function renderNav() {
+    if (!els.phases || !els.cards) return;
+    const s = activeScene() || {};
+    const g = state.game || {};
+    let phase = s.phase || null;
+    if (!phase && g.scen) {
+      const byId = C.byId[g.scen];
+      phase = byId ? byId.phase : null;
+    }
+    if (!phase) phase = 'preop';
+
+    els.phases.innerHTML = PHASES.map((ph) =>
+      `<button class="bt-phase${ph === phase ? ' on' : ''}${s.phase && s.phase !== ph ? ' dim' : ''}" data-phase="${ph}">${PFX[ph]}</button>`
+    ).join('');
+
+    const list = C.scenarios.filter((x) => x.phase === phase);
+    els.cards.innerHTML = list.map((sc) =>
+      `<button class="bt-card${s.scenarioId === sc.id ? ' on' : ''}" data-scene="${sc.id}">
+         <b>${sc.no} ${sc.functionName}</b>
+         <span>${sc.taskName}</span>
+       </button>`
+    ).join('') || '<div style="grid-column:1/-1;color:var(--bt-sub);font-size:12px">该阶段暂无智能场景</div>';
+
+    // 当前 Unity 任务（真实任务名，来自 observer）
+    const tasks = g.dayTasks || [];
+    if (tasks.length) {
+      els.current.classList.add('show');
+      els.current.innerHTML = `<b>当前实验任务</b>：<span class="sub">${tasks.slice(0, 3).join(' · ')}</span>`
+        + (tasks.length > 3 ? ` 等 ${tasks.length} 项` : '');
+    } else if (g.subtitle) {
+      els.current.classList.add('show');
+      els.current.innerHTML = `<b>游戏当前</b>：<span class="sub">${g.subtitle.slice(0, 26)}</span>`;
+    } else {
+      els.current.classList.remove('show');
+    }
+  }
+
   function renderScene() {
     const s = activeScene();
     const conf = state.override ? 'medium' : (s && s.phase ? s.confidence : 'none');
@@ -196,6 +236,8 @@
 
     const rs = window.BT_PROMPT.ROLE_SPEC[roleOfScene()] || {};
     els.headAvatar.src = AV[rs.avatar] || AV.nurse;
+
+    renderNav();
 
     const isPost = s && s.phase === 'postop';
     els.day.classList.toggle('show', !!isPost);
@@ -1095,6 +1137,9 @@
       dot: root.querySelector('.bt-dot'),
       select: root.querySelector('.bt-scene-select'),
       hint: root.querySelector('.bt-scene-hint'),
+      phases: root.querySelector('.bt-phases'),
+      cards: root.querySelector('.bt-cards'),
+      current: root.querySelector('.bt-current'),
       day: root.querySelector('.bt-day'),
       daySel: root.querySelector('.bt-day-select'),
       body: root.querySelector('.bt-body'),
@@ -1133,6 +1178,24 @@
           .catch(() => { });
       }
       renderSettings();
+    });
+
+    els.phases && els.phases.addEventListener('click', (e) => {
+      const b = e.target.closest('.bt-phase');
+      if (!b) return;
+      const ph = b.dataset.phase;
+      const first = C.scenarios.find((x) => x.phase === ph);
+      if (first) {
+        els.select.value = first.id;
+        els.select.dispatchEvent(new Event('change'));
+      }
+    });
+
+    els.cards && els.cards.addEventListener('click', (e) => {
+      const b = e.target.closest('.bt-card');
+      if (!b) return;
+      els.select.value = b.dataset.scene;
+      els.select.dispatchEvent(new Event('change'));
     });
 
     els.select.addEventListener('change', () => {
