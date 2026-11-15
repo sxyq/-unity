@@ -65,6 +65,29 @@ namespace Gqy
                     go.transform.position.x, go.transform.position.y, go.transform.position.z, sx, sy);
             }
 
+            if (verb == "text")
+            {
+                // 把界面上包含 old 的文本换成 new —— 证明可以运行时改 UI
+                var oldT = parts.Length > 1 ? parts[1] : "";
+                var newT = parts.Length > 2 ? parts[2] : "";
+                var txtType = Type.GetType("UnityEngine.UI.Text, UnityEngine.UI");
+                if (txtType == null) return "no UI";
+                var prop = txtType.GetProperty("text");
+                int n = 0;
+                foreach (var o in Resources.FindObjectsOfTypeAll(txtType))
+                {
+                    var c = o as Component;
+                    if (c == null || !c.gameObject.activeInHierarchy) continue;
+                    if (!c.gameObject.scene.IsValid()) continue;
+                    var cur = prop.GetValue(c, null) as string;
+                    if (string.IsNullOrEmpty(cur) || cur.IndexOf(oldT, StringComparison.Ordinal) < 0) continue;
+                    prop.SetValue(c, newT);
+                    n++;
+                    if (n >= 8) break;
+                }
+                return "replaced " + n;
+            }
+
             if (verb == "scan")
             {
                 // 扫描所有 *Panel 类实例上可见按钮，按文字过滤，返回「类型|文字@x,y」
