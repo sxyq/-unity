@@ -36,6 +36,8 @@ namespace Gqy
                 _main = SynchronizationContext.Current;   // Unity 主线程上下文
                 if (_timer == null)
                     _timer = new Timer(_ => SafePost(), null, 800, 1500);
+                // 常驻驱动（Update 每帧采样，不依赖已失效的同步上下文）
+                Runner.Ensure();
                 // 5 秒后把 Assembly-CSharp 的 IL 摘要导出一次（只读，不影响游戏）
                 if (!_ilDumpStarted)
                 {
