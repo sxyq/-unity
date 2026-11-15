@@ -65,6 +65,22 @@ namespace Gqy
                     go.transform.position.x, go.transform.position.y, go.transform.position.z, sx, sy);
             }
 
+            if (verb == "methods")
+            {
+                var tn3 = parts.Length > 1 ? parts[1].Trim() : "";
+                var ty3 = Type.GetType(tn3 + ", Assembly-CSharp") ?? Type.GetType(tn3);
+                if (ty3 == null) return "no type " + tn3;
+                var sb3 = new System.Text.StringBuilder();
+                foreach (var m in ty3.GetMethods(ALL))
+                {
+                    if (m.DeclaringType != ty3) continue;
+                    var ps3 = m.GetParameters().Select(x => x.ParameterType.Name).ToArray();
+                    sb3.Append(m.Name).Append('(').Append(string.Join(",", ps3)).Append("); ");
+                    if (sb3.Length > 1500) break;
+                }
+                return sb3.ToString();
+            }
+
             if (verb == "hide" || verb == "show")
             {
                 var nm = parts.Length > 1 ? parts[1].Trim() : "";

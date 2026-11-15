@@ -38,6 +38,13 @@ const clicked = await send('Runtime.evaluate', {
 });
 if (!clicked.result.value) { console.log('按钮没找到'); ws.close(); process.exit(1); }
 console.log('clicked, 等响应...');
+// 「启动虚拟实验」会弹确认框，必须点「确定」才会真正发起 Launch 请求
+await new Promise(r => setTimeout(r, 1200));
+const confirmed = await send('Runtime.evaluate', {
+  expression: `(()=>{const b=[...document.querySelectorAll('button,div[class*=btn]')].find(e=>/^确定$/.test((e.innerText||'').trim()));if(b){b.click();return true}return false})()`,
+  returnByValue: true
+});
+console.log('confirm:', confirmed.result.value);
 for (let i = 0; i < 45; i++) { await new Promise(r => setTimeout(r, 1000)); if (launchReq || consoleUrl) break; }
 
 let url = null;
