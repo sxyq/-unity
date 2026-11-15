@@ -210,6 +210,9 @@ namespace Gqy
                     else if (tn == "Nurse.Logic.ScoreMgr")
                     {
                         Add(d, "scoreDatas", Field(t, null, "ScoreDatas"));
+                        /* 错项原文在 communicationDatas（SN/Section/Score/Feedback_Wrong），
+                           ScoreDatas 只有 isRight+score，拿不到题目和反馈文字。 */
+                        Add(d, "commDatas", DumpCommDatas(t));
                         Add(d, "typeScores", Field(t, null, "TypeScores"));
                         Add(d, "totalScore", Field(t, b, "<TotalScore>k__BackingField"));
                         Add(d, "alreadyAnswer", Field(t, b, "alreadAnswer"));
@@ -460,6 +463,40 @@ namespace Gqy
                 if (sb.Length > 400) break;
             }
             return sb.Length > 0 ? sb.ToString() : null;
+        }
+
+        /* 逐项读出 ScoreMgr.communicationDatas：SN / Section / Score / Feedback_Wrong */
+        private static string DumpCommDatas(Type scoreMgr)
+        {
+            try
+            {
+                var f = scoreMgr.GetField("communicationDatas",
+                    BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+                var list = f == null ? null : f.GetValue(null) as System.Collections.IEnumerable;
+                if (list == null) return null;
+                var sb = new System.Text.StringBuilder();
+                int n = 0;
+                foreach (var it in list)
+                {
+                    if (it == null) continue;
+                    var ty = it.GetType();
+                    object V(string name)
+                    {
+                        var fi = ty.GetField(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                        if (fi != null) return fi.GetValue(it);
+                        var pi = ty.GetProperty(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                        return pi == null ? null : pi.GetValue(it, null);
+                    }
+                    var w = V("Feedback_Wrong");
+                    string ws = w == null ? "" : w.ToString().Replace("|", "／").Replace("\n", " ").Replace("\r", " ").Trim();
+                    if (ws.Length > 120) ws = ws.Substring(0, 120);
+                    sb.Append(V("SN")).Append('\u0001').Append(V("Section")).Append('\u0001')
+                      .Append(V("Score")).Append('\u0001').Append(ws).Append('\u0002');
+                    if (++n >= 60) break;
+                }
+                return n == 0 ? null : ("count=" + n + "\u0003" + sb);
+            }
+            catch { return null; }
         }
 
         private static void Add(Dictionary<string, object> d, string key, object v)

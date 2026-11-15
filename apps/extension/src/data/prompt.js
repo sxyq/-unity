@@ -102,6 +102,15 @@
     }
     if (u.dayTaskNames) live.push(`- 今日任务清单：${String(u.dayTaskNames).split('|').filter(Boolean).join('、')}`);
     if (u.tipOptButtons) live.push(`- 患者交互菜单：${u.tipOptButtons}`);
+    /* 真实错项（来自原程序 communicationDatas）：报告场景必须基于它分析 */
+    const comm = Array.isArray(u.commDatas) ? u.commDatas : [];
+    const wrongs = comm.filter((x) => x && x.wrong);
+    if (wrongs.length) {
+      L.push('## 本次实验真实错项（来自原程序，逐项分析，不得编造其他错项）');
+      L.push(wrongs.slice(0, 20).map((x) =>
+        `- 第${x.sn ?? '?'}步（${x.section || '未标模块'}）：${x.wrong}`).join('\n'));
+      L.push('');
+    }
     if (live.length) {
       L.push('## 当前实验实测参数（只可引用以下数据，不得编造其他数值）');
       L.push(live.join('\n'));

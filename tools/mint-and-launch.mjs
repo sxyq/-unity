@@ -51,8 +51,14 @@ let url = null;
 if (launchReq) {
   try {
     const body = await send('Network.getResponseBody', { requestId: launchReq });
-    const json = JSON.parse(body.body);
-    url = json && json.data && json.data.url;
+    const raw = body.body || '';
+    let json = null;
+    try { json = JSON.parse(raw); } catch { }
+    url = json && (json.data && json.data.url || json.url || (json.data && json.data.Data && json.data.Data.url));
+    if (!url) {
+      // 结构变了：打印前 400 字便于定位
+      console.log('body-sample:', raw.slice(0, 400).replace(/\s+/g, ' '));
+    }
     console.log('via network');
   } catch (e) { console.log('body err:', e.message); }
 }

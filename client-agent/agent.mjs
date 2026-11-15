@@ -271,6 +271,24 @@ const UNITY_TASK_RULES = [
   { re: /体位护理|翻身|有效咳嗽|皮肤护理|日常生活指导|排便/, phase: 'postop', taskId: 'postop-care', taskName: '术后护理指导' },
   { re: /深静脉血栓|牵引失效|患肢肿胀|创口出血|牵引针道|压力性损伤|肺部感染|并发症/, phase: 'postop', taskId: 'postop-complication', taskName: '并发症观察' }
 ];
+/* commDatas 是 observer 打包的字符串：count=N\u0003SN\u0001Section\u0001Score\u0001Wrong\u0002… */
+function parseComm(raw) {
+  if (!raw || typeof raw !== 'string') return null;
+  const i = raw.indexOf('\u0003');
+  if (i < 0) return null;
+  const body = raw.slice(i + 1);
+  const items = body.split('\u0002').filter(Boolean).map((seg) => {
+    const [sn, section, score, wrong] = seg.split('\u0001');
+    return {
+      sn: Number(sn) || null,
+      section: section || null,
+      score: Number(score) || 0,
+      wrong: (wrong || '').trim() || null,
+    };
+  });
+  return items.length ? items : null;
+}
+
 const UNITY_FUNCTIONS = {
   /* 只允许四个统一功能名（与 case-data.js 的 FN 对齐） */
   'preop-history': '智能病史问诊',
@@ -508,6 +526,7 @@ function mapUnityEvent(ev) {
       tractionWeight: ev.tractionWeight != null ? Number(ev.tractionWeight) : null,
       totalScore: ev.totalScore != null ? Number(ev.totalScore) : null,
       scoreDatas: ev.scoreDatas || null,
+      commDatas: parseComm(ev.commDatas),
       typeScores: ev.typeScores || null
     }
   };
@@ -875,17 +894,9 @@ async function buildState() {
     if (uni.phase) {
       phase = uni.phase;
       postopDay = uni.postopDay;
-      if (unityBest.live) {
-        taskId = uni.taskId;
-        taskName = uni.taskName;
-        confidence = uni.confidence;
-      } else {
-        // 客户端事件已过期（退出/卡死）：不再展示"当前任务"，避免误导学生
-        taskId = null;
-        taskName = null;
-        confidence = 'low';
-        evidence = ['客户端状态已过期，请重新进入实验任务'];
-      }
+      taskId = uni.taskId;
+      taskName = uni.taskName;
+      confidence = unityBest.live ? uni.confidence : 'low';
     } else {
       confidence = 'low';                       // 只有运行事件，不能证明业务阶段
     }

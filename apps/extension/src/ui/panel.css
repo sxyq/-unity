@@ -564,13 +564,3 @@
   line-height: 1.5;
 }
 .bt-progress.bt-hidden { display: none; }
-
-/* 错项追问按钮 */
-.bt-ask {
-  margin-left: 4px; padding: 1px 6px;
-  border: 1px solid var(--bt-line); border-radius: 6px;
-  background: var(--bt-card); color: var(--bt-accent);
-  font-size: calc(var(--bt-fs) - 4px); font-family: inherit;
-  cursor: pointer;
-}
-.bt-ask:hover { border-color: var(--bt-accent); background: color-mix(in srgb, var(--bt-accent) 8%, var(--bt-card)); }
