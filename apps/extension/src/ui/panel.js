@@ -543,6 +543,33 @@
     }
   }
 
+  /* —— TTS 语音播报 ——
+     默认用系统中文语音（WebView2/Chromium 内置）。若配置了 BT_TTS_URL，
+     改为请求外部 TTS 服务返回音频，便于替换成真正的语音模型。 */
+  let ttsOn = localStorage.getItem('bt_tts') !== '0';
+  function speak(text) {
+    if (!ttsOn || !text) return;
+    const clean = String(text).replace(/[*#`>]/g, '').slice(0, 300);
+    const url = window.BT_TTS_URL;
+    if (url) {
+      try {
+        const a = new Audio(url + (url.includes('?') ? '&' : '?') + 'text=' + encodeURIComponent(clean));
+        a.play().catch(() => { });
+        return;
+      } catch { }
+    }
+    if (!window.speechSynthesis) return;
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(clean);
+      u.lang = 'zh-CN';
+      u.rate = 1.05;
+      const v = (speechSynthesis.getVoices() || []).find((x) => /zh|Chinese/i.test(x.lang));
+      if (v) u.voice = v;
+      speechSynthesis.speak(u);
+    } catch { }
+  }
+
   function finishStream(reason) {
     const th = currentThread();
     const last = th[th.length - 1];
@@ -550,6 +577,7 @@
       last.streaming = false;
       T.log('answer', { reason, chars: (last.text || '').length });
     }
+    if (last && last.role === 'assistant' && last.text) speak(last.text);
     state.busy = false;
     state.activeReqId = null;
     els.send.classList.remove('stop');
@@ -561,8 +589,17 @@
 
   function renderFooter() {
     const m = state.health.mode;
-    if (m === 'mock') { els.modeBadge.className = 'bt-badge mock'; els.modeBadge.textContent = '未接入模型 · 不会回答'; }
-    else if (m === 'live') { els.modeBadge.className = 'bt-badge live'; els.modeBadge.textContent = '已接入 ' + (state.health.model || '模型'); }
+    if (els.modeBadge) {
+      els.modeBadge.title = '点击切换语音播报';
+      els.modeBadge.onclick = () => {
+        ttsOn = !ttsOn;
+        localStorage.setItem('bt_tts', ttsOn ? '1' : '0');
+        if (!ttsOn && window.speechSynthesis) speechSynthesis.cancel();
+        renderFooter();
+      };
+    }
+    if (m === 'mock') { els.modeBadge.className = 'bt-badge mock'; els.modeBadge.textContent = '未接入模型 · 不会回答' + (ttsOn ? ' · 🔊' : ' · 🔇'); }
+    else if (m === 'live') { els.modeBadge.className = 'bt-badge live'; els.modeBadge.textContent = '已接入 ' + (state.health.model || '模型') + (ttsOn ? ' · 🔊' : ' · 🔇'); }
     else { els.modeBadge.className = 'bt-badge mock'; els.modeBadge.textContent = '未连接本地服务'; }
   }
 

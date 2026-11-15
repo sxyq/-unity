@@ -87,7 +87,7 @@ async function main() {
     const txtAll = (st.uiTexts || []).join('|');
     if (/恭喜|操作成功/.test(txtAll)) {
       const hit = clickByText(/确定/);
-      if (!hit) click(1280, 1105);
+      if (!hit) click(853, 737);
       sleepSync(900);
       failCount = 0; tryIdx = 0; qKey = '';   // 下一题重新开始
       console.log('成功确认');
@@ -95,7 +95,7 @@ async function main() {
     }
     if (/操作失败|很遗憾/.test(txtAll)) {
       const hit2 = clickByText(/再次操作/);
-      if (!hit2) click(1081, 969);
+      if (!hit2) click(721, 646);
       sleepSync(900);
       failCount++; tryIdx++;
       console.log('失败重试 第' + (tryIdx + 1) + '次尝试');
@@ -113,7 +113,7 @@ async function main() {
       const prog = (st.uiTexts || []).find((t) => /^\d+\/\d+$/.test(t)) || '';
       const key = prog + '|' + qText;
       if (key !== qKey) { qKey = key; tryIdx = 0; }
-      const FIXED = [[664, 505], [664, 661], [664, 818], [664, 974]];   // A/B/C/D 四选项
+      const FIXED = [[173, 389], [173, 487], [173, 585], [173, 683]];   // A/B/C/D（实测：截图坐标/1.5）
       const pick = opts.length >= 2 ? opts[tryIdx % opts.length] : null;
       if (pick) click(pick.x, pick.y);
       else { const f = FIXED[tryIdx % FIXED.length]; click(f[0], f[1]); }
@@ -122,7 +122,7 @@ async function main() {
       else {
         // 选中后「提交」才会出现，位置固定在右上
         const sub = btns(type).find((b) => /提交/.test(b.label));
-        click(sub ? sub.x : 2146, sub ? sub.y : 223);
+        click(sub ? Math.round(sub.x / 1.5) : 1431, sub ? Math.round(sub.y / 1.5) : 202);
       }
       sleepSync(1100);
       console.log('答题', prog, qText.slice(0, 14), 'opt=' + (pick ? pick.label : (tryIdx % 2 === 0 ? 'A' : 'B')));
