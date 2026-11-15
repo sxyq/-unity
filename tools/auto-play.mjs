@@ -106,7 +106,20 @@ async function main() {
       continue;
     }
 
-    if (has(st, /UISelectionExamPanel|UISelectionOtherExamPanel/)) {
+    // 综合评估面板（是/否 + 压疮分期 + 部位）：勾选第一项再确定
+    if (has(st, /UISelectionOtherExamPanel/)) {
+      const bs = btns('Nurse.Logic.UISelectionOtherExamPanel');
+      const ok = bs.find((b) => /确定/.test(b.label));
+      const opts = bs.filter((b) => !/确定/.test(b.label));
+      if (opts.length) { const o = opts[0]; click(Math.round(o.x / 1.5), Math.round(o.y / 1.5)); sleepSync(700); }
+      if (ok) { click(Math.round(ok.x / 1.5), Math.round(ok.y / 1.5)); }
+      else { const hit = clickByText(/确定/); if (!hit) click(738, 923); }
+      sleepSync(1300);
+      console.log('评估提交');
+      continue;
+    }
+
+    if (has(st, /UISelectionExamPanel/)) {
       const type = has(st, /UISelectionOtherExamPanel/) ? 'Nurse.Logic.UISelectionOtherExamPanel' : 'Nurse.Logic.UISelectionExamPanel';
       const bs = btns(type);
       const ok = bs.find((b) => /确定|提交/.test(b.label));

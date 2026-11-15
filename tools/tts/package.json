@@ -1,0 +1,1 @@
+{"name":"gqy-tts","private":true,"type":"module","dependencies":{"msedge-tts":"^2.1.1","sherpa-onnx-node":"^2.0.1"}}
