@@ -77,6 +77,14 @@ namespace GouQianYinOverlay
         private IntPtr target = IntPtr.Zero;
         private SubtitleForm subtitle;
 
+        /* 三态尺寸：Ctrl+Alt+M 循环切换。
+           展开 420x820 / 窄条 360x104 / 小球 78x78 —— 窗口真的变小，不是只藏内容。 */
+        private static readonly Size[] FORMS = { new Size(420, 820), new Size(360, 104), new Size(78, 78) };
+        private static readonly string[] FORM_NAMES = { "展开", "窄条", "小球" };
+        private int formIndex = 0;
+        private readonly Forms.Timer formTimer = new Forms.Timer { Interval = 600 };
+        private string formMode = "panel";
+
         private const string DefaultPanelUrl = "http://127.0.0.1:8787/demo/panel.html";
 
         private static readonly string[] Keywords =
@@ -97,7 +105,7 @@ namespace GouQianYinOverlay
             Controls.Add(web);
 
             Load += OnLoaded;
-            FormClosing += (_, __) => { follow.Stop(); retry.Stop(); subtitle?.Close(); };
+            FormClosing += (_, __) => { follow.Stop(); retry.Stop(); formTimer.Stop(); subtitle?.Close(); };
 
             follow.Tick += (_, __) => { if (pinned) FollowTarget(); };
             retry.Tick += (_, __) => { retry.Stop(); if (retries-- > 0) LoadPanel(); };
@@ -137,6 +145,23 @@ namespace GouQianYinOverlay
             FollowTarget();
             follow.Start();
 
+            formTimer.Tick += async (_, __) =>
+            {
+                try
+                {
+                    if (web.CoreWebView2 == null) return;
+                    var raw = await web.CoreWebView2.ExecuteScriptAsync("window.__BT_FORM||'panel'");
+                    var m = (raw ?? "").Trim('"');
+                    if (m != formMode && (m == "panel" || m == "mini" || m == "launcher"))
+                    {
+                        formMode = m;
+                        ApplyMode(m);
+                    }
+                }
+                catch { }
+            };
+            formTimer.Start();
+
             // 字幕条（SubtitleForm 自己轮询 /state 并跟随窗口）
             subtitle = new SubtitleForm();
             subtitle.Show();
@@ -147,6 +172,27 @@ namespace GouQianYinOverlay
             var url = Environment.GetEnvironmentVariable("GQY_PANEL_URL");
             if (string.IsNullOrWhiteSpace(url)) url = DefaultPanelUrl;
             try { web.CoreWebView2.Navigate(url); } catch { /* 环境未就绪 */ }
+        }
+
+        private void ApplyMode(string m)
+        {
+            Size f;
+            if (m == "launcher") f = new Size(78, 78);
+            else if (m == "mini") f = new Size(360, 104);
+            else f = FORMS[0];
+            if (MinimumSize.Width > f.Width || MinimumSize.Height > f.Height)
+                MinimumSize = new Size(60, 60);
+            Size = f;
+            FollowTarget();
+        }
+
+        private void ApplyForm()
+        {
+            var f = FORMS[formIndex];
+            if (MinimumSize.Width > f.Width || MinimumSize.Height > f.Height)
+                MinimumSize = new Size(60, 60);
+            Size = f;
+            FollowTarget();
         }
 
         private void OnKeyDown(object sender, Forms.KeyEventArgs e)
@@ -161,6 +207,12 @@ namespace GouQianYinOverlay
             else if (e.KeyCode == Forms.Keys.T)
             {
                 SetClickThrough(!clickThrough);
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Forms.Keys.M)
+            {
+                formIndex = (formIndex + 1) % FORMS.Length;
+                ApplyForm();
                 e.Handled = true;
             }
             else if (e.KeyCode == Forms.Keys.P)
