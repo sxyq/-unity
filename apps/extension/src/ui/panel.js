@@ -235,7 +235,11 @@
       parts.push(`<div><b>当前实验任务</b>：<span class="sub">${realTask}</span>`
         + (g.tipButtons ? `　<span class="bt-nav-note">病人菜单：${g.tipButtons.split('|').slice(0, 3).join(' / ')}</span>` : '')
         + '</div>');
-    } else if (g.dayTasks && g.dayTasks.length) {
+    }
+    if (g.tractionWeight != null) {
+      parts.push(`<div><b>实测参数</b>：牵引重量 <span class="sub">${g.tractionWeight} kg</span><span class="bt-nav-note">来自原实验装置</span></div>`);
+    }
+    if (!realTask && g.dayTasks && g.dayTasks.length) {
       parts.push(`<div><b>今日任务</b>：<span class="sub">${g.dayTasks.slice(0, 3).join(' · ')}</span>`
         + (g.dayTasks.length > 3 ? ` 等 ${g.dayTasks.length} 项` : '') + '</div>');
     } else if (g.subtitle) {
@@ -748,6 +752,7 @@
           selectedTasks: Array.isArray(u.selectedTasks) ? u.selectedTasks : [],
           uiTexts: Array.isArray(u.uiTexts) ? u.uiTexts : [],
           curTask: u.taskCurrentText || ((u.selectedTasks || []).join('、') || ''),
+          tractionWeight: u.tractionWeight != null ? Number(u.tractionWeight) : null,
           scen: cs.scenarioId || null,
           conf: cs.confidence || null,
           day: cs.postopDay || null,
@@ -756,6 +761,7 @@
         const changed = next.subtitle !== prev.subtitle
           || next.curTask !== prev.curTask
           || next.tipButtons !== prev.tipButtons
+          || next.tractionWeight !== prev.tractionWeight
           || next.commData.length !== (prev.commData || []).length
           || next.dayTasks.join() !== (prev.dayTasks || []).join();
         state.game = next;
