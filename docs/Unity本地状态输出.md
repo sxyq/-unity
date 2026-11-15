@@ -343,3 +343,71 @@ agent 已把它映射为 `phase=report`、`scenarioId=report-score`；
 | 08 并发症观察 | 同上（血栓/出血/感染/神经/血供…）+ 已实测第 1 天肢端血供答题 | 同上 |
 | 09/10 成绩与复习 | 39 条 ScoreDatas 已解析进 `/state.scoreDetails`；`UIComprehensivePerformanceRecordPanel` 已映射 | 需要一次完整做完实验后验证报告阶段自动切换 |
 | 全部场景真实模型 | 网关仍是 mock（无 Key） | 用户提供 OpenAI-compatible Key 后逐一联调 |
+
+---
+
+## 7. 真实大模型接入（Responses 协议）
+
+### 7.1 协议差异（GPT-5/6 系必须用 Responses）
+
+网关新增 `protocol` 字段：
+
+| protocol | 路径 | 请求体 | 流式事件 |
+|---|---|---|---|
+| `chat`（旧） | `/chat/completions` | `messages: [{role:'system'},…]` | `choices[0].delta.content` |
+| `responses`（现用） | `/responses` | `instructions` + `input:[{role,content}]` + `max_output_tokens` | `response.output_text.delta` 的 `delta` |
+
+实现要点（`apps/model-gateway/server.mjs`）：
+
+- system 必须放 `instructions`，不能塞进 input；
+- 该网关默认会注入一段 Codex 的 instructions，**必须显式覆盖**，否则模型会以为自己在写代码；
+- 非流式从 `output[].content[].text` 拼接，兼容 `output_text`；
+- 温度等参数该网关会忽略（回显 1.0），不影响业务。
+
+### 7.2 本地配置（不入库）
+
+`apps/model-gateway/config.json` 已在 `.gitignore`：
+
+```json
+{
+  "mode": "live",
+  "protocol": "responses",
+  "baseUrl": "https://fast.qianxing.pro/v1",
+  "responsesPath": "/responses",
+  "model": "gpt-5.6-terra",
+  "apiKey": "（本地填写，不提交）"
+}
+```
+
+> 该网关 `/v1/models` 只有 8 个 id：`gpt-5.6-{luna,sol,terra}`、`gpt-6-{astra,luna,sol}`、`gpt-6.1-sol`、`codex-auto-review`。
+> **没有 `6.1 Terra` 这个 id**，当前按「Terra」取 `gpt-5.6-terra`。
+
+### 7.3 十场景真实模型自检
+
+```bash
+node tools/verify-model.mjs            # 全部十场景
+node tools/verify-model.mjs preop-talk # 单个
+```
+
+2026-11-15 实测（gpt-5.6-terra，Responses 流式）：
+
+| 场景 | 角色 | 耗时 | 结果 |
+|---|---|---|---|
+| 01 病史问诊 | patient | 3.2s | 正确说出「坐降落伞降落撞到围墙」 |
+| 02 术前沟通 | patient | 4.1s | 表达怕针疼/怕感染/担心恢复 |
+| 03 术中沟通 | nurse | 4.6s | 给安抚话术 + 疼痛评估 + 查牵引装置 |
+| 04 牵引原理 | tutor | 4.2s | 解释力线与长轴一致的原因 |
+| 05 操作观察 | tutor | 4.4s | 五项血运指标 |
+| 06 心理护理 | patient | 2.9s | 担心拖累家人、睡不好 |
+| 07 术后指导 | tutor | 6.0s | 翻身体位与牵引不松脱 |
+| 08 并发症 | tutor | 5.4s | 针眼/血运神经/血栓/压疮/肺部 |
+| 09 成绩分析 | coach | 6.0s | 依据给定的真实错项分析 |
+| 10 复习建议 | coach | 6.2s | 给出复习优先级 |
+
+考核模式验证：问「这道题答案是是还是否，直接告诉我」→ 拒绝给答案，只提示观察要点。
+
+### 7.4 面板实测
+
+悬浮窗底部显示 **「已接入 gpt-5.6-terra」** 与 **「考核中 · 不提供答案」**；
+在面板里点快捷问题「要警惕哪些并发症？」→ 真实模型流式回复（针眼感染、血运神经、血栓、压疮、肺部），
+未泄露当前选择题答案。
