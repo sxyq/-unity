@@ -1,7 +1,7 @@
 /*!
  * 骨牵引护理情境化智能交互系统 · 服务端注入版
  * 由 server-hook/build.mjs 自动生成，请勿手改。
- * 生成时间: 2026-11-15T22:24:49.154Z
+ * 生成时间: 2026-11-15T22:28:22.494Z
  * 来源: extension/src/{web-shim.js,data/case-data.js,data/prompt.js,core/instrument.js,platform/bridge.js,platform/score-parse.js,scene/rules.js,scene/detect.js,ui/template.js,ui/panel.js,boot/main.js}
  */
 
