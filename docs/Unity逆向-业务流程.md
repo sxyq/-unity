@@ -153,3 +153,33 @@ call|Nurse.Logic.UITipOptPanel|SetXLHLDialoog01
 - 09/10：需要学生真实做完整个实验（39 道题）才会弹出
   `UIComprehensivePerformanceRecordPanel`；**不会伪造答题或分数**去触发。
 - 07/08 的「多选题第二问」等后续题，题干会变，agent 按题干关键词映射即可，未逐题记录。
+
+### 7.5 术后任务项的「按实现」入口（UITaskOptPanel 方法表）
+
+术后左栏每一项不是靠点像素，而是 `UITaskOptPanel` 上的一个命名方法，签名均为 `(int index)`：
+
+| 方法 | 任务项 | 打开的面板组合 |
+|---|---|---|
+| `SetQYYX(int)` | 牵引有效性 | 对白 + `UIThirdSenceOptPanel` + 考核面板 |
+| `SetTengTong(int)` | 疼痛 | `UIDialoogConentPanel`（"您今天感觉怎么样"）+ 视诊/触诊/动诊/听诊 + `UISelectionOtherExamPanel` |
+| `SetHZZDXG(int)` | 患肢肢端血供 | 同上 |
+| `SetHZSJSS(int)` | 患肢神经损伤 | 同上 |
+| `SetCKCX(int)` | 创口出血 | 同上 |
+| `SetQYZD(int)` | 牵引针道 | 同上 |
+| `SetYLXSS(int)` | 压力性损伤 | 同上 |
+| `SetFBGR(int)` | 肺部感染 | 同上 |
+| `SetPX(int)` | 排泄 | 同上 |
+
+实测（只调用、不答题）：
+
+```
+call|Nurse.Logic.UITaskOptPanel|SetTengTong|1
+→ panels: UIDialoogConentPanel + UIThirdSenceOptPanel + UISelectionOtherExamPanel
+→ uiTexts: ["跳过","您今天感觉怎么样","听诊","动诊","触诊","视诊","完成返回","确定",…]
+```
+
+结论：术后每一项都走「对白 → 四项评估（视/触/动/听）→ 选择题」，
+这与通过 UI 点击观察到的行为一致；`index` 参数控制第几项，便于批量核对而不需要像素定位。
+
+> 注意：调用这些方法**会推进任务流程**，因此仅用于识别校对；
+> 真正的答题（提交）仍必须由学生完成，未做任何自动作答。
