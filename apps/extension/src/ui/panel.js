@@ -117,9 +117,11 @@
     const sc = C.byId[s.scenarioId];
 
     if (sc.role === 'patient') {
+      const who = `${C.patient.name}`;
+      const bed = C.patient.bed.replace(/^.*?(\d+\s*床)$/, '$1');
       return s.phase === 'preop'
-        ? `您好，我是 3 床王建国。${sc.id === 'preop-history' ? '您想了解我这次受伤的情况，直接问就行。' : '手术前的事我还想再问问您。'}`
-        : `我是王建国。${sc.id === 'postop-psych' ? '这几天躺着，心里有点烦，您能陪我聊会儿吗？' : '您有什么要交代的，我听着。'}`;
+        ? `您好，我是 ${bed}${who}。${sc.id === 'preop-history' ? '您想了解我这次受伤的情况，直接问就行。' : '手术前的事我还想再问问您。'}`
+        : `我是${who}。${sc.id === 'postop-psych' ? '这几天躺着，心里有点烦，您能陪我聊会儿吗？' : '您有什么要交代的，我听着。'}`;
     }
     if (sc.role === 'nurse') return '我是本次操作的责任护士。牵引的配合要点、装置和重量、要观察什么，你可以问我；需要我示范怎么跟患者说，也可以直接讲。';
     if (sc.role === 'tutor') return `我是护理带教老师。这一环节讲「${sc.taskName}」，你可以问原理、判断标准，或者让我解释你看到的现象。`;

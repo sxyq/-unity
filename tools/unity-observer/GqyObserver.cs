@@ -188,6 +188,17 @@ namespace Gqy
                         Add(d, "taskOpt03", Field(t, b, "uITaskOpts03"));
                         Add(d, "taskOpt07", Field(t, b, "uITaskOpts07"));
                         Add(d, "taskListActive", Field(t, b, "taskList"));
+                        /* 2026-11-15：术后「当前选中任务项」——任务级识别缺的就是这一项 */
+                        var cur = Field(t, b, "currentTarget");
+                        Add(d, "taskCurrent", cur);
+                        var curText = TextUnderTransform(cur);
+                        if (!string.IsNullOrEmpty(curText)) d["taskCurrentText"] = curText;
+                    }
+                    else if (tn == "Nurse.Logic.UIThirdSenceOptPanel")
+                    {
+                        /* 术后观察评估面板：dayTime=第几天，orderIndex=当前第几项任务 */
+                        Add(d, "sence3Day", Field(t, b, "dayTime"));
+                        Add(d, "sence3Order", Field(t, b, "orderIndex"));
                     }
                     else if (tn == "Nurse.Logic.UISkeletaTractionOptPanel")
                     {
@@ -297,6 +308,34 @@ namespace Gqy
         {
             var s = Describe(v);
             if (s != null) d[key] = s;
+        }
+
+        /* 读取某个 Transform 子树下的 UnityEngine.UI.Text 文本（反射，避免编译期依赖）
+         * 用途：UITaskOptPanel.currentTarget 指向当前选中的任务按钮，其子 Text 就是任务名 */
+        private static string TextUnderTransform(object tr)
+        {
+            var t = tr as UnityEngine.Transform;
+            if (t == null) return null;
+            var tt = Type.GetType("UnityEngine.UI.Text, UnityEngine.UI");
+            if (tt == null) return null;
+            try
+            {
+                var arr = t.GetComponentsInChildren(tt, true);
+                if (arr == null || arr.Length == 0) return null;
+                var prop = tt.GetProperty("text");
+                if (prop == null) return null;
+                var sb = new System.Text.StringBuilder();
+                foreach (var c in arr)
+                {
+                    var v = prop.GetValue(c, null) as string;
+                    if (string.IsNullOrEmpty(v)) continue;
+                    if (sb.Length > 0) sb.Append('/');
+                    sb.Append(v);
+                    if (sb.Length > 80) break;
+                }
+                return sb.Length > 0 ? sb.ToString() : null;
+            }
+            catch { return null; }
         }
 
         /* 读实例或静态字段；枚举转成名字，集合转成 count + 前几项 */

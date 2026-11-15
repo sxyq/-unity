@@ -270,11 +270,26 @@ const UNITY_TASK_RULES = [
   { re: /深静脉血栓|牵引失效|患肢肿胀|创口出血|牵引针道|压力性损伤|肺部感染|并发症/, phase: 'postop', taskId: 'postop-complication', taskName: '并发症观察' }
 ];
 const UNITY_FUNCTIONS = {
-  'preop-history': '智能病史问诊', 'preop-talk': '智能护患交流',
-  'intraop-communicate': '智能护理宣教', 'intraop-principle': '智能护理导学',
-  'intraop-observe': '智能操作观察', 'postop-psych': '智能心理护理',
-  'postop-care': '智能护理导学', 'postop-complication': '智能并发症辨析'
+  /* 只允许四个统一功能名（与 case-data.js 的 FN 对齐） */
+  'preop-history': '智能病史问诊',
+  'preop-talk': '智能情境化护患交流',
+  'intraop-communicate': '智能情境化护患交流',
+  'intraop-principle': '智能护理导学',
+  'intraop-observe': '智能护理导学',
+  'postop-psych': '智能情境化护患交流',
+  'postop-care': '智能护理导学',
+  'postop-complication': '智能护理导学',
+  'report-score': '智能个性化学习反馈',
+  'report-review': '智能个性化学习反馈'
 };
+
+/* 术后每日任务项 → 智能场景（2026-11-15 实测任务栏文字）
+ * 依据：术后任务栏的条目名（uiTexts / taskCurrentText），不是猜阶段 */
+const POSTOP_ITEM_RULES = [
+  { re: /心理|情绪|焦虑|睡眠/, taskId: 'postop-psych', taskName: '术后心理护理' },
+  { re: /深静脉血栓|创口出血|肺部感染|神经损伤|肢端血供|牵引针道|压力性损伤|并发症/, taskId: 'postop-complication', taskName: '并发症观察' },
+  { re: /牵引有效性|疼痛|排泄|体位|翻身|皮肤|活动|咳嗽|康复/, taskId: 'postop-care', taskName: '术后护理指导' }
+];
 
 function parseUnityEvent(text) {
   const marker = 'GQY_STATE:';
@@ -313,12 +328,38 @@ function mapUnityEvent(ev) {
     if (taskId) break;
   }
 
+  /* 术后任务栏的「当前选中项」是任务级真实来源（UITaskOptPanel.currentTarget 的子 Text）。
+     它比 selectedTasks（术后只给「第一天」这种日期标签）细一级。 */
+  const curText = String(ev.taskCurrentText || '');
+  if (curText) {
+    for (const r of POSTOP_ITEM_RULES) {
+      if (!r.re.test(curText)) continue;
+      phase = 'postop'; taskId = r.taskId; taskName = r.taskName;
+      why = '术后任务栏当前项：' + curText;
+      break;
+    }
+  }
+
   let postopDay = null;
   const dt = Number(ev.dayTime);
   if (Number.isFinite(dt) && dt >= 1 && dt <= 7) postopDay = dt;
   else if (String(ev.isFirstDay) === 'true') postopDay = 1;
 
-  const mode = String(ev.isStudyModel) === 'false' ? 'exam' : 'study';
+  /* 术前谈话（2026-11-15 实测）：点「3.术前谈话」热点不写 selectedTasks，
+     但会打开 UIDialoogConentPanel 对白，且动作栏出现「同意书」。
+     用「对白面板 + 同意书」作为证据，避免把普通对白误判成术前谈话。 */
+  const uTexts = strArray(ev.uiTexts);
+  if (uTexts.some(t => /同意书/.test(t)) && /ChildSence01/i.test(String(ev.senceState || ''))) {
+    phase = 'preop'; taskId = 'preop-talk'; taskName = '术前沟通与疑问交流';
+    why = '术前谈话：对白面板 + 知情同意书';
+  }
+
+  /* 原系统答题测试：UISelectionExamPanel（是/否选择题，提交后判分）
+   * 只要这个面板在，就按考核处理——模型不得直接给答案。 */
+  const quizOn = /UISelectionExamPanel|UIPaperModelPanel/i.test(panels);
+  if (quizOn) why = (why ? why + '；' : '') + '原系统答题测试进行中（考核保护）';
+
+  const mode = quizOn ? 'exam' : (String(ev.isStudyModel) === 'false' ? 'exam' : 'study');
   return {
     phase,
     postopDay: phase === 'postop' ? postopDay : null,
@@ -334,6 +375,9 @@ function mapUnityEvent(ev) {
       panels: strArray(ev.panels),
       uiTexts: strArray(ev.uiTexts).slice(0, 20),
       selectedTasks: selected,
+      taskCurrentText: ev.taskCurrentText || null,
+      sence3Order: ev.sence3Order != null ? Number(ev.sence3Order) : null,
+      quizOn,
       dayTime: Number.isFinite(dt) ? dt : null,
       isFirstDay: String(ev.isFirstDay) === 'true',
       isStudyModel: mode === 'study',
