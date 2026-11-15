@@ -293,6 +293,22 @@ const POSTOP_ITEM_RULES = [
   { re: /牵引有效性|疼痛|排泄|体位|翻身|皮肤|活动|咳嗽|康复/, taskId: 'postop-care', taskName: '术后护理指导' }
 ];
 
+/* 字幕劫持用：从面板文本里挑出「最像一句台词」的那条
+   规则：含中文、长度 6~80、排除按钮词与纯数字 */
+function pickSubtitle(texts) {
+  const BAN = /^(确定|取消|提交|关闭|返回|跳过|是|否|下一|上一|我已知道|提示|退出|答题测试|任务栏)$/;
+  let best = '';
+  for (const raw of (texts || [])) {
+    const t = String(raw || '').trim();
+    if (!t || t.length < 6 || t.length > 80) continue;
+    if (BAN.test(t)) continue;
+    if (!/[\u4e00-\u9fa5]/.test(t)) continue;
+    if (/^[\d\s.,%/]+$/.test(t)) continue;
+    if (t.length > best.length) best = t;
+  }
+  return best || null;
+}
+
 function parseUnityEvent(text) {
   const marker = 'GQY_STATE:';
   let from = 0, last = null;
@@ -480,6 +496,7 @@ function mapUnityEvent(ev) {
       taskCurrentText: ev.taskCurrentText || null,
       sence3Order: ev.sence3Order != null ? Number(ev.sence3Order) : null,
       examQuestion: ev.examQuestion || null,
+      subtitle: pickSubtitle(ev.uiTexts),
       tipOptButtons: ev.tipOptButtons || null,
       dayTaskNames: ev.dayTaskNames || null,
       huLiDone: String(ev.huLiDone) === 'true',

@@ -47,6 +47,7 @@ namespace GouQianYinOverlay
 
         public const int GWL_EXSTYLE = -20;
         public const int WS_EX_TRANSPARENT = 0x20;
+        public const int WS_EX_NOACTIVATE = 0x08000000;
         public const int WS_EX_LAYERED = 0x80000;
 
         [StructLayout(LayoutKind.Sequential)]
@@ -74,6 +75,7 @@ namespace GouQianYinOverlay
         private bool clickThrough = false;
         private int retries = 0;
         private IntPtr target = IntPtr.Zero;
+        private SubtitleForm subtitle;
 
         private const string DefaultPanelUrl = "http://127.0.0.1:8787/demo/panel.html";
 
@@ -95,7 +97,7 @@ namespace GouQianYinOverlay
             Controls.Add(web);
 
             Load += OnLoaded;
-            FormClosing += (_, __) => { follow.Stop(); retry.Stop(); };
+            FormClosing += (_, __) => { follow.Stop(); retry.Stop(); subtitle?.Close(); };
 
             follow.Tick += (_, __) => { if (pinned) FollowTarget(); };
             retry.Tick += (_, __) => { retry.Stop(); if (retries-- > 0) LoadPanel(); };
@@ -134,6 +136,10 @@ namespace GouQianYinOverlay
             LoadPanel();
             FollowTarget();
             follow.Start();
+
+            // 字幕条（SubtitleForm 自己轮询 /state 并跟随窗口）
+            subtitle = new SubtitleForm();
+            subtitle.Show();
         }
 
         private void LoadPanel()
