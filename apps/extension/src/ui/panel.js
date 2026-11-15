@@ -165,15 +165,17 @@
       // 客户端日志能证明「实验正在跑、当前是哪个 UI」，但证明不了业务阶段。
       // 如实显示运行证据，仍然要求手动选任务，不拿界面名猜场景。
       const lc = state.clientEvidence && state.clientEvidence.lifecycle;
-      els.hint.textContent = lc
+      const subTxt = (state.game && state.game.subtitle) ? `　「${state.game.subtitle.slice(0, 20)}」` : '';
+      els.hint.textContent = (lc
         ? `客户端已运行 · ${lc.label} · 任务请手动选`
-        : '未识别，请手动选择';
+        : '未识别，请手动选择') + subTxt;
     } else if (state.override) {
       els.hint.textContent = '手动指定' + (state.examLock ? ' · 考核保护中' : '');
     } else {
       const src = SOURCE_LABEL[s.contextSource] || '自动识别';
+      const sub = (state.game && state.game.subtitle) ? `　「${state.game.subtitle.slice(0, 22)}」` : '';
       els.hint.textContent = src + ' · ' + (CONF_LABEL[s.confidence] || '已识别')
-        + (s.scenarioId ? '' : ' · 仅到阶段');
+        + (s.scenarioId ? '' : ' · 仅到阶段') + sub;
     }
 
     els.select.innerHTML = sceneOptions();
@@ -282,6 +284,10 @@
     els.scoreBox.classList.toggle('show', !!sc && sc.phase === 'report' && state.scoreOpen);
 
     let chips = sc ? sc.chips.slice() : ['我该做什么？'];
+    const realTasks = (state.game && state.game.dayTasks) || [];
+    if (realTasks.length) {
+      chips = realTasks.slice(0, 6).map((t) => `${t}要注意什么？`);
+    }
     if (sc && sc.phase === 'report') chips = ['读取本页成绩'].concat(chips, ['粘贴我的成绩']);
     els.chips.innerHTML = chips.map(c => `<button class="bt-chip" data-q="${c}">${c}</button>`).join('');
     els.chips.classList.toggle('bt-hidden', !sc);
@@ -568,6 +574,34 @@
       if (v) u.voice = v;
       speechSynthesis.speak(u);
     } catch { }
+  }
+
+  /* 与游戏同步：每 2 秒拉一次 /state，拿到字幕、今日任务、识别结果。
+     面板因此能显示「游戏里正在说什么」「今天要做哪几项」，而不是固定菜单。 */
+  let gameTimer = null;
+  function startGameSync() {
+    if (gameTimer) return;
+    const pull = async () => {
+      try {
+        const r = await fetch('http://127.0.0.1:8790/state', { cache: 'no-store' });
+        const cs = await r.json();
+        const u = cs.unity || {};
+        const next = {
+          subtitle: (u.subtitle || '').trim(),
+          dayTasks: String(u.dayTaskNames || '').split('|').filter(Boolean),
+          tipButtons: u.tipOptButtons || '',
+          scen: cs.scenarioId || null,
+          conf: cs.confidence || null,
+          day: cs.postopDay || null,
+        };
+        const prev = state.game || {};
+        const changed = next.subtitle !== prev.subtitle || next.dayTasks.join() !== (prev.dayTasks || []).join();
+        state.game = next;
+        if (changed) renderScene();
+      } catch { /* agent 没开就静默 */ }
+    };
+    pull();
+    gameTimer = setInterval(pull, 2000);
   }
 
   function finishStream(reason) {
@@ -1129,6 +1163,7 @@
       applyScene(next, false);
     });
 
+    startGameSync();
     els.chips.addEventListener('click', (e) => {
       const btn = e.target.closest('.bt-chip');
       if (!btn) return;
