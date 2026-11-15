@@ -35,6 +35,7 @@ namespace GouQianYinOverlay
         [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr h, out RECT r);
         [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr h);
         [DllImport("user32.dll")] public static extern bool IsIconic(IntPtr h);
+        [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
         [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
         [DllImport("user32.dll")] public static extern int GetWindowLong(IntPtr h, int idx);
         [DllImport("user32.dll")] public static extern int SetWindowLong(IntPtr h, int idx, int val);
@@ -177,7 +178,10 @@ namespace GouQianYinOverlay
             return false;
         }
 
-        /// <summary>找出面积最大的、标题像实验的可见窗口（不再只认前台窗口）</summary>
+        /// <summary>实验客户端的进程名（真实客户端窗口标题是 HLF10631030，不含任何中文关键词）</summary>
+        private static readonly string[] ProcessNames = { "HLF10631030", "MCLocalLauncher" };
+
+        /// <summary>按进程名找实验窗口；找不到就返回 0（此时面板应当隐藏，不做独立悬浮窗）</summary>
         private IntPtr FindTarget()
         {
             IntPtr best = IntPtr.Zero;
@@ -190,8 +194,15 @@ namespace GouQianYinOverlay
                 if (!Native.IsWindowVisible(h)) return true;
                 if (Native.IsIconic(h)) return true;
 
-                var title = Native.TitleOf(h);
-                if (!LooksLikeTarget(title)) return true;
+                uint pid;
+                Native.GetWindowThreadProcessId(h, out pid);
+                string pname = string.Empty;
+                try { pname = System.Diagnostics.Process.GetProcessById((int)pid).ProcessName; } catch { }
+                bool byProc = false;
+                foreach (var pn in ProcessNames)
+                    if (string.Equals(pname, pn, StringComparison.OrdinalIgnoreCase)) { byProc = true; break; }
+                // 只认实验本体进程：按标题关键词找会把「骨牵引…」的浏览器页也当成实验
+                if (!byProc) return true;
 
                 Native.RECT r;
                 if (!Native.GetWindowRect(h, out r)) return true;
@@ -208,45 +219,36 @@ namespace GouQianYinOverlay
 
         private void FollowTarget()
         {
-            if (!Visible) return;
-
             var h = FindTarget();
             if (h == IntPtr.Zero)
             {
-                if (target == IntPtr.Zero && Screen.PrimaryScreen != null)
-                {
-                    var wa0 = Screen.PrimaryScreen.WorkingArea;
-                    Location = new Point(wa0.Right - Width - 32, wa0.Top + 80);
-                }
+                /* 没有实验窗口就不应该存在：隐藏自己，等实验启动后再出现。
+                   以前的实现会退到屏幕右缘当独立悬浮窗，那是“单独的存在”。 */
+                target = IntPtr.Zero;
+                if (Visible) Visible = false;
                 return;
             }
+            if (!Visible) Visible = true;
             target = h;
 
             Native.RECT r;
             if (!Native.GetWindowRect(h, out r)) return;
 
             var targetRect = Rectangle.FromLTRB(r.Left, r.Top, r.Right, r.Bottom);
-            var screen = Screen.FromRectangle(targetRect).WorkingArea;
 
-            const int gap = 12;
-            int x = targetRect.Right + gap;                 // 优先贴右侧外面
-            if (x + Width > screen.Right) x = targetRect.Left - gap - Width;  // 再试左侧外面
+            /* 贴在实验窗口内部的右侧，随窗口移动/缩放一起走 */
+            const int inset = 18;
+            int w = Math.Min(Width, Math.Max(360, targetRect.Width / 4));
+            int h2 = Math.Min(820, Math.Max(420, targetRect.Height - 140));
+            int x = targetRect.Right - w - inset;
+            int y = targetRect.Top + 64;
 
-            bool outside = x >= screen.Left && x + Width <= screen.Right;
-            if (!outside)
-            {
-                // 屏幕放不下（实验全屏）→ 贴屏幕右缘，允许覆盖，可用 Ctrl+Alt+T 穿透
-                x = Math.Max(screen.Left + 4, screen.Right - Width - 8);
-            }
-
-            int h2 = Math.Min(760, Math.Max(420, targetRect.Height - 96));
-            int y = Math.Max(screen.Top + 8, Math.Min(targetRect.Top + 48, screen.Bottom - h2 - 8));
-
-            if (Location.X != x || Location.Y != y) Location = new Point(x, y);
+            if (Size.Width != w) Width = w;
             if (Height != h2) Height = h2;
+            if (Location.X != x || Location.Y != y) Location = new Point(x, y);
 
-            Text = "骨牵引智能交互 · " + (pinned ? "跟随实验窗口" : "位置已固定")
-                 + (outside ? "" : " · 已覆盖场景，Ctrl+Alt+T 穿透");
+            Text = "骨牵引智能交互 · 绑定实验窗口"
+                 + (pinned ? "" : " · 位置已固定");
         }
     }
 

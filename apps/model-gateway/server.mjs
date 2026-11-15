@@ -23,7 +23,6 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { mockAnswer } from './lib/mock.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..', 'extension');
@@ -316,7 +315,7 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     res.end(JSON.stringify({
       ok: true, mode: CFG.mode,
-      model: CFG.mode === 'live' ? CFG.model : '演示知识库',
+      model: CFG.mode === 'live' ? CFG.model : null,
       provider: CFG.mode === 'live' ? CFG.baseUrl : 'mock',
       hasKey: !!CFG.apiKey
     }));
@@ -394,7 +393,7 @@ const server = http.createServer(async (req, res) => {
     const clientAbort = new AbortController();
     res.on('close', () => { if (!res.writableEnded) clientAbort.abort(); });
 
-    sse(res, { mode: CFG.mode, model: CFG.mode === 'live' ? CFG.model : '演示知识库' });
+    sse(res, { mode: CFG.mode, model: CFG.mode === 'live' ? CFG.model : null });
 
     if (CFG.mode === 'live') {
       if (stream === false || CFG.stream === false) await nonStreamLive(res, String(system || ''), safeMessages, clientAbort.signal);
@@ -402,19 +401,12 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    const answer = mockAnswer(String(system || ''), safeMessages);
-    const parts = answer.match(/[\s\S]{1,18}/g) || [answer];
-    let i = 0;
-    const timer = setInterval(() => {
-      if (clientAbort.signal.aborted) { clearInterval(timer); return; }
-      if (i >= parts.length) {
-        clearInterval(timer);
-        sse(res, '[DONE]');
-        res.end();
-        return;
-      }
-      sse(res, { t: parts[i++] });
-    }, 24);
+    /* 未配置真实模型时**不做任何模拟回答**：
+       以前这里会用知识库做意图匹配生成一段“看起来像回答”的文字，
+       学生无法分辨那是模型说的还是规则拼的。现在直接报错，把边界说清楚。 */
+    sse(res, { error: '未接入真实模型：请在 apps/model-gateway/config.json 填写 apiKey 与 model，并把 mode 设为 live。' });
+    sse(res, '[DONE]');
+    res.end();
     return;
   }
 
@@ -422,7 +414,7 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(CFG.port, '127.0.0.1', () => {
-  const modeText = CFG.mode === 'live' ? `真实模型（${CFG.model}）` : '演示模式（未配置 API Key）';
+  const modeText = CFG.mode === 'live' ? `真实模型（${CFG.model}）` : '未接入模型（不会回答，仅报错）';
   console.log('');
   console.log('  骨牵引智能交互组件 · 本地服务已启动');
   console.log('  ---------------------------------------------');

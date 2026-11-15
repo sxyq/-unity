@@ -561,7 +561,7 @@
 
   function renderFooter() {
     const m = state.health.mode;
-    if (m === 'mock') { els.modeBadge.className = 'bt-badge mock'; els.modeBadge.textContent = '演示模式 · 未接入模型'; }
+    if (m === 'mock') { els.modeBadge.className = 'bt-badge mock'; els.modeBadge.textContent = '未接入模型 · 不会回答'; }
     else if (m === 'live') { els.modeBadge.className = 'bt-badge live'; els.modeBadge.textContent = '已接入 ' + (state.health.model || '模型'); }
     else { els.modeBadge.className = 'bt-badge mock'; els.modeBadge.textContent = '未连接本地服务'; }
   }
@@ -569,6 +569,12 @@
   function send(text) {
     const s = activeScene();
     if (!s || !s.phase) { toast('请先选择当前实验场景'); T.log('block', { why: 'no-scene' }); return; }
+    /* 没有真实模型时不做任何本地规则回答：直接告诉学生为什么不能问 */
+    if (state.health && state.health.mode && state.health.mode !== 'live') {
+      toast('未接入真实模型：请在本地网关配置 API Key');
+      T.log('block', { why: 'no-live-model' });
+      return;
+    }
     if (state.busy) return;
     text = (text || '').trim();
     if (!text) return;
