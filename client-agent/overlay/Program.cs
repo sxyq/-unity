@@ -277,6 +277,14 @@ namespace GouQianYinOverlay
         {
             Forms.Application.EnableVisualStyles();
             Forms.Application.SetCompatibleTextRenderingDefault(false);
+
+            // 字幕条：GQY_SUBTITLE=0 可关闭
+            var sub = Environment.GetEnvironmentVariable("GQY_SUBTITLE");
+            if (!string.Equals(sub, "0", StringComparison.Ordinal))
+            {
+                try { new SubtitleForm().Show(); } catch { }
+            }
+
             Forms.Application.Run(new OverlayForm());
         }
     }

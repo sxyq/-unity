@@ -795,6 +795,36 @@
     if (!state.settingsOpen) return;
     els.setBody.innerHTML = '';
 
+    if (state.settingsTab === 'score') {
+      const cs = (state.clientEvidence && state.clientEvidence.score) || null;
+      if (!cs || !cs.totalItems) {
+        els.setBody.innerHTML = `
+          <div class="bt-field">
+            <label>还没有成绩数据</label>
+            <div class="hint">完成一次实验（或原程序写入 39 项评分）后，这里会显示总分、分类正确率与错项。</div>
+          </div>`;
+        return;
+      }
+      const rows = Object.entries(cs.bySection || {}).map(([k, v]) =>
+        `<div>${k}：<b>${v.right}/${v.total}</b> 正确，${v.score} 分</div>`).join('');
+      const wrong = (cs.wrongItems || []).slice(0, 10).map((w) =>
+        `<li><b>${w.sn}</b>${w.section ? ' · ' + w.section : ''}${w.feedback ? '：' + w.feedback : ''}</li>`).join('');
+      els.setBody.innerHTML = `
+        <div class="bt-field">
+          <label>总分：<b>${cs.totalScore}</b> / 正确 ${cs.rightItems}/${cs.totalItems}</label>
+          <div class="hint">进度 PV ${cs.pv}/${cs.maxPV}${cs.isDone ? ' · 已完成' : ''}${cs.isStudyModel ? ' · 学习模式' : ''}</div>
+        </div>
+        <div class="bt-field">
+          <label>分类得分</label>
+          <div style="font-size:12px;line-height:1.9">${rows || '无'}</div>
+        </div>
+        <div class="bt-field">
+          <label>错项（${(cs.wrongItems || []).length}）</label>
+          <ul class="bt-score-wrong">${wrong || '<li>没有错项</li>'}</ul>
+        </div>`;
+      return;
+    }
+
     if (state.settingsTab === 'ui') {
       els.setBody.innerHTML = `
         <div class="bt-field">
@@ -1057,6 +1087,12 @@
       state.settingsTab = b.dataset.tab;
       els.tabs.querySelectorAll('.bt-tab').forEach(x => x.classList.toggle('on', x === b));
       if (state.settingsTab === 'model' && !state.cfg) loadConfig();
+      if (state.settingsTab === 'score') {
+        fetch('http://127.0.0.1:8790/state', { cache: 'no-store' })
+          .then((r) => r.json())
+          .then((cs) => { state.clientEvidence = { score: cs.scoreDetails || null, lifecycle: cs.lifecycle || null }; renderSettings(); })
+          .catch(() => { });
+      }
       renderSettings();
     });
 

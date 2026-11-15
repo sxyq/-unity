@@ -81,6 +81,7 @@
               <button class="bt-tab on" data-tab="ui">界面</button>
               <button class="bt-tab" data-tab="model">模型</button>
               <button class="bt-tab" data-tab="trace">埋点</button>
+              <button class="bt-tab" data-tab="score">成绩</button>
             </div>
             <div class="bt-set-body"></div>
           </div>
