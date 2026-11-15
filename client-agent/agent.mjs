@@ -404,7 +404,7 @@ function mapUnityEvent(ev) {
 
   /* 原系统答题测试：UISelectionExamPanel（是/否选择题，提交后判分）
    * 只要这个面板在，就按考核处理——模型不得直接给答案。 */
-  const quizOn = /UISelectionExamPanel|UIPaperModelPanel/i.test(panels);
+  const quizOn = /UISelectionExamPanel|UISelectionOtherExamPanel|UIPaperModelPanel|errorPanel/i.test(panels);
   if (quizOn) why = (why ? why + '；' : '') + '原系统答题测试进行中（考核保护）';
 
   const mode = quizOn ? 'exam' : (String(ev.isStudyModel) === 'false' ? 'exam' : 'study');
