@@ -313,3 +313,33 @@ findstr GQY_STATE "%USERPROFILE%\AppData\LocalLow\Mengoo\HLF10631030\Player.log"
 agent 已把它映射为 `phase=report`、`scenarioId=report-score`；
 场景 10 目前由学生在面板下拉切换（同一份成绩，不同提示策略），
 **不声称是 Unity 自动识别**。
+
+### 6.8 模块 2 真实任务与识别结果（2026-11-15 实测）
+
+模块 2「骨牵引的操作方法及原理」的病房里是四个热点，不是原先假设的「牵引原理」一个：
+
+| 热点 | 打开的真实面板 | 面板内文字 | scenarioId | 实测置信度 |
+|---|---|---|---|---|
+| 1.医患沟通 | `UIDialoogConentPanel` | 「2床李先生，您好，我是您…」+ 跳过 | intraop-communicate | high |
+| 2.体格检查 | `UISecondSenceOptPanel` | 视诊/触诊/动诊/量诊 | intraop-observe | high |
+| 3.辅助检查 | `RecordPanel`+`UISampleBingLiPanel` | 电子病历（记录日期 2020-08-19） | 只报 intraop，不认领任务 | medium |
+| 4.手术治疗 | `UISecondSenceOptPanel`+`OptPanel` | 1.确认穿刺部位 2.打开穿刺包 3.戴无菌手套 4.消毒 5.铺巾 6.麻醉 7.穿刺 8.调节肢体高度 9.牵引 | intraop-principle | high |
+
+要点：
+
+- 体格检查与手术治疗**共用同一个底部动作条面板**，只能靠动作条文字区分（量诊 vs 穿刺/铺巾/消毒）；
+- 模块 2 的「3.辅助检查」会打开和场景 01 一模一样的电子病历面板，
+  此时 `selectedTasks` 会写成 `["入院记录"]`——**这是病历页签，不是场景 01 的任务**，
+  已按 `senceState` 分域，避免误判；
+- `panels` 列表里的面板关闭后仍留在列表（`UIDialoogConentPanel` 实测），
+  observer 已加 `CanvasGroup.alpha > 0.01` 过滤；即便如此，判断仍以「面板内文字」为准。
+
+### 6.9 尚未验证的部分（不得当成已完成）
+
+| 场景 | 现状 | 缺什么 |
+|---|---|---|
+| 06 术后心理护理 | 任务栏第一天清单里没有心理项；规则已写（含心理/情绪/焦虑/睡眠） | 需要术后第 2/3/7 天里出现心理任务时的真实点击 |
+| 07 术后护理指导 | 规则按真实任务项（疼痛/牵引有效性/排泄…）编写 | `taskCurrentText` 尚未在真实点击中取到值 |
+| 08 并发症观察 | 同上（血栓/出血/感染/神经/血供…）+ 已实测第 1 天肢端血供答题 | 同上 |
+| 09/10 成绩与复习 | 39 条 ScoreDatas 已解析进 `/state.scoreDetails`；`UIComprehensivePerformanceRecordPanel` 已映射 | 需要一次完整做完实验后验证报告阶段自动切换 |
+| 全部场景真实模型 | 网关仍是 mock（无 Key） | 用户提供 OpenAI-compatible Key 后逐一联调 |
