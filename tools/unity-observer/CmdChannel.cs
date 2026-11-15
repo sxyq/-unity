@@ -65,6 +65,56 @@ namespace Gqy
                     go.transform.position.x, go.transform.position.y, go.transform.position.z, sx, sy);
             }
 
+            if (verb == "hide" || verb == "show")
+            {
+                var nm = parts.Length > 1 ? parts[1].Trim() : "";
+                var go = GameObject.Find(nm);
+                if (go == null)
+                {
+                    var all = Resources.FindObjectsOfTypeAll<Transform>()
+                        .FirstOrDefault(t => t != null && t.gameObject.scene.IsValid() && t.name == nm);
+                    if (all != null) go = all.gameObject;
+                }
+                if (go == null) return "null";
+                go.SetActive(verb == "show");
+                return "ok " + verb + " " + nm;
+            }
+
+            if (verb == "buttons")
+            {
+                var tn2 = parts.Length > 1 ? parts[1].Trim() : "";
+                var ty2 = Type.GetType(tn2 + ", Assembly-CSharp") ?? Type.GetType(tn2);
+                if (ty2 == null) return "no type " + tn2;
+                var host2 = typeof(Component).IsAssignableFrom(ty2)
+                    ? (object)UnityEngine.Object.FindObjectOfType(ty2) : null;
+                var comp2 = host2 as Component;
+                if (comp2 == null) return "no instance";
+
+                var btnType = Type.GetType("UnityEngine.UI.Button, UnityEngine.UI");
+                var txtType = Type.GetType("UnityEngine.UI.Text, UnityEngine.UI");
+                if (btnType == null) return "no UI";
+                var sb2 = new System.Text.StringBuilder();
+                foreach (var bo in comp2.GetComponentsInChildren(btnType, true))
+                {
+                    var btn = bo as Component;
+                    if (btn == null || !btn.gameObject.activeInHierarchy) continue;
+                    string label = "";
+                    if (txtType != null)
+                    {
+                        var t2 = btn.GetComponentInChildren(txtType, true);
+                        if (t2 != null)
+                        {
+                            var tp = txtType.GetProperty("text");
+                            if (tp != null) label = (tp.GetValue(t2, null) as string) ?? "";
+                        }
+                    }
+                    var p2 = btn.transform.position;
+                    sb2.Append(label).Append('@').Append(Mathf.RoundToInt(p2.x)).Append(',')
+                       .Append(Mathf.RoundToInt(Screen.height - p2.y)).Append("; ");
+                }
+                return sb2.Length > 0 ? sb2.ToString() : "no buttons";
+            }
+
             var typeName = parts.Length > 1 ? parts[1].Trim() : "";
             var type = Type.GetType(typeName + ", Assembly-CSharp") ?? Type.GetType(typeName);
             if (type == null) return "no type " + typeName;
@@ -81,7 +131,8 @@ namespace Gqy
             {
                 var mn = parts.Length > 2 ? parts[2].Trim() : "";
                 var args = parts.Skip(3).ToArray();
-                var inst = UnityEngine.Object.FindObjectOfType(type);
+                object inst = typeof(Component).IsAssignableFrom(type)
+                    ? (object)UnityEngine.Object.FindObjectOfType(type) : null;
                 var mi = type.GetMethods(ALL).FirstOrDefault(m => m.Name == mn && m.GetParameters().Length == args.Length)
                          ?? type.GetMethods(ALL).FirstOrDefault(m => m.Name == mn);
                 if (mi == null) return "no method " + mn;
@@ -105,7 +156,8 @@ namespace Gqy
             if (verb == "inst")
             {
                 var fn = parts.Length > 2 ? parts[2].Trim() : "";
-                var inst = UnityEngine.Object.FindObjectOfType(type);
+                var inst = typeof(Component).IsAssignableFrom(type)
+                    ? (object)UnityEngine.Object.FindObjectOfType(type) : null;
                 if (inst == null) return "no instance";
                 var f = type.GetField(fn, ALL);
                 if (f == null) return "no field " + fn;
