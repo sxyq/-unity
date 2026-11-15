@@ -470,6 +470,14 @@ function mapUnityEvent(ev) {
     }
   }
 
+  /* 术后「疼痛」任务：点任务栏的疼痛后，原程序开的是患者对白
+     「您今天感觉怎么样？左腿还疼吗？」，而不是答题面板。
+     注意不能只看任务栏里常驻的「疼痛」二字，必须命中对白本身。 */
+  if (/UIDialoogConentPanel/i.test(panels) && /还疼吗|疼痛评分|疼得|0分.*10分/.test(uiJoined)) {
+    phase = 'postop'; taskId = 'postop-care'; taskName = '术后护理指导';
+    why = '术后疼痛评估对白：' + (uTexts.find(t => /还疼吗|疼痛评分|疼得/.test(t)) || '').slice(0, 30);
+  }
+
   /* 术后综合评估面板（UISelectionOtherExamPanel）的选项组本身就是任务特征：
      examList2 是压疮分期（1期..5期）、examList3 是压疮好发部位（骶尾部/足跟…），
      只要出现这两组，就确定学生在做「压力性损伤」观察 → 08 并发症观察。 */
