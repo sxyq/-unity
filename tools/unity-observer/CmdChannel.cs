@@ -65,6 +65,46 @@ namespace Gqy
                     go.transform.position.x, go.transform.position.y, go.transform.position.z, sx, sy);
             }
 
+            if (verb == "scan")
+            {
+                // 扫描所有 *Panel 类实例上可见按钮，按文字过滤，返回「类型|文字@x,y」
+                var want = parts.Length > 1 ? parts[1].Trim() : "";
+                var asm = Type.GetType("Nurse.Logic.GameManager, Assembly-CSharp")?.Assembly;
+                if (asm == null) return "no asm";
+                var btnType = Type.GetType("UnityEngine.UI.Button, UnityEngine.UI");
+                var txtType = Type.GetType("UnityEngine.UI.Text, UnityEngine.UI");
+                if (btnType == null || txtType == null) return "no UI";
+                var tp = txtType.GetProperty("text");
+                var sb = new System.Text.StringBuilder();
+                foreach (var t in asm.GetTypes())
+                {
+                    if (t == null || t.IsAbstract || !typeof(Component).IsAssignableFrom(t)) continue;
+                    if (t.Name.IndexOf("Panel", StringComparison.OrdinalIgnoreCase) < 0) continue;
+                    UnityEngine.Object[] objs;
+                    try { objs = Resources.FindObjectsOfTypeAll(t); } catch { continue; }
+                    foreach (var o in objs)
+                    {
+                        var c = o as Component;
+                        if (c == null || !c.gameObject.activeInHierarchy) continue;
+                        if (!c.gameObject.scene.IsValid()) continue;
+                        foreach (var bo in c.GetComponentsInChildren(btnType, true))
+                        {
+                            var b = bo as Component;
+                            if (b == null || !b.gameObject.activeInHierarchy) continue;
+                            var tx = b.GetComponentInChildren(txtType, true);
+                            var label = (tx != null && tp != null) ? (tp.GetValue(tx, null) as string) : null;
+                            if (string.IsNullOrEmpty(label)) continue;
+                            if (want.Length > 0 && label.IndexOf(want, StringComparison.Ordinal) < 0) continue;
+                            var pos = b.transform.position;
+                            sb.Append(t.Name).Append('|').Append(label).Append('@')
+                              .Append(Mathf.RoundToInt(pos.x)).Append(',').Append(Mathf.RoundToInt(Screen.height - pos.y)).Append("; ");
+                            if (sb.Length > 900) return sb.ToString();
+                        }
+                    }
+                }
+                return sb.Length > 0 ? sb.ToString() : "no match";
+            }
+
             if (verb == "methods")
             {
                 var tn3 = parts.Length > 1 ? parts[1].Trim() : "";

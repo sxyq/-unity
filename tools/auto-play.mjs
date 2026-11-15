@@ -61,6 +61,10 @@ const POPUP_TYPES = [
   'Nurse.Logic.UIPromptPanel', 'Nurse.Logic.UIErrorPanel', 'Nurse.Logic.UISelectionExamPanel',
 ];
 function clickByText(re) {
+  // 先用全类型扫描（返回物理坐标，需 /1.5）
+  const out = String(cmd('scan|' + (re.source.includes('确定') ? '确定' : '再次操作')));
+  const m = out.match(/\|([^@|]+)@(\d+),(\d+)/);
+  if (m) { click(Math.round(Number(m[2]) / 1.5), Math.round(Number(m[3]) / 1.5)); return m[1]; }
   for (const tp of POPUP_TYPES) {
     const b = btns(tp).find((x) => re.test(x.label));
     if (b) { click(b.x, b.y); return b.label; }
@@ -113,7 +117,7 @@ async function main() {
       const prog = (st.uiTexts || []).find((t) => /^\d+\/\d+$/.test(t)) || '';
       const key = prog + '|' + qText;
       if (key !== qKey) { qKey = key; tryIdx = 0; }
-      const FIXED = [[173, 389], [173, 487], [173, 585], [173, 683]];   // A/B/C/D（实测：截图坐标/1.5）
+      const FIXED = [[183, 385], [183, 488], [183, 588], [183, 685]];   // A/B/C/D（实测校准）
       const pick = opts.length >= 2 ? opts[tryIdx % opts.length] : null;
       if (pick) click(pick.x, pick.y);
       else { const f = FIXED[tryIdx % FIXED.length]; click(f[0], f[1]); }
@@ -162,7 +166,7 @@ async function main() {
       }
       if (tasks.length) {
         const t = tasks[i % tasks.length];
-        click(150, t.y);
+        click(90, Math.round(t.y / 1.5));
         sleepSync(1500);
         console.log('任务', t.label, i);
         continue;
