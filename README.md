@@ -1,95 +1,69 @@
-# 骨牵引虚拟仿真 · 外部智能化升级
+# 骨牵引护理仿真：Windows 接续
 
-在**不改原 Unity 实验**（27 个计分步骤、动画、成绩上传均不动）的前提下，
-给已部署的《下肢骨折骨牵引护理技术虚拟仿真实验》加一层"看得懂场景、能对话、会讲评"的智能外壳。
+当前开发路线为 Godot 4.7.2 + Blender，默认1280×720小窗。Unity源码保留作为迁移依据。分支 `handoff/windows-2026-11-17` 保存本轮源码、模型、分析结果及两平台成品。
 
-## 目录（按业务拆分）
+## 在 Windows 获取
 
-```
-apps/
-  extension/          浏览器扩展：平台网页里的智能面板（主力形态）
-    src/
-      boot/           入口与后台服务（挂载、模型转发、状态推送）
-      data/           病例与话术（case-data）、角色提示词（prompt）
-      platform/       与平台对接：接口旁听、进度轮询、实验事件桥、成绩解析
-      scene/          场景识别：规则表（rules）+ 识别逻辑（detect）
-      ui/             面板：DOM 模板（template）+ 状态与交互（panel）
-      core/           埋点与本地追踪
-    demo/             本地预览页（不需要扩展也能看效果）
-  model-gateway/      OpenAI 兼容网关（Key 只在这里）
-    lib/mock.mjs      未配置 Key 时的演示知识库
-  server-inject/      服务端注入：学生免装扩展
-    conf/             nginx / IIS 两套反代配置
-  client-agent/       客户端侧：读 Player.log 与窗口标题，提供状态；含悬浮窗源码
-docs/                 调研、实测流程、状态核对（截图在 docs/flow/）
+安装 Git for Windows 与 Git LFS 后，在 PowerShell 执行。以下 `D:\Project` 为外置盘路径示例，按实际盘符替换。
+
+```powershell
+git lfs install
+git clone --branch handoff/windows-2026-11-17 https://github.com/sxyq/-unity.git 'D:\Project\医院仿真'
+Set-Location 'D:\Project\医院仿真'
+git lfs pull
+& '.\builds\Windows\TractionCare.exe'
 ```
 
-## 三条运行形态
+`builds\Windows\Gateway` 须与EXE一起保留。安装文件和Node运行文件使用Git LFS；仅下载源码ZIP会缺少实际大文件。
 
-| 形态 | 学生要装什么 | 能力 | 状态 |
-|---|---|---|---|
-| 浏览器扩展 | 装一次扩展 | 平台页内全功能 + 实时进度 + 成绩 | 实测可用 |
-| 服务端注入 | 什么都不用装 | 同上（学校反代注入） | 本地预演通过 |
-| 客户端悬浮窗 | 装一个小程序 | 实验客户端旁边贴一个面板 | ✅ 已构建运行，并与真实 Unity 实验窗口同屏（2026-11-15） |
+## 工程与资料
 
-## 快速跑起来
-
-```bash
-node apps/model-gateway/server.mjs        # 127.0.0.1:8787（默认演示模式）
-# 浏览器加载 apps/extension 作为「已解压的扩展程序」
-# 打开 https://skeletaltraction.cqmu.edu.cn/mengoo/ 即可看到右侧「智能助教」
-```
-
-接入真实模型：把 `apps/model-gateway/config.example.json` 复制为 `config.json`，
-填 `apiKey`，`mode` 改 `auto`，重启网关。
-
-## 关键设计
-
-- **不碰成绩**：只读页面与旁听平台自己的响应，不发写请求、不伪造成绩。
-- **不猜场景**：证据不足就显示"未识别，请手动选择"；只识别到阶段时，不拿阶段猜任务。
-- **考核锁**：一旦出现考核信号，手动切换场景也不会解除"不提供答案"的保护。
-- **术后不串台**：术后第 1/2/3/7 天各自独立会话，切日期即切上下文。
-- **密钥不出服务端**：`/api/config` 只返回 `hasKey`，且只接受本机页面/扩展写入（跨站 403）。
-- **实时状态两条腿**：平台 `GetProcess` 轮询（进度/次数/用时）+ 客户端 `Player.log`。
-- **实机更正（2026-11-16）**：原程序 `ScoreDatas` 会把 39 项全部写出来，未作答项同样是
-  `isRight=false / score=0 / time=0`，因此**不能把 39 项都算错项**。状态层现在区分
-  「已作答 / 未作答」，并把成绩归属标成 `本次运行 / 上一次运行 / 历史记录`；
-  没有已作答记录时，模型只能说明数据不足，不得编造薄弱点。
-- **过期状态不再冒充当前**：实验进程退出后，最后一条 `GQY_STATE` 只作为「上次识别到」提示，
-  `phase/taskId` 会被清空；面板显示"实验未运行"，不再自动切入旧任务。
-- **本地测试副本（2026-11-15 续）**：`tools/unity-observer` 在独立副本里只读反射原程序运行时状态
-  （`SenceState` / `DayTime` / `isStudyModel` / `WeightValue` / `ScoreDatas`），输出 `GQY_STATE:`；
-  `client-agent` 解析为 `unity-event` 驱动面板自动切换。使用 REA 与 Craft Anything CLI 完成程序集取证。
-  **未嵌入 Unity 原生 UI**，仍用外部悬浮窗。悬浮窗会记住用户拖动/拉伸后的位置与尺寸。
-  见 `docs/Unity本地状态输出.md`。
-- **十场景可复跑**：`node tools/scenario-selftest.mjs` 用真实网关逐场景发请求，校验角色、
-  事实边界、未作答口径与考核保护，结果写入 `docs/model-selftest.md`。
-- **状态映射可复跑**：`node tools/replay-unity-states.mjs` 用 2026-11-15 真实抓到的
-  `GQY_STATE` 事件离线回放 11 个状态，核对阶段/任务映射，结果写入 `docs/unity-replay.json`。
-- **真机复验（2026-11-16 06:00）**：平台重新取票后进入真实 3D 病房；点「1.入院记录」
-  自动切到 01 智能病史问诊，真实模型 4.4 秒按病例回答；切「辅助检查」子任务不重开会话；
-  点病人菜单「3.术前谈话」自动切到 02；点术后「疼痛」「下肢深静脉血栓」自动切到 07/08，真实答题中模型拒绝给选项；
-  模块2「医患沟通/体格检查/手术治疗」自动切到 03/05/04；关闭实验后状态立即解除。
-- **跨会话考核锁重置**：上一轮考核后开新实验，面板不再残留「考核中」。
-- **真机修复**：原程序 `GQY_STATE` 的 `uiTexts` 含未转义换行，会让整条 JSON 解析失败
-  （表现为"游戏在跑但状态一直为空"）；agent 已做容错解析。取票脚本也已修正为客户端
-  只认的小写 `mlauncher://` 与 `https//` 分隔形式。
-
-Windows 实机接管过程、误报修复与十场景核对见 `docs/Windows实测记录.md`。
-
-## 联调账号（不在仓库中保存）
-
-本仓库为公开仓库，**不保存任何平台账号、密码、ticket、Cookie 或 API Key**。
-
-| 项 | 说明 |
+| 路径 | 内容 |
 |---|---|
-| 平台 | https://skeletaltraction.cqmu.edu.cn/mengoo/ |
-| 登录方式 | 平台保留「密码登录」页签（首屏无验证码）；同时提供 CAS 单点登录入口 |
-| 账号来源 | 课程联调用的测试账号，离线保管，**不写入仓库、不写入提交信息、不写入截图** |
-| 身份 | 学生（护理学院） |
+| `godot-rebuild/project.godot` | 当前正式应用，在Godot 4.7.2中打开 |
+| `godot-rebuild/scripts/`、`data/` | 四模块、护理操作、评分、助教、任务数据 |
+| `work/models/Ward.blend` | 可编辑病房模型；GLB在 `godot-rebuild/assets/` |
+| `unity-rebuild/` | 已完成的Unity源码，保留迁移依据 |
+| `source/` | 原GitHub工程、Windows记录、只读observer、模型网关 |
+| `reverse/静态分析交付.md`、`reverse/analysis/` | 原EXE/DLL静态结果、字段、方法、调用位置及Craft项目 |
+| `reverse/input/experiment-Version.json` | 原实验1.0.7版本文件清单 |
+| `.agents/skills/` | REA与Craft项目级Skill |
+| `.codex/config.windows.toml` | Windows项目MCP配置模板 |
+| `docs/任务目标.md` | 完整目标与后续用户要求 |
+| `work/learning-state/` | Mac独立应用的学习记录导出，含当前记录指针 |
 
-联调时由使用者在自己的浏览器里**手动登录**（含滑块验证码），
-扩展只复用已登录的页面会话，不读取、不保存、不外传任何凭据。
+原Git工作树从 `source/` 上移到项目根目录，已有提交历史保留；原工程文件仍在 `source/`。
 
-> 历史版本曾在此处写入明文账号密码，已在 `git log` 中保留提交记录。
-> 若该账号仍有效，请账号所有者通过平台正常渠道修改密码或停用该测试账号。
+## 当前真实进度
+
+- Mac已实际操作病历导航、穿刺包、手套及第1/2天血供判断；Windows产物已导出，实机运行待在Windows完成。
+- 助教会话按实验、任务、场景、日期分别保存；真实模型需在应用“设置”中配置。配置保存在Windows成品旁的 `runtime/model-config.json`，不提交。
+- 原第1天血供问题及“是/否”题目有Windows实测来源；其他日期仍是标明来源的自主教学情境。
+- 完整原27步骤与39成绩对应、原病历完整页面及完成条件、原资源对象目录仍缺原Windows导出。R/C编号及当前多数评分规则为自主实现，完整1:1尚未完成。
+- 最近构建CPU采样峰值为单核46.93%；Mac应用含网关内存采样48.7MiB。Windows性能尚待实测。
+
+恢复导出的学习记录时，在首次打开应用前执行：
+
+```powershell
+New-Item -ItemType Directory -Force '.\builds\Windows\runtime' | Out-Null
+Copy-Item '.\work\learning-state\*' '.\builds\Windows\runtime\' -Recurse -Force
+```
+
+## Windows继续顺序
+
+1. 读取根目录 `AGENTS.md`、`godot-rebuild/README.md`、`reverse/静态分析交付.md` 和 `source/docs/Unity本地状态输出.md`。
+2. 先复用原Windows上已有 `%TEMP%\gqy-runtime-dump.txt`、`%TEMP%\gqy-il\`，提取原27项 `No/Name`、39项 `SN`、`ScoreMgr.SendExamScore` 的调用实参。保持账号、密码、Cookie和ticket在仓库之外。
+3. 先逐项对齐原版入口、任务、题目、完成条件与模型，再推进下一项。分析对象是本地 `HLF10631030.exe.mengoo`、`UnityPlayer.dll` 和 `HLF10631030_Data`。
+4. 在本机正常配置模型服务，实际验证流式回答、任务和日期上下文；运行Windows成品完成实际交互与内存记录。
+
+原安装包及实验二进制按原要求留在Mac本机，未进入此分支。官方MSI为 https://skeletaltraction.cqmu.edu.cn/MZL/MLauncherSetup.msi ，实验版本目录为 https://skeletaltraction.cqmu.edu.cn/mzl/HLF10631030/1.0.7/ 。分析目录保留原文件结构、大小与SHA256，便于在Windows对应已有文件。不要运行新取得的原厂EXE、使用Wine、改写或解密原文件。
+
+## 工具与资源约束
+
+所有工具、缓存和临时文件放项目所在外置盘。运行内存含子进程不超过2GB；编译进程树CPU总量不超过一个逻辑核心的80%，一次一个构建。`source/tools/limit-build.py` 使用macOS进程接口，Windows编译需采用本机适用的限速方式。
+
+两个Skill保持项目级。REA 6.9.0使用Node 22.23.4及以上的22.x；Craft官方CLI需加入Windows PATH。准备好CLI后，从项目根目录使用 `.codex/config.windows.toml`，将其复制为 `.codex/config.toml`，并把Craft的 `--project` 改为本机该项目的绝对路径。不要运行会写全局配置的setup。
+
+Windows成品运行数据写入 `builds/Windows/runtime/`。Mac编辑器、Hub、Godot、SDK、缓存及APFS工具映像属于本机工具环境，不随Git传输。
+
+WJSGFMTHZ

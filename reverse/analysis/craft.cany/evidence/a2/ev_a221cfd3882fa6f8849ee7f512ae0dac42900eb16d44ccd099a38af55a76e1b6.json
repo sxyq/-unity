@@ -1,0 +1,235 @@
+{
+  "id": "ev_a221cfd3882fa6f8849ee7f512ae0dac42900eb16d44ccd099a38af55a76e1b6",
+  "subject": {
+    "kind": "pe",
+    "sha256": "d15d807a405d12a0a2ec2150ea08b932da90a04780788ea7a9f695c46e36a047",
+    "name": "HLF10631030.exe.mengoo"
+  },
+  "operation": "native_pe_resources_list",
+  "params": {
+    "max_entries": 16384,
+    "path": "/Volumes/Lexar/Project/医院仿真/reverse/experiment/raw/HLF10631030.exe.mengoo"
+  },
+  "result": {
+    "entries": [
+      {
+        "codepage": 0,
+        "file_offset": 649272,
+        "language": 1033,
+        "name": "103",
+        "rva": "0xa2838",
+        "sha256": "5c92a41adaf3265071482fd1a182ae8702c168636a7d9ff51798ee3a1dfc8500",
+        "size": 132,
+        "type": "RT_GROUP_ICON"
+      },
+      {
+        "codepage": 0,
+        "file_offset": 86704,
+        "language": 1033,
+        "name": "1",
+        "rva": "0x192b0",
+        "sha256": "18514d3c624c74afe875f25f15ad23a9f0c177f00215612584be75251e964bf5",
+        "size": 270376,
+        "type": "RT_ICON"
+      },
+      {
+        "codepage": 0,
+        "file_offset": 357080,
+        "language": 1033,
+        "name": "2",
+        "rva": "0x5b2d8",
+        "sha256": "d68b335fe0cf6e4731ce8caa9acf85ff5e9f94bb5f42b9e2a25bb44c2ada241e",
+        "size": 152104,
+        "type": "RT_ICON"
+      },
+      {
+        "codepage": 0,
+        "file_offset": 509184,
+        "language": 1033,
+        "name": "3",
+        "rva": "0x80500",
+        "sha256": "0d3c50b4cdd7ef7701616f5166a7845195139f36247acc1453bba0a0bdc320b7",
+        "size": 67624,
+        "type": "RT_ICON"
+      },
+      {
+        "codepage": 0,
+        "file_offset": 576808,
+        "language": 1033,
+        "name": "4",
+        "rva": "0x90d28",
+        "sha256": "85fdbf366e763fd39b3206e42cc86a2f838d970dc27bbc2559318d4a084f0039",
+        "size": 38056,
+        "type": "RT_ICON"
+      },
+      {
+        "codepage": 0,
+        "file_offset": 614864,
+        "language": 1033,
+        "name": "5",
+        "rva": "0x9a1d0",
+        "sha256": "44e36349ccee071e956f1edac02a2c1672f157e17545960cff57bfdc06bd3833",
+        "size": 16936,
+        "type": "RT_ICON"
+      },
+      {
+        "codepage": 0,
+        "file_offset": 631800,
+        "language": 1033,
+        "name": "6",
+        "rva": "0x9e3f8",
+        "sha256": "065b241cb37368cdcb2d6b44ec1a44dbe3e30dc9498a7d27659a1d516d599a8d",
+        "size": 9640,
+        "type": "RT_ICON"
+      },
+      {
+        "codepage": 0,
+        "file_offset": 641440,
+        "language": 1033,
+        "name": "7",
+        "rva": "0xa09a0",
+        "sha256": "f2dbfc54b6368976fc8a6c0874c9c6668536ef04c4899c4cabc0789af44763ea",
+        "size": 4264,
+        "type": "RT_ICON"
+      },
+      {
+        "codepage": 0,
+        "file_offset": 645704,
+        "language": 1033,
+        "name": "8",
+        "rva": "0xa1a48",
+        "sha256": "604dd7ad594d04a4995dda4f9e9218994a16633ed462f4edf905bd8526c28c34",
+        "size": 2440,
+        "type": "RT_ICON"
+      },
+      {
+        "codepage": 0,
+        "file_offset": 648144,
+        "language": 1033,
+        "name": "9",
+        "rva": "0xa23d0",
+        "sha256": "f5c5f5381f852ac0b5938740a0bac09d3faced8a51e6670e4d100c3a81e31727",
+        "size": 1128,
+        "type": "RT_ICON"
+      },
+      {
+        "codepage": 0,
+        "file_offset": 649408,
+        "language": 1033,
+        "name": "1",
+        "rva": "0xa28c0",
+        "sha256": "fb88b19523afd8fed48eddfd10805a3a0a45997bbf8fac04d595ddf93c1a88a8",
+        "size": 1729,
+        "type": "RT_MANIFEST"
+      },
+      {
+        "codepage": 0,
+        "file_offset": 651144,
+        "language": 1033,
+        "name": "1",
+        "rva": "0xa2f88",
+        "sha256": "9a132466a37cd8bd5a42b34a8642c567bf7e57c3875ddbae4ba5991cde4941c5",
+        "size": 444,
+        "type": "RT_VERSION"
+      }
+    ],
+    "icon_groups": [
+      {
+        "icons": [
+          {
+            "bit_count": 32,
+            "bytes": 270376,
+            "height": 256,
+            "icon_id": 1,
+            "width": 256
+          },
+          {
+            "bit_count": 32,
+            "bytes": 152104,
+            "height": 192,
+            "icon_id": 2,
+            "width": 192
+          },
+          {
+            "bit_count": 32,
+            "bytes": 67624,
+            "height": 128,
+            "icon_id": 3,
+            "width": 128
+          },
+          {
+            "bit_count": 32,
+            "bytes": 38056,
+            "height": 96,
+            "icon_id": 4,
+            "width": 96
+          },
+          {
+            "bit_count": 32,
+            "bytes": 16936,
+            "height": 64,
+            "icon_id": 5,
+            "width": 64
+          },
+          {
+            "bit_count": 32,
+            "bytes": 9640,
+            "height": 48,
+            "icon_id": 6,
+            "width": 48
+          },
+          {
+            "bit_count": 32,
+            "bytes": 4264,
+            "height": 32,
+            "icon_id": 7,
+            "width": 32
+          },
+          {
+            "bit_count": 32,
+            "bytes": 2440,
+            "height": 24,
+            "icon_id": 8,
+            "width": 24
+          },
+          {
+            "bit_count": 32,
+            "bytes": 1128,
+            "height": 16,
+            "icon_id": 9,
+            "width": 16
+          }
+        ],
+        "name": "103"
+      }
+    ],
+    "manifest": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\r\n<assembly xmlns=\"urn:schemas-microsoft-com:asm.v1\" manifestVersion=\"1.0\">\r\n\t<assemblyIdentity version=\"1.0.0.0\" processorArchitecture=\"*\" name=\"UnityTechnologies.Unity.UnityPlayer\" type=\"win32\"/>\r\n\t<description>Unity</description>\r\n\t<dependency>\r\n\t\t<dependentAssembly>\r\n\t\t\t<assemblyIdentity\r\n\t\t\t\t\ttype=\"win32\" name=\"Microsoft.Windows.Common-Controls\"\r\n\t\t\t\t\tversion=\"6.0.0.0\" processorArchitecture=\"*\" publicKeyToken=\"6595b64144ccf1df\"\r\n\t\t\t\t\tlanguage=\"*\"\r\n        />\r\n\t\t</dependentAssembly>\r\n\t</dependency>\r\n\t<trustInfo xmlns=\"urn:schemas-microsoft-com:asm.v3\">\r\n\t\t<security>\r\n\t\t\t<requestedPrivileges>\r\n\t\t\t\t<requestedExecutionLevel\r\n\t\t\t\t\t\tlevel=\"asInvoker\"\r\n\t\t\t\t\t\tuiAccess=\"false\"\r\n\t\t\t\t\t\t\t\t\t/>\r\n\t\t\t</requestedPrivileges>\r\n\t\t</security>\r\n\t</trustInfo>\r\n\t<!-- From MSDN: Note that Windows XP and Windows Vista ignore this manifest section and it has no impact on them. -->\r\n\t<compatibility xmlns=\"urn:schemas-microsoft-com:compatibility.v1\">\r\n\t\t<application>\r\n\t\t\t<!-- Windows 10 -->\r\n\t\t\t<supportedOS Id=\"{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}\"/>\r\n\t\t\t<!-- Windows 8.1 -->\r\n\t\t\t<supportedOS Id=\"{1f676c76-80e1-4239-95bb-83d0f6d0da78}\"/>\r\n\t\t\t<!-- Windows 8 -->\r\n\t\t\t<supportedOS Id=\"{4a2f28e3-53b9-4441-ba9c-d69d4a4a6e38}\"/>\r\n\t\t\t<!-- Windows 7 -->\r\n\t\t\t<supportedOS Id=\"{35138b9a-5d96-4fbd-8e2d-a2440225f93a}\"/>\r\n\t\t</application>\r\n\t</compatibility>\r\n\t<application xmlns=\"urn:schemas-microsoft-com:asm.v3\">\r\n\t\t<windowsSettings>\r\n\t\t\t<dpiAware xmlns=\"http://schemas.microsoft.com/SMI/2005/WindowsSettings\">True/PM</dpiAware>\r\n\t\t\t<dpiAwareness xmlns=\"http://schemas.microsoft.com/SMI/2016/WindowsSettings\">PerMonitorV2</dpiAwareness>\r\n\t\t</windowsSettings>\r\n\t</application>\r\n</assembly>",
+    "truncated": false,
+    "version": {
+      "file_version": "2021.3.6.41869",
+      "product_version": "2021.3.6.41869",
+      "strings": {
+        "FileVersion": "2021.3.6.8233869",
+        "ProductVersion": "2021.3.6.8233869",
+        "Unity Version": "2021.3.6f1_7da38d85baf6"
+      }
+    }
+  },
+  "summary": "12 resources, 1 icon groups.",
+  "confidence": "observed",
+  "authority": "original-files",
+  "environment": {
+    "clean_room": false,
+    "engine": "builtin",
+    "engine_version": "0.6.1",
+    "host": "macos-aarch64"
+  },
+  "limitations": [],
+  "coverage": {
+    "status": "complete",
+    "examined": 12,
+    "total": 12
+  },
+  "locations": [],
+  "links": []
+}

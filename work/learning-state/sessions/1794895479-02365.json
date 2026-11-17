@@ -1,0 +1,47 @@
+{
+	"alignment": 18.0,
+	"anesthesia": false,
+	"attempts": {},
+	"day": 1,
+	"days": {
+		"1": {
+			"exercise": false,
+			"pain": 6,
+			"pin_clean": false,
+			"pressure_relief": false
+		},
+		"2": {
+			"exercise": false,
+			"pain": 4,
+			"pin_clean": false,
+			"pressure_relief": false
+		},
+		"3": {
+			"exercise": false,
+			"pain": 3,
+			"pin_clean": false,
+			"pressure_relief": false
+		},
+		"7": {
+			"exercise": false,
+			"pain": 2,
+			"pin_clean": false,
+			"pressure_relief": false
+		}
+	},
+	"disinfect": false,
+	"drape": false,
+	"exam": false,
+	"gloves": false,
+	"height": 0.26,
+	"id": "1794895479-02365",
+	"module": 0,
+	"pack": false,
+	"pin": false,
+	"review_of": "",
+	"rope": false,
+	"started": "2026-11-17T06:04:39",
+	"submitted": false,
+	"task": 0,
+	"weight": 0.0
+}

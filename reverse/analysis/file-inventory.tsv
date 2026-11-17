@@ -1,0 +1,325 @@
+group	path	bytes	sha256	format	architecture	assembly_version	authenticode	strong_name	rea_classification
+launcher	MCLocalLauncher.exe	637440	5c122648fa69cd3a376102a12ac27e07a4a8b03bf2c77320dab504cbe747e4b8	PE-native	x86		absent	not-applicable	
+launcher	MCLocalLauncher_Data/Managed/Assembly-CSharp.dll	115712	724c0a9ea603aabccd95b9d4b2541e489b20995909758c2c42e4641021e72feb	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/Mono.Posix.dll	212480	a33abceffeaa6b6d5dbd2cf77210daddfe331ed40eeae4cea3c5efb0c0db2cc0	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+launcher	MCLocalLauncher_Data/Managed/Mono.Security.dll	309248	2b7651b398dc63af0dbc0038758981c29238a495681a7ed487357a464ad4de15	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+launcher	MCLocalLauncher_Data/Managed/Newtonsoft.Json.dll	554408	aaff62bb51edaee3bb948e7f54d12018894f6ccfbf26203c6eecfd00b36523ab	PE/CLI	x86/anycpu	12.0.0.0	present	present	managed
+launcher	MCLocalLauncher_Data/Managed/System.Configuration.dll	124928	cd5793957604e1448443da0d703f29a31100d4a7030c140121c7ddf6b2027d94	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+launcher	MCLocalLauncher_Data/Managed/System.Core.dll	1046016	d982f54622edc2ed4637fe547b70907f589a2ae4de4b6d604c54ee35f97dca03	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+launcher	MCLocalLauncher_Data/Managed/System.Data.dll	2081280	5d846f404b74488136627e4df414bff9fc24457735373b6184746b69900d00be	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+launcher	MCLocalLauncher_Data/Managed/System.EnterpriseServices.dll	44544	aa83ea4a85632d8c10c0cddc44771fb06339198a05c96bb516101cf5d7584e36	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+launcher	MCLocalLauncher_Data/Managed/System.Numerics.dll	114176	8633ce312516585bd70dd5b4213363cb1e581a75a76cf7a4ea3bfdb4f4bca85d	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+launcher	MCLocalLauncher_Data/Managed/System.Runtime.Serialization.dll	928256	c5998c329e93930241728eef8370496d60a44a3945589320402db0223c6ef527	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+launcher	MCLocalLauncher_Data/Managed/System.Security.dll	184320	c931417eb4690730438d7c93d1cf6e1864695d8d90a5833fe83298802a84ee58	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+launcher	MCLocalLauncher_Data/Managed/System.ServiceModel.Internals.dll	214528	44ba40965149ae2cc0021100ca6f5157346d8df8a88fdaf76489b208f163e933	PE/CLI	x86/anycpu	0.0.0.0	absent	present	managed
+launcher	MCLocalLauncher_Data/Managed/System.Transactions.dll	34304	b77cde418aed34056fbf0b5f8593857335200c64ce2142ffc17f6b7426f81833	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+launcher	MCLocalLauncher_Data/Managed/System.Xml.Linq.dll	119296	5fa26c37af7ed3c73c2909c95406f91dad5bd366bff822a640142b9c556020c8	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+launcher	MCLocalLauncher_Data/Managed/System.Xml.dll	3138048	f37fa3ad6135a3bd298e7e6196debd1629891723767263d6fe80359f71ee6edd	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+launcher	MCLocalLauncher_Data/Managed/System.dll	2715136	7024daaa80b55752a1d09471aa0c8ec88dea64a68ab730253d045eb887a50451	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+launcher	MCLocalLauncher_Data/Managed/UniTask.Addressables.dll	3584	9d65472a6fa6d3402009add7e761e86b5c5738292bf6f1f7663950cb18153405	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UniTask.DOTween.dll	3584	e44aec41a0a988b2f1de0aa31a6127aa0dccdc0609d4ffbbcc260b0178705aea	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UniTask.Linq.dll	670720	ff175e92d33b7520880a1ffc0f68307a4f585e2f67d5769f34221261214b1921	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UniTask.TextMeshPro.dll	11776	0a4a04eb10f7e14d211572defb4db9e7adbca39e7233edfb7bf240372bf1d0b7	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UniTask.dll	484864	00033012b393f04bd859be3eb63b8e0d19a06586be1c34491890ad1cd09a808e	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/Unity.TextMeshPro.dll	331776	e9440380e3a4c35cadfaf6f668abed4e9826d4363c77bb55a2b017a611f64456	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/Unity.Timeline.dll	109056	ee1732536db1f84bca1e378459ea538a21cad67b8b4c3595ba73be1853ca9e02	PE/CLI	x86/anycpu	1.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.AIModule.dll	44544	1b77333041fbeb8031725b38e2f7c87565376327be33894c0eabfeba021092a3	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.ARModule.dll	12800	d8e4aa67d9da1a6b8e6dc513c25413059429c00e32ded77db38dd25272cf4e0d	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.AccessibilityModule.dll	12288	727a3a4a3cc655bc3499f780d6b6eb3252665eb168a1eedd223cb8068c8fb7fb	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.AndroidJNIModule.dll	57344	9c2176c00f613d049cd4ba33c14a5b0b59d60fd7b53088250bd2943029e94243	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.AnimationModule.dll	145408	34736132fb9db9cc8e7ad18b142915aecea98a49aeed3163bcc13297f0d95863	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.AssetBundleModule.dll	21504	489257d2d6e077c5cea8336422d5bfb40274f0c85f66f72eceeb277e66335929	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.AudioModule.dll	57344	f09ceb656f94888b01c6337e5478af27bd850569c0519fc0186c4a283ed5cf53	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.ClothModule.dll	15360	46c146c0d4acc872ab1ed14f3468780cf6b3c6ec992b1ac3f110c2120806ed1e	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.ClusterInputModule.dll	10240	80720b1d1915df028fd05d9c97f89776784a9a7fa714cba2620cb49aedab2290	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.ClusterRendererModule.dll	9216	eb06c066359b37a6f9364a5458f67e388800664b616230e5ea011168ce14941c	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.CoreModule.dll	1004032	42cefbf9ab633a80daeaf0d39ae9c4ee543a1e4d60bd9017c54a37938516d0f7	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.CrashReportingModule.dll	9728	36689f5f8725eab71abf89e52a9420b9aaab29b43e9559f8cc52ff971b200699	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.DSPGraphModule.dll	17920	e8bcebd91299d74bbba12605616f98f7ed4bfbfb769b3af5a53885b664ddd5aa	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.DirectorModule.dll	13312	13067dc66ecc6639b4234188294cf8dbc29b0bb2a2eab560520a35b3cab448ec	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.GameCenterModule.dll	26624	8a56087db2184bdf8da5ca0976a2213d1dd9c6bd50c4e5ad2d6a157270436b02	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.GridModule.dll	13824	976dfd532e117c22e54cbad878cd2d7d57bab994b2cabfa6fc4db0c53c432464	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.HotReloadModule.dll	8704	04d676ce8d7f11da0b370b140e13fc87d4b297d312ec7394424d4ae94b510fa4	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.IMGUIModule.dll	156160	5a408f9ffb2b11480bf0107bbe2219cc7cf82f92ef0cc21ed87a774d07d4471e	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.ImageConversionModule.dll	10752	5b71e00af37ca9db49d29a1af9464ed0bcae5fd20f9bc8ecc2428cf6c4ea9aad	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.InputLegacyModule.dll	25600	69883faa7df21052bd6d794edf2a13637e980392d4dddf1f04d4cef3d08c9c4c	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.InputModule.dll	12288	acfd4ffaf90d77fff2c6b731817d269810268dbc31cd7fdf17baceeabdbb6efd	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.JSONSerializeModule.dll	10752	49cfa48e7d408824f3ce3667fcf591e93b14ca2f8a06552c2bd4478826cf5961	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.LocalizationModule.dll	9728	20fa1f963d008dcb35f5c364a2fc22d18b058749df4935512b218e7387d16057	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.ParticleSystemModule.dll	134656	a147ef9b94ab76698995f9923f6660fabff825b123551134602aa4be1c5644fd	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.PerformanceReportingModule.dll	9216	c75b84c810c2bb5d94973ef695b6d47b3e3685a607334ac206a9a8ec111868e0	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.Physics2DModule.dll	105984	de4dfe2c2f5e983c72828fee3629af73222bfd2f0623201567df3817028ae8a7	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.PhysicsModule.dll	87040	7d59198d3306d71bd339ea022477abba4db158d442badc096ea17c252fbce73f	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.ProfilerModule.dll	8704	448d80eca432fc67f38e1f1a0ed43f81ae33f9ac2666bf81fdfb257e46100edf	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.ScreenCaptureModule.dll	9728	d6fe6cccade8e4e0e9c46e8d949616f010dbde04b7394f4772fdbdc1e78dd3c7	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.SharedInternalsModule.dll	19456	885108e986faf36ce982b7a9cdaafdc1e891d4f272eef84b72aea56c0d8b88ec	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.SpriteMaskModule.dll	10240	b5ae5053a87b70953d8e7a752635303defd62e1b21ffeb98cf51e277fba0b362	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.SpriteShapeModule.dll	13824	19d5c7d3fcff3a6df18d0cac43b70992c36de6bafa01852d428f7972f49e8761	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.StreamingModule.dll	9216	831dc76ff8d6cba089645eb6c0dc07ed5370e5eeb581e33fad0ea96dd1917ba4	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.SubstanceModule.dll	13312	ce22ea9bee3942aa2cabe333d46d8729951a86d936e34d4df97e23ee2f72e325	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.SubsystemsModule.dll	16896	b82c1dcbeef56cac757d6decf370a1769bba141230ba090c6b51d90a4338658a	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.TLSModule.dll	8704	f9989c6dec67ac7075c071df8a09f9ad4bc7f516769dcd1cb78f2b4ef7d414ea	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.TerrainModule.dll	80384	92bf83c3e0d6ee0ef28334aa5adfa0fbeec27097f483aa5fcc0d3d5ce180bb4e	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.TerrainPhysicsModule.dll	9728	7542f5e2481a6b4b182768c5a8b5a06c699d5b9bae383e5d64b27d0cdbf0ee01	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.TextCoreModule.dll	181248	63efb5090853e7a867882f1ee561b4abb9859fa40e2812cf3b69b90ea8fdd6a6	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.TextRenderingModule.dll	27648	8fa5ceffb91520be7c79b53bebcd1e4e1b77afa11ec3706a5966f3dd1f03832f	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.TilemapModule.dll	25088	b757371764d69ce1eaa577187f7d43fcb10f8199b4299ec5d6a680c12c8e8503	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.UI.dll	224768	e1e8cdfed0ec05cea6d2ad6a34069fedded35873c5a3ca7b55af167597585fe6	PE/CLI	x86/anycpu	1.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.UIElementsModule.dll	723968	9c79e0249bf781611b1cf4515248c22c15e48065ac994654c76d9f2e7355826b	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.UIModule.dll	22528	34a07a383342026d8309f88e91795659fc35498ddcb33daa0fe29a92d8487d05	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.UNETModule.dll	77312	5fe73951516ab575e2a6602f69ccfe5d4cc7fa3e51aab42992fae7a609fc3a9a	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.UmbraModule.dll	8704	eaedeff1e8b82c5a3499c823d795ab8d01f41ba2796209ed530922b443ec3d90	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.UnityAnalyticsModule.dll	32768	a4906767f5dc88cbe1b174211763ccf6e2cbe89ad46653c2e5718a2f8dcc0c5e	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.UnityConnectModule.dll	10752	039dfd29fa9eb115d9d040115db174658313165d52c844817e10efd2e45635ba	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.UnityTestProtocolModule.dll	8704	eacf71a7eb8e5ed81dcc3f84fa60980c3595dd6bb80cfd54e0c494f658599590	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.UnityWebRequestAssetBundleModule.dll	11776	bf4c1c0f76306a8968697a6aa4aa2db49a5c3e924fc531d75be76b85b7643822	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.UnityWebRequestAudioModule.dll	11264	e4dcc9ddab9e8771c8234983a67e1e25e9676bf98c2e557f6290d66af0c21401	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.UnityWebRequestModule.dll	43008	19efbe05a04fcd347863599634e6c8cf1dc5f00ef84b14c3c6338eb668ec914e	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.UnityWebRequestTextureModule.dll	10752	6029c77101339de8f5b347899633802b5a2115d9ef4872931ad53de76671d413	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.UnityWebRequestWWWModule.dll	19968	b950be2981f2f1924d6511cd58a0d794f1a61ae968019a07e0a2642071616838	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.VFXModule.dll	38400	df6a773a6c35ff24e3d2ca23475bcb4ca5bf60db10cf44908f2ca9ddfb0d72e7	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.VRModule.dll	34304	d2c578ff198bdd08dff45793cbb39db82b218f3fa8ffc709e3efc994cabdd3a7	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.VehiclesModule.dll	12288	ff09e16f5f0b3f62b50c7e00e80ceaffb7b3c17c86c0b02006564e6be07947c5	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.VideoModule.dll	28672	5ab32866e107eb8905f0c3676c53181104ef5b3455fa7c0f2e072b59223bc06d	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.WindModule.dll	9728	5c431be48fb53229f7149328a018606d94e20f38d1f3812517fdf25bd5404b1b	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.XRModule.dll	53760	5ab1d0638a2f8c248f693b1b444e10e00e19dbc38a97c20706596bd46f6e768a	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/UnityEngine.dll	84992	a775c954ad5441d35476db5adafed88aa92327f9bb005580da65ecd4b8a480f3	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+launcher	MCLocalLauncher_Data/Managed/mscorlib.dll	4072448	11ae017d1504af038e430d0607e9e3171de15b021af1d2d4563fd6f388a916a7	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+launcher	MCLocalLauncher_Data/Resources/unity default resources	3834812	565649b99f42a95183a318146b9ac8c24abd623e9e25f4aa243eaa9d146a80d1	data			not-applicable	not-applicable	
+launcher	MCLocalLauncher_Data/Resources/unity_builtin_extra	341620	6d26c465c2bedcca38b63e538ba8e1c2684268c022637e5ae1f5a6ee01cdffa5	data			not-applicable	not-applicable	
+launcher	MCLocalLauncher_Data/StreamingAssets/data.unity3d	34754884	d7bdc35eb39a92511e1e91d5a09e6d1ba44fc4a46cfa9776f367d195042dd621	data			not-applicable	not-applicable	
+launcher	MCLocalLauncher_Data/StreamingAssets/resources.resource	16466842	3c07f53136de143aaf873ed584d252427ee43619f472722ae76a9c21b1374610	data			not-applicable	not-applicable	
+launcher	MCLocalLauncher_Data/StreamingAssets/warehouse	50	94ddaad33db61d30b59c0c477e95776c5153d48bd636fa9fea344415d75073b1	ASCII text, with CRLF line terminators			not-applicable	not-applicable	
+launcher	MCLocalLauncher_Data/app.info	22	ad7e7aceb112bbcbb0a16db27742e750c4536a1098558aaf8a9ac0ffe63f0340	ASCII text			not-applicable	not-applicable	
+launcher	MCLocalLauncher_Data/boot.config	62	78cc47cbbed8923df2d9eb2da0c8fd7b3b400b3353544adb47c327802fc0ba56	ASCII text			not-applicable	not-applicable	
+launcher	MCLocalLauncher_Data/globalgamemanagers	53996	f87bec9b0a8f118964245513d71be298f5e5199c2d2236ea9f054668a00faf1d	DIY-Thermocam raw data (Lepton 2.x), scale 29696-0, spot sensor temperature 0.000000, unit celsius, color scheme 0, calibration: offset 0.000000, slope 33554432.000000			not-applicable	not-applicable	
+launcher	MCLocalLauncher_Data/globalgamemanagers.assets	80984	8cc2425f9acee6c2c6085a6d3850e4099175d68630b0dc11bb27454147cb4fb5	data			not-applicable	not-applicable	
+launcher	MCLocalLauncher_Data/globalgamemanagers.assets.resS	2073600	8de08532e2a6f71df1b5b0edcf287ee650e38dd55568c51412a6847a0de22bea	data			not-applicable	not-applicable	
+launcher	MCLocalLauncher_Data/level0	52964	b3459321fb400abcde0c609337099f4ad9201df4c7ec7232e7f4999e63e58b3e	data			not-applicable	not-applicable	
+launcher	MCLocalLauncher_Data/resources.assets	553328	55ae7d847332e7e11455547f9cefd3d7404dea768d1d0519852708093d50b8cd	data			not-applicable	not-applicable	
+launcher	MCLocalLauncher_Data/resources.assets.resS	1398128	7e63196c5448d1e2930d89087ac43aeda13e1d163a1191fd7f4192c55d6b4ff3	data			not-applicable	not-applicable	
+launcher	MCLocalLauncher_Data/sharedassets0.assets	8387264	17c1304fbc4532e75c3766ff976801463f24f628d86d98c7913913d73e27f9c1	data			not-applicable	not-applicable	
+launcher	MCLocalLauncher_Data/sharedassets0.assets.resS	5387824	d18730d027d56a53b404156e7885486a25d12a8cff9d639e2fa478935ab11840	data			not-applicable	not-applicable	
+launcher	MonoBleedingEdge/EmbedRuntime/MonoPosixHelper.dll	612352	4942573e11ed1b10645421328026f50ec8437e6f156aa3bc65c072d320795e9e	PE-native	x86		absent	not-applicable	
+launcher	MonoBleedingEdge/EmbedRuntime/mono-2.0-bdwgc.dll	3908096	3bef967821e504387a9b1ef5aafb3d9a1ca21d2faf511bd52fe71f27a638f22e	PE-native	x86		absent	not-applicable	
+launcher	MonoBleedingEdge/etc/mono/2.0/Browsers/Compat.browser	1605	8a1082057ac5681dcd4e9c227ed7fb8eb42ac1618963b5de3b65739dd77e2741	exported SGML document text, ASCII text, with CRLF, LF line terminators			not-applicable	not-applicable	
+launcher	MonoBleedingEdge/etc/mono/2.0/DefaultWsdlHelpGenerator.aspx	60575	751861040b69ea63a3827507b7c8da9c7f549dc181c1c8af4b7ca78cc97d710a	HTML document text, ASCII text			not-applicable	not-applicable	
+launcher	MonoBleedingEdge/etc/mono/2.0/machine.config	29116	edc5bcf685d930a607bc097927260a3f9ac7f52dd809db68158298bfd934b7ce	XML 1.0 document text, ASCII text, with very long lines (541)			not-applicable	not-applicable	
+launcher	MonoBleedingEdge/etc/mono/2.0/settings.map	2622	49c6160f9d54af4270a3b4e997fc4a8301f79b9e2070118fa46ddbcbbc44f9a2	XML 1.0 document text, ASCII text			not-applicable	not-applicable	
+launcher	MonoBleedingEdge/etc/mono/2.0/web.config	11686	3c1a76a5849074b437d297656a208a3bef6d84b982153542b9c797046c601dfc	XML 1.0 document text, ASCII text			not-applicable	not-applicable	
+launcher	MonoBleedingEdge/etc/mono/4.0/Browsers/Compat.browser	1605	8a1082057ac5681dcd4e9c227ed7fb8eb42ac1618963b5de3b65739dd77e2741	exported SGML document text, ASCII text, with CRLF, LF line terminators			not-applicable	not-applicable	
+launcher	MonoBleedingEdge/etc/mono/4.0/DefaultWsdlHelpGenerator.aspx	60575	751861040b69ea63a3827507b7c8da9c7f549dc181c1c8af4b7ca78cc97d710a	HTML document text, ASCII text			not-applicable	not-applicable	
+launcher	MonoBleedingEdge/etc/mono/4.0/machine.config	33648	6919d5af506aae0d93e91bd83418a81895a5554b9f54cf94aad20d025a4db664	XML 1.0 document text, ASCII text, with very long lines (541)			not-applicable	not-applicable	
+launcher	MonoBleedingEdge/etc/mono/4.0/settings.map	2622	ce1db1ad8a9512073164e3eccdc193f7eda036e1a9733caec4635de21b2865c8	XML 1.0 document text, ASCII text			not-applicable	not-applicable	
+launcher	MonoBleedingEdge/etc/mono/4.0/web.config	18848	f1a6416eeedd9d040387fd85dcf7d6e074b6644c6829d08be220ff9fc32efb31	XML 1.0 document text, ASCII text			not-applicable	not-applicable	
+launcher	MonoBleedingEdge/etc/mono/4.5/Browsers/Compat.browser	1605	8a1082057ac5681dcd4e9c227ed7fb8eb42ac1618963b5de3b65739dd77e2741	exported SGML document text, ASCII text, with CRLF, LF line terminators			not-applicable	not-applicable	
+launcher	MonoBleedingEdge/etc/mono/4.5/DefaultWsdlHelpGenerator.aspx	60575	751861040b69ea63a3827507b7c8da9c7f549dc181c1c8af4b7ca78cc97d710a	HTML document text, ASCII text			not-applicable	not-applicable	
+launcher	MonoBleedingEdge/etc/mono/4.5/machine.config	34106	ef9b9387168fd1dd6c996f96c134d9c44f8eb06f9587004bf997252a520182d6	XML 1.0 document text, ASCII text, with very long lines (541)			not-applicable	not-applicable	
+launcher	MonoBleedingEdge/etc/mono/4.5/settings.map	2622	ce1db1ad8a9512073164e3eccdc193f7eda036e1a9733caec4635de21b2865c8	XML 1.0 document text, ASCII text			not-applicable	not-applicable	
+launcher	MonoBleedingEdge/etc/mono/4.5/web.config	18857	15a2c7a9242bf54d3ccb3e07fa6d8f84ba8b303d8877243787a1103009941bdb	XML 1.0 document text, ASCII text			not-applicable	not-applicable	
+launcher	MonoBleedingEdge/etc/mono/browscap.ini	311984	4ddd50f31fb968f30bedefc253a46dc3f2890192d05cdaa9e0a64a056eee807e	ASCII text			not-applicable	not-applicable	
+launcher	MonoBleedingEdge/etc/mono/config	3276	60099cf91bb1a5717fc1f2d23cf36a61d3bfb70d9489fbb6f4bae98c560bf3d5	ASCII text			not-applicable	not-applicable	
+launcher	MonoBleedingEdge/etc/mono/mconfig/config.xml	25817	0c56e34c69124510fa8c19e7b4c2ca6c1c4ff460ae19f798dd0ca035809e396d	XML 1.0 document text, ASCII text, with very long lines (334)			not-applicable	not-applicable	
+launcher	Service/InstallService.exe	8704	d310f8452467e499f4bb10d766a399086f5f373ad04baba04c3eae8a6996f1f2	PE/CLI	x86/anycpu-prefer-32	1.0.0.0	absent	absent	managed
+launcher	Service/MCLocalLauncherService.exe	14336	85c261ab469d7f178752c26d567e91b503e086fe42d886b3c254350893ba4d94	PE/CLI	x86/anycpu-prefer-32	1.0.0.0	absent	absent	managed
+launcher	Service/UninstallService.exe	8704	5601ab70e1afe35930e5533b734e6d9e7bd3d19cc9b6623d43e4ecee3a9d1afd	PE/CLI	x86/anycpu-prefer-32	1.0.0.0	absent	absent	managed
+launcher	Service/log4net.dll	270336	1d45a6afa38f0b10814063f2a42e6efce45752853667650e765844b8566b3332	PE/CLI	x86/anycpu	2.0.15.0	absent	present	managed
+launcher	UnityCrashHandler32.exe	922624	f708181178fe3a52741f651f3457cf6e5f5c5c78b83ccda91a4443fae6df4091	PE-native	x86		absent	not-applicable	
+launcher	UnityPlayer.dll	20012032	2216acc4bc351acf63ac204830d917336e3e7a102fde75a32072b755da082e00	PE-native	x86		absent	not-applicable	
+launcher	Version.json	20743	e9fa81de8b6d9a802241ac3b7ddd9c3e95f85f9e0feab0221e88fe1a3fbbf5b8	JSON data			not-applicable	not-applicable	
+experiment	HLF10631030.exe.mengoo	653824	d15d807a405d12a0a2ec2150ea08b932da90a04780788ea7a9f695c46e36a047	PE-native	x64		absent	not-applicable	
+experiment	HLF10631030_BurstDebugInformation_DoNotShip/Data/Plugins/x86_64/lib_burst_generated.txt	44640	2901ba037808a189a7b4020b5e97086ad054ffae4510bd4ed4eb013f3099b5ff	ASCII text, with very long lines (1138), with CRLF line terminators			not-applicable	not-applicable	
+experiment	HLF10631030_Data/Managed/Assembly-CSharp-firstpass.dll	57896	09702aa630d65972352f1c1dc0e9c424b0ef630129467d305d62b62194233c89	data			not-applicable	not-applicable	
+experiment	HLF10631030_Data/Managed/Assembly-CSharp.dll	665128	4dcb5b0232c45885f087a6ada3cea52f315ff7dcef9eecdc9851f40d8842b825	data			not-applicable	not-applicable	
+experiment	HLF10631030_Data/Managed/Cinemachine.dll	237568	5654c40cb2fea3fba570ba2fd2adb89e7e481f60d7b8b5af8265253f031fe37e	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/DOTween.dll	138240	be6a11249366c8105f6329454edffadc006705eec9feafcdb66738d300658ae9	PE/CLI	x86/anycpu	1.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/DOTween43.dll	9216	0d84eefbbdf4eb8dc283bb9cd16f0a723912ff0896ae0327835958602bbbea10	PE/CLI	x86/anycpu	1.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/DOTween46.dll	17408	acfee63c6df02f4f56bbbbde00c9d1d27ff1ec7a222a3fd0efe0401038cc0782	PE/CLI	x86/anycpu	1.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/DOTween50.dll	5632	ce9b3c3a7eb4dacf6254949c64e7f97779e903986aa33a840ec95b037755c56d	PE/CLI	x86/anycpu	1.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/ESPPost.dll	98816	ea35ff88c71fdb85e246669d9014a1efa6e27614a2b708d83428243ec3232dd6	PE/CLI	x86/anycpu	1.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/EngineHttp.dll	14848	9594339573e34152adb8a3ebc1107e6d5d672ea5786bee2556dbdf19a3a02f71	PE/CLI	x86/anycpu	1.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Excel.dll	64000	67e0a592f5aabf78e6602f3cebdeee9b8d668cf4f928a3e784a3685c9076172c	PE/CLI	x86/anycpu	2.1.0.0	absent	present	managed
+experiment	HLF10631030_Data/Managed/ICSharpCode.SharpZipLib.dll	192512	cfc2a838569a48d16a15269bb701de87b81b3d2bc303bb7c4c3724cc3bba0c50	PE/CLI	x86/anycpu	0.85.5.452	absent	present	managed
+experiment	HLF10631030_Data/Managed/MengooPlatform.dll	34816	a17b52ef46e5bacd9ade2c01842094feb1fbe3580abc7c186b2e0dc544ba0311	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Mono.Security.dll	241152	007701ad92ca8bbbea60889e688f742a7cc453b15804b589a43ab30a05ef9fa6	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+experiment	HLF10631030_Data/Managed/Newtonsoft.Json.dll	686080	87fa9a30e8406b0ccee1ac7f44b529228b4d76f7a3549b1a3817fdda0f5b5b2a	PE/CLI	x86/anycpu	13.0.0.0	absent	present	managed
+experiment	HLF10631030_Data/Managed/ProtobufNet.dll	157184	d0279b8b0116eebba4a33832dcfeb7452d31ec96fc4dfef53134d5b38897d479	PE/CLI	x86/anycpu	1.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Purchasing.Common.dll	12288	bf20e1b16dc64ee47d06e8d103e4418d2df73f2c096925f45f4609cf531a52ba	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/QFramework.Log.dll	5120	95c972134bc01439ed9cfc536c8130c79ed2e6fb9493eac2aefe1d0f4dea70ed	PE/CLI	x86/anycpu	1.0.6656.30051	absent	absent	managed
+experiment	HLF10631030_Data/Managed/System.ComponentModel.Composition.dll	257024	c9add38dd54ded549033974ef928ee73b53e9a86a1a04f89f06f91f2c40fe68b	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+experiment	HLF10631030_Data/Managed/System.Configuration.dll	124928	43dccb78cffa18125699b15cce650af93e93d5a2c23a10bfd873e351f77b3ecc	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+experiment	HLF10631030_Data/Managed/System.Core.dll	1113088	a8b0994e96d705898295da73f65e8795263080da9d488e1c96682f9cda2dea83	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+experiment	HLF10631030_Data/Managed/System.Data.DataSetExtensions.dll	29696	e251a88e16a37c8d2d5c7691e3867cbb2a1851c93d1cb90444477f8c6e48377d	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+experiment	HLF10631030_Data/Managed/System.Data.dll	2118656	87992df7507c7a311a5d0e81b09c46a254d27de220fcdce9c91ed5bf2b5a7818	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+experiment	HLF10631030_Data/Managed/System.Drawing.dll	489984	12e87ee8ba24907673775b4efacd54186cbed7a6396a4a79087011f89b9811e7	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+experiment	HLF10631030_Data/Managed/System.EnterpriseServices.dll	44544	0013abdd78f5d45c815b13e5e114ad21169bbc8a6c9ce7d1a46b29b650c3e639	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+experiment	HLF10631030_Data/Managed/System.IO.Compression.FileSystem.dll	18432	8496e1792301ddfea06a0c893da99fcc365ac2f13fa89945f24c16f25c954731	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+experiment	HLF10631030_Data/Managed/System.IO.Compression.dll	114688	f683a16462a67705754aae48717c46e6ea779a889d761425ce99a7dd25466cd3	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+experiment	HLF10631030_Data/Managed/System.Net.Http.dll	121344	abd311d0ad31652c88c7c9f45d2bb1a65404d46c9030a9a9be52d6b683f998e2	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+experiment	HLF10631030_Data/Managed/System.Numerics.dll	119296	75c65c1149389a2be8f68ab4654b78e92a467804c076ae534c0babb62d65ce96	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+experiment	HLF10631030_Data/Managed/System.Runtime.Serialization.dll	934400	f3d40b0a7d1676042c31542644aa3327d04a1a226f8be69695778a9da74a21b3	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+experiment	HLF10631030_Data/Managed/System.Runtime.dll	12288	e0a7334b7ba419aaab6bd3bb6992d693e689341a9178172c9bf99c2aa6a085bd	PE/CLI	x86/anycpu	4.1.0.0	absent	present	managed
+experiment	HLF10631030_Data/Managed/System.Security.dll	320000	f1c913985f56cb1bd38f84999f74248f4f91411623c0ae18a8f94b50784b0c6a	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+experiment	HLF10631030_Data/Managed/System.ServiceModel.Internals.dll	215040	468bc70882f1deeef0e5ce3169badc96739b8aae2688087c0a4ad2079bf7e152	PE/CLI	x86/anycpu	0.0.0.0	absent	present	managed
+experiment	HLF10631030_Data/Managed/System.Transactions.dll	35328	875d4550e48a41efdaa7112916e989e9471132927e8d6bfa490b990a47921169	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+experiment	HLF10631030_Data/Managed/System.Xml.Linq.dll	136704	f64a69ddea0259a4cf6e2ffc6275ff26d95bbd624f81ce3677012dcc10cfc47c	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+experiment	HLF10631030_Data/Managed/System.Xml.dll	3160064	9702bdb4c4776dbf3797d892d2b3d2e4a21d33f6a292441e2135196e53f2c5dc	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+experiment	HLF10631030_Data/Managed/System.dll	2637824	fe44b5a48c4825cbf26afba05e06e90f48aa57d321a12edbf26765bbefddaa1a	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+experiment	HLF10631030_Data/Managed/Unity.2D.Animation.Runtime.dll	41984	afa5fa8ea1bd01c4352a445fa306d56b382eac4748abeb38cade8df7b12c93b4	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Unity.2D.Common.Runtime.dll	38912	a854ae75983a610b14fe6b5f700ad2463eb4f7e8ab0f5036357aaa637ae91011	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Unity.2D.IK.Runtime.dll	16896	68ec193059139f0e10b1639f21320da18dc0c3e3bec0335a9fa939d813a131d3	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Unity.Analytics.DataPrivacy.dll	7680	85730f2880b4a04c70f60af01dad9daa3ff137a43802cda1605a53669b97f477	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Unity.Burst.Cecil.Mdb.dll	44544	e8d348ff1034a8c2dcfe3d1d3e0f42454ccfa4ef753131be7f4e1ea1e4a97503	PE/CLI	x86/anycpu	0.10.0.0	absent	present	managed
+experiment	HLF10631030_Data/Managed/Unity.Burst.Cecil.Pdb.dll	87040	9f02a61c010d0e5ebdee501874393cd61f7ff2da48deebcaf7eac37a7535cc03	PE/CLI	x86/anycpu	0.10.0.0	absent	present	managed
+experiment	HLF10631030_Data/Managed/Unity.Burst.Cecil.Rocks.dll	28160	9b38bba1173edcfd3422d6b8031f5249687933401e3095e76d7981256a75def5	PE/CLI	x86/anycpu	0.10.0.0	absent	present	managed
+experiment	HLF10631030_Data/Managed/Unity.Burst.Cecil.dll	346624	e887709f984f0939ed13cc2ccc8c8cf084c058d5a42c465802d7b19d70b20745	PE/CLI	x86/anycpu	0.10.0.0	absent	present	managed
+experiment	HLF10631030_Data/Managed/Unity.Burst.Unsafe.dll	5632	9d9c1ff52411decbee5d9f0d1cd61ebeaa222077aa77a52101ea3debafae98e2	PE/CLI	x86/anycpu	4.0.5.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Unity.Burst.dll	305152	561cfbfeda7fa9c556f0250224b1d020956de55934c5d54ff110972d39d9d2c2	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Unity.InternalAPIEngineBridge.001.dll	4608	b69cc33a1883ebd964dc1131e984362ac30e958af6cb79284db41693638556ee	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Unity.Mathematics.dll	726528	69672cc8dbc385cb0fe59d95f8a8ed33f53a8f194fcd3d8a068b8c5ee63a04a6	PE/CLI	x86/anycpu	1.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Unity.RenderPipeline.Universal.ShaderLibrary.dll	6656	fc84a7abe59988d5b4c278b3fd390bd308af8ee14c2d1bfa63f63221ce8be7da	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Unity.RenderPipelines.Core.Runtime.dll	340992	2178a083afc44d52ee1f3e180e9d6a76eb16f05161185481a6d716451438ba1e	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Unity.RenderPipelines.Core.ShaderLibrary.dll	3584	b8f0f62696e795e7cf247daae6c64a2adfaf1bb170de12a88c5cad78b065f078	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary.dll	3584	8ce40a403556155e347696e20915d53f4422f83426bf910d58f9f18c883132f9	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Unity.RenderPipelines.Universal.Runtime.dll	587264	7d3d2ae972f02122b2f32186cdc817970354469fc1a113de9c62e3ebe3b3edf9	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Unity.RenderPipelines.Universal.Shaders.dll	3584	59cff3df0cec0bb723965374d5eb527fd15a4e0344f914a859db543dd014b3c5	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Unity.Services.Core.Analytics.dll	4096	f1b0e2aee9ec24518f4739e2088d27137fa2c3edc00453f05dde35a8a18dfc10	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Unity.Services.Core.Configuration.dll	11264	71943003a5c21f904078f1ddc62333badccc3654b79ed8ea24dc919787c4dd53	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Unity.Services.Core.Device.dll	5120	39b62b6368476409d5bcc87dcb328071398bb3ceb6a1e8a3ddd72758ef3aa665	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Unity.Services.Core.Environments.Internal.dll	4096	f857e401c186a520d84798bdbda407904b75a989b3a7899cde0dd5b8c651b368	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Unity.Services.Core.Environments.dll	4096	23e7b29f06cc5c84790d42c918c77f154a6cd3882a50715e718e07c84bd427e5	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Unity.Services.Core.Internal.dll	50176	ba31733493a8a3c0665f010a3d63b46fce267de9b1d188ae4c40494d79f810bf	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Unity.Services.Core.Networking.dll	6656	aa406ee58cfbbcdc1bec81cc58937bdac9cc57e11d0963dbf6ec54b3cd285036	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Unity.Services.Core.Registration.dll	14848	b76aea5af56cbe273539b62d0de672d7f0ed651c820e0faa716749fb70d78e2a	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Unity.Services.Core.Scheduler.dll	8192	b6137213bacc1878c834f51de0afa345e6d743a1d20321bdc8537857c3e9e643	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Unity.Services.Core.Telemetry.dll	26624	299ab3389bec17c567503e9556d71b0fc9b95ec33c08fbb5371bf55c612f0584	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Unity.Services.Core.Threading.dll	5632	196f1df550de8c24b43b941927ea52b76b731a70d3714cc5b644388bf4c92fd8	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Unity.Services.Core.dll	10240	f6b3bd3717f039c4040e0e5801bbdd813067250288b1a57f8f8a7be552596741	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Unity.TextMeshPro.dll	370688	13fd41ed612d656771d6caf3b1026aae609906cb0bddc04ebb2d2edeecd2b755	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/Unity.Timeline.dll	115712	6e009805850d92e7f507d1cfbf4bc079da203160004a141c100097927ffdad32	PE/CLI	x86/anycpu	1.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.AIModule.dll	55872	ba9c3f5b51c75cdf60214a56f4ce77a1f560184edcb60551a06e19656854d402	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.ARModule.dll	21056	849f3894ae5e8be291cd33f8e734150e57e2ea91b03949583b6e8a42987fbe05	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.AccessibilityModule.dll	23104	64231a8f5420188b7c7f994f1f55709cd69879246e3c2c90e5b2c106e76e2572	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.Advertisements.dll	34816	c794d320b94e3ed0e3153f45fb4450c1b9eeeb005ec508c5833fb0e9e1665c4f	PE/CLI	x86/anycpu	3.7.5.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.AndroidJNIModule.dll	78912	3a5bbcaaa38d10438ad6ea4f6130d8caeb1621a4b8b722806d28b15cdf2a4438	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.AnimationModule.dll	161344	9f30df63abc38d0d9eabc89a9beca60b05f37a78f7650917e6f02c254476fbeb	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.AssetBundleModule.dll	33344	47a05e6c235607d4cee18bc6e4c5afd4022a9c2d252f041e67af3e7b24b0dd98	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.AudioModule.dll	69696	70e9d4041e50b3601bbccc455298da8985c57ec8abd8dca6923ba1adda1627fc	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.ClothModule.dll	25664	67024d09226585a2dc9f17f9fe8d8021f43e5ce1004f1a53a8a15b995a9bbb30	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.ClusterInputModule.dll	21056	9dbb6715bd37f208ef67905be08a3cc3d340ebe2eda5441444e6eb4e8e52816d	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.ClusterRendererModule.dll	22080	f4988ad1e4679a782dbf517ca857833729934940e63149d5f02f25aa40de34d5	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.CoreModule.dll	1264192	73598a319d12506a8af179f493ed8c6df275e81a0239a0e01b238bcc4f837074	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.CrashReportingModule.dll	20544	de8b9282c6ba8d4f6ebd014c4ad2fda5953cd92a6a9a422b3cd86072f4ed02b0	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.DSPGraphModule.dll	29248	8f8b0d64f213131fa461b42242eaa43fc0f6182146a60253f8d998380a95d915	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.DirectorModule.dll	24640	6a26b68144a624f101ee1587b1825204eac0960cb898defd3e9015abb36e1c5c	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.GIModule.dll	19520	72e5e1721759b1f1de6b7831079d17ee71e322e80b9f01394fbabcd18c4241fd	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.GameCenterModule.dll	39488	339ae61bf7c3603b9493e7b19457f214464c3f8ad56ef2e21b95fcce23ea64fc	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.GridModule.dll	24640	5b4d919e046bde8170e6d99677ecd716b8b7edf476de0041eee2fdcc4f960b20	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.HotReloadModule.dll	20032	b9b6d462f0bf875a7c1757e490d5f8baaefdda613a9456cce7481d5365138763	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.IMGUIModule.dll	173120	8c3a28d1035a5a1058b99e8972441cb629e78eae54f6b5419ed7cd167c8e2513	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.ImageConversionModule.dll	24128	9fe1eade72bcf77ac134b3e8e4517afc57bc3df966f0d3cfbf8eeb73e6e1bf66	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.InputLegacyModule.dll	36928	133aa180e3cd0b5327b87cceb69477885a225e389a537f387900164fbd1413d2	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.InputModule.dll	23104	67758f24892d649dc70372bc74abd31fd0d19fd3bf36a2969f727ead3cfc0343	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.JSONSerializeModule.dll	21568	57485afdf315576e03f9c40487d8d2e545f49c798a97af7f5768c50187ed753c	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.LocalizationModule.dll	21056	f742022e140b1e7558dd2c0774a8895086fc59bad589b228d021416e7a8ae0e4	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.Monetization.dll	28672	01bc7f293a7d71b0930358e9fa0ab0ab34a4cd32ac9ec33f3f8c07698b687b83	PE/CLI	x86/anycpu	3.7.5.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.NVIDIAModule.dll	33344	e77f5aece2cc46a11dd3d54b47374ef98f7f218767fdb2f726037ea138825882	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.ParticleSystemModule.dll	154688	bb9a3c4414e0127d7ef3039b3165c03761644074104ba91ffba565af079ead70	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.PerformanceReportingModule.dll	20544	3fa78d848de56995357a487e47be51d2a8c85b080e054e2c68b944028c26c6a7	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.Physics2DModule.dll	133696	08890b4206b99f185742bb1b666a290acc911021f9bc65f313eb52a8378c5888	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.PhysicsModule.dll	114752	0d55a0a0536301cbccbaefa3385ccc559795a792e8186f9e74c747214275d978	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.ProfilerModule.dll	20032	fa7954d7d8c025bf2363ab49e5db28537e1501a9f3a2a1dfd79019a154d64670	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.Purchasing.AppleCore.dll	4608	6f54f60bc8b6ea711baa94169b86bdfc707fa948bbcc3bd006d251a553200fc4	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.Purchasing.AppleMacosStub.dll	5120	e89daec4772649e92b91ab120b84e0e70090ff9bfaaef7b577f9414edc5a864b	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.Purchasing.AppleStub.dll	5120	72ff05d6802db4d7e605ca2c26c1e969e76efee31fd78bfc6de5869a86729c8f	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.Purchasing.Codeless.dll	13312	fa6dc4e4e51994ea565eac3e10ad3a7855cd2231e57b9ad23253b61ee1c5e5e6	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.Purchasing.SecurityCore.dll	7168	89ed35ef51418903de28233f0062b0fef5908668556ee4ef140d15ad73ab8f1b	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.Purchasing.SecurityStub.dll	5632	b76b5edf284d561161d921a00edbdbc705c327fe8e109f7216825aafc7702158	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.Purchasing.Stores.dll	140288	0ddfa25985faf67fd3d0e61a033886760e52278637ca7adeca1d1a3c0b3f00a2	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.Purchasing.WinRTCore.dll	6144	f8fa5288650a8618b146e1a322b5dbabf10598163230b0cc6f1b05f789b8d115	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.Purchasing.WinRTStub.dll	3584	c5dd715810a8945a40d7cb51200cffb62b2436244d8d3e1b31d925811d56fd1b	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.Purchasing.dll	27648	13bb9bd7fd8345f758da09066ea1312c74835bd9e294ff7872194efdbe5b1269	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule.dll	20032	4a2ba768fe32d39bf4b3f59590d1bf9e303e0347f92b1d1a6bc736c96915a3dd	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.ScreenCaptureModule.dll	21056	47ec2d5fa44d1541d1482647aed3f2ddaf18e0c87172d236a3aec89aae2bab70	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.SharedInternalsModule.dll	31808	36e32b2cd403bf44841b6705fb2d6fd507a8805b8b3aa6ba7f584c831b5aca17	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.SpatialTracking.dll	10240	3f0f8ad6b3bb8f494282f2a034b6665a9bab6a87b32c25a8830e83c6cd8c6367	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.SpriteMaskModule.dll	21056	116d48d7bf80e7b9a456b94140319cd6f6154993f6f6498f50f97eec572e4aef	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.SpriteShapeModule.dll	25152	65e36b57cc169ec0144dd342e062a4efd7a5abf6ba7d8bc53de1fd091524aebb	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.StreamingModule.dll	20544	58d45ac670fa53bf36e6e02102b5fb603bcab81e623cd65ad98aac5fe78ecc03	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.SubstanceModule.dll	24640	f77942e940056c9a471bcde722f4d25ded397302e20cfac3b9e6f8af00f37c69	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.SubsystemsModule.dll	34368	3791bc0af6146652659a6b2aa3145346d63f37823da0b774cba03a41bbc9bb30	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.TLSModule.dll	26176	db64769d4443ed181cff82abb5f739ab9bec1b57ef3929bdee728f5dab8378a6	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.TerrainModule.dll	98368	9f0b4f07391e6c8bd0700ba71e7d1b2d96ac204a07740dc63a5ffca729d2cf6a	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.TerrainPhysicsModule.dll	20544	4f99aa5e6e6f023671eb2922e030b9a4f24add81ddae450f996ddc1fddf6ce31	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.TextCoreFontEngineModule.dll	51264	3b54e05dc442c5751365402d23e4ef19dc34837b55783bf1f01a47b1afea87c1	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.TextCoreTextEngineModule.dll	194624	97fcc8bf404ebc4c7d15278b1826abc301ff435483b0526f4e09ac5b9cbf738d	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.TextRenderingModule.dll	38464	24357e57fd920e2e65ac7ba5fac2d510fc39378a6aabe774387d3ff05d7c3eb6	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.TilemapModule.dll	42560	c6ddc516d27cf6192238ce948759562e5b22aeac72740478b647b6c36fa28737	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.UI.dll	247296	1e66c5c06f54edfb605d4d56ed5b7e3a73f18bcc6f2e6c4e200187714e096598	PE/CLI	x86/anycpu	1.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.UIElementsModule.dll	1203776	9e5a0ddd6e007d9644099e242f9760625a87e8c137335476f3510404168387e1	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.UIElementsNativeModule.dll	58432	f1d9c130c31fa693883ac6595a13bc42d1c5492f39743d6934ba9d5875089159	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.UIModule.dll	35904	9850cb8862b2fcd11411e04c70ac3584725c35c25c7bb011a1bf3133b5abe578	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.UNETModule.dll	89152	30ff6944e3587d8206a6990044b3c4bb80a6174cae08632a167e692a818d5085	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.UmbraModule.dll	19520	315648d3e55dc24fb29065160462aa14c09738f15955a86c701bef4cfc325bd3	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.UnityAnalyticsModule.dll	44096	c7fe07a28002e08e57ed5c9ef82508e8c94cf3749cc867bc6d59cc062dc6eb6a	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.UnityConnectModule.dll	21568	3b426b25c444c2bbc1789900a7eb4baa2cc935dac2fe73d891c80713be3b842b	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.UnityCurlModule.dll	21568	eb46dc2944b1b20935636c34d11c312a662a3599f8b771ce00a0511c86665675	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.UnityTestProtocolModule.dll	20032	318672d4dcd3aaca0bf30f16e7bc63aa56cefaac0dc8661e36c83e4cc9183003	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.UnityWebRequestAssetBundleModule.dll	22592	a5761c47e0789e02674d4dd3575adb70771e515fc078bbf8b83b12bfb66b96e2	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.UnityWebRequestAudioModule.dll	22592	2f98e87d3b4a18ea09f252da38ee29a09aa0a5f3b13a02a67ec8f8c202dae872	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.UnityWebRequestModule.dll	56896	24f04c022a3bc01e82b6ee34930ebddf35a60dc0cc09e6d9f65eb0e91ed03bdc	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.UnityWebRequestTextureModule.dll	21568	2a9de46d6a1fa49a9cfe6cfcd6f7d0079261c02328e7a0276c81ac1eb0c7f6ca	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.UnityWebRequestWWWModule.dll	31296	242ada6671b3f7f157a82ad1cb337a7eb15f3dc75f8e4159b3b025b90e16e474	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.VFXModule.dll	53824	78910a73dd502e905820173cd6ba9d025825df5b37c4a9bbdb3bc3aa78e6dab9	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.VRModule.dll	26176	9ddd836bc5013f165981f0c55a2ccb286966d18df7a69c75e6e9c7ee51edd4e6	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.VehiclesModule.dll	23616	f5aba156d21dac5cf55513604da7bf30211da100c3f47496a2a25f12c544903e	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.VideoModule.dll	40000	64e5e28f910729e1052803497fbb8533248bcf6d7ae8e5d2cc452d8f57d1d447	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.VirtualTexturingModule.dll	34368	c72af27eac8f45ad3b9af42029f104a9d02f3f6cc3c464664778baf71fb031a4	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.WindModule.dll	20544	6bf7ca13cf3587af6a81b5c2dde9ce2d1074ef358e1697a5191125fd1e433271	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.XR.LegacyInputHelpers.dll	21504	8b993e986a2de71813eedc7db2f500af33540874063d3e1da4284fe189581c7f	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.XRModule.dll	70208	e7632f5576871525f9025213b7e871c4c4eccc6911e0436cf5c5770e9df3df44	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/UnityEngine.dll	111168	ca33e7019ffa2a5e5235750890030bc8c3006e5f6ef763623b98118537007619	PE/CLI	x86/anycpu	0.0.0.0	present	absent	managed
+experiment	HLF10631030_Data/Managed/Vectrosity.dll	122368	53466b163f1fefadfba2b006aa78a4f056484d79f4deaf5990c3b5a9b36f120b	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/XCharts.Examples.Runtime.dll	52736	da00183f1308f559df56079ff55fed62cf61c021d3a03735933836818e712705	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/XCharts.Runtime.dll	338432	98e518512163ab8874a1b9390fb79da21c95ef1ca7744395edfe92520d1ea4ce	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/clipper_library.dll	55296	ca5ca38ef57ce591f4530c32e74fdda649fde30bda722b32aef833545c0c709c	PE/CLI	x86/anycpu	1.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/com.mengoo.platform.cryptography.dll	11776	1b2626ffb40ab6b0f153dad283f6361e21b3f55434e662d397becde1ea7e9e21	PE/CLI	x86/anycpu	0.0.0.0	absent	absent	managed
+experiment	HLF10631030_Data/Managed/mscorlib.dll	4630528	bda87775337f96d9c48ceda2a0ea4274cbb46db971cbef261f9c5822f3ae2833	PE/CLI	x86/anycpu	4.0.0.0	absent	present	managed
+experiment	HLF10631030_Data/Managed/netstandard.dll	90112	6ae62e082dc494a2433984177f60ca4db5fae69b1f360a8b33754172b310b8c5	PE/CLI	x86/anycpu	2.1.0.0	absent	present	managed
+experiment	HLF10631030_Data/Plugins/x86_64/lib_burst_generated.dll	37376	bac8a8c26879b66e75abefe2965a36ee71585446861d246e91bb1cc36d643754	PE-native	x64		absent	not-applicable	
+experiment	HLF10631030_Data/Resources/unity default resources	4843688	cddbc2622b51208b04d216b58b23599e90d7c140f4c3d9f95502c7e319e9eeae	data			not-applicable	not-applicable	
+experiment	HLF10631030_Data/RuntimeInitializeOnLoads.json	2361	5b56b84ba39f757365e540da50482455327ddb94b0437648ddd0e21ea66d02de	JSON data			not-applicable	not-applicable	
+experiment	HLF10631030_Data/ScriptingAssemblies.json	4829	3f7709536b83f135486ac521c6064ffa0be16958f7c8dd6d62452c1c1f1d7fab	JSON data			not-applicable	not-applicable	
+experiment	HLF10631030_Data/StreamingAssets/UnityServicesProjectConfiguration.json	95	2082dc7cfb373de4e9b12d43d9f0caf00a0e8c128ef860a627814840565bc7fe	JSON data			not-applicable	not-applicable	
+experiment	HLF10631030_Data/StreamingAssets/Version.txt	5	bfec2e34583ada7e6af2cb73993fb75a3f7147a6c943e5ff5f5c4294fc577b90	ASCII text, with no line terminators			not-applicable	not-applicable	
+experiment	HLF10631030_Data/StreamingAssets/Video/handel.mp4	1006600	0ee166dac6af4442233bf8460c9f9322b3978bfd6c6d16969accf5433929b619	ISO Media, MP4 v2 [ISO 14496-14]			not-applicable	not-applicable	
+experiment	HLF10631030_Data/StreamingAssets/Video/introduce.mp4	8676065	d69501d2bb852984e1eb00445d21e83eca75cbe48acb4d77faa4c191f0d7cdbb	ISO Media, MP4 v2 [ISO 14496-14]			not-applicable	not-applicable	
+experiment	HLF10631030_Data/StreamingAssets/Video/xzsjmxs.mp4	9659771	5474cd306256fb0f13cfe532caa3f4a0477d6225fc5b16e58327a9eb24901315	ISO Media, MP4 v2 [ISO 14496-14]			not-applicable	not-applicable	
+experiment	HLF10631030_Data/StreamingAssets/http/http.json	232	0622a1cece05007174363b33a54b6e0ab6429c32dc36ed9ab91e232af85151a5	JSON data			not-applicable	not-applicable	
+experiment	HLF10631030_Data/StreamingAssets/readstate.txt	3244	160b1c4a0edc0c86f86d295794144677786039d57bac66e0f14bcf7eb057569d	JSON data			not-applicable	not-applicable	
+experiment	HLF10631030_Data/app.info	18	ab59e361697aa8fdba7f2b99b810eb5163738ad0301830c92dbbd0cc3dbf4b61	ASCII text			not-applicable	not-applicable	
+experiment	HLF10631030_Data/boot.config.mengoo	100	2f5cfdf4bc978e3607095ebeddfd323d71b4834edee0cb642351d05392da40db	ASCII text			not-applicable	not-applicable	
+experiment	HLF10631030_Data/data.unity3d	293663279	8781d14a06ccba7f42ad1cd5780863cc0654742aa3274462c1b8765177725277	QuArk archive data			not-applicable	not-applicable	
+experiment	HLF10631030_Data/resources.resource	27364866	0ef25789bafdd6a008a7688abdb285adbb696a0da4d1825f9dd67f651e6d1a61	data			not-applicable	not-applicable	
+experiment	MonoBleedingEdge/EmbedRuntime/MonoPosixHelper.dll	610880	3779dca29147e1c8b92668b9b3fe1b906746814b0efaec877ac9e4e42f386329	PE-native	x64		present	not-applicable	
+experiment	MonoBleedingEdge/EmbedRuntime/mono-2.0-bdwgc.dll	8098816	aef6836e11a22b9c51be1a9c260c0820807a6a41c73deca8f59680b9f14f0001	PE-native	x64		absent	not-applicable	
+experiment	MonoBleedingEdge/etc/mono/2.0/Browsers/Compat.browser.mengoo	1605	8a1082057ac5681dcd4e9c227ed7fb8eb42ac1618963b5de3b65739dd77e2741	exported SGML document text, ASCII text, with CRLF, LF line terminators			not-applicable	not-applicable	
+experiment	MonoBleedingEdge/etc/mono/2.0/DefaultWsdlHelpGenerator.aspx.mengoo	60575	751861040b69ea63a3827507b7c8da9c7f549dc181c1c8af4b7ca78cc97d710a	HTML document text, ASCII text			not-applicable	not-applicable	
+experiment	MonoBleedingEdge/etc/mono/2.0/machine.config.mengoo	29066	e91782a27fa39fc6c1d6ee8b08529f5d35052310d0006034b878eb04b8f2af30	XML 1.0 document text, ASCII text, with very long lines (541)			not-applicable	not-applicable	
+experiment	MonoBleedingEdge/etc/mono/2.0/settings.map.mengoo	2622	49c6160f9d54af4270a3b4e997fc4a8301f79b9e2070118fa46ddbcbbc44f9a2	XML 1.0 document text, ASCII text			not-applicable	not-applicable	
+experiment	MonoBleedingEdge/etc/mono/2.0/web.config.mengoo	11635	cf2b54339e069b9e42f7d6795eecbf562c50c1011f4ca8f65f578fe52d97ff92	XML 1.0 document text, ASCII text			not-applicable	not-applicable	
+experiment	MonoBleedingEdge/etc/mono/4.0/Browsers/Compat.browser.mengoo	1605	8a1082057ac5681dcd4e9c227ed7fb8eb42ac1618963b5de3b65739dd77e2741	exported SGML document text, ASCII text, with CRLF, LF line terminators			not-applicable	not-applicable	
+experiment	MonoBleedingEdge/etc/mono/4.0/DefaultWsdlHelpGenerator.aspx.mengoo	60575	751861040b69ea63a3827507b7c8da9c7f549dc181c1c8af4b7ca78cc97d710a	HTML document text, ASCII text			not-applicable	not-applicable	
+experiment	MonoBleedingEdge/etc/mono/4.0/machine.config.mengoo	33598	e60aec2c5115d65b3acb3c55ea21576dbd770f579166c017125571e46ae560ed	XML 1.0 document text, ASCII text, with very long lines (541)			not-applicable	not-applicable	
+experiment	MonoBleedingEdge/etc/mono/4.0/settings.map.mengoo	2622	ce1db1ad8a9512073164e3eccdc193f7eda036e1a9733caec4635de21b2865c8	XML 1.0 document text, ASCII text			not-applicable	not-applicable	
+experiment	MonoBleedingEdge/etc/mono/4.0/web.config.mengoo	18802	e38bb8cc68fe5b4edecdfd288d094b9e8ced7629039b2a347682aba0d8bd7492	XML 1.0 document text, ASCII text			not-applicable	not-applicable	
+experiment	MonoBleedingEdge/etc/mono/4.5/Browsers/Compat.browser.mengoo	1605	8a1082057ac5681dcd4e9c227ed7fb8eb42ac1618963b5de3b65739dd77e2741	exported SGML document text, ASCII text, with CRLF, LF line terminators			not-applicable	not-applicable	
+experiment	MonoBleedingEdge/etc/mono/4.5/DefaultWsdlHelpGenerator.aspx.mengoo	60575	751861040b69ea63a3827507b7c8da9c7f549dc181c1c8af4b7ca78cc97d710a	HTML document text, ASCII text			not-applicable	not-applicable	
+experiment	MonoBleedingEdge/etc/mono/4.5/machine.config.mengoo	34056	ee950004b576fb28dc85f4b0435ed04bf96612de2e8b53be84d07afe85a0de6c	XML 1.0 document text, ASCII text, with very long lines (541)			not-applicable	not-applicable	
+experiment	MonoBleedingEdge/etc/mono/4.5/settings.map.mengoo	2622	ce1db1ad8a9512073164e3eccdc193f7eda036e1a9733caec4635de21b2865c8	XML 1.0 document text, ASCII text			not-applicable	not-applicable	
+experiment	MonoBleedingEdge/etc/mono/4.5/web.config.mengoo	18811	c4cbddd4fd9347b58cc5a72b36dc4ba1ad2bb699e65869d05cd3fb9865f0d824	XML 1.0 document text, ASCII text			not-applicable	not-applicable	
+experiment	MonoBleedingEdge/etc/mono/browscap.ini	311984	4ddd50f31fb968f30bedefc253a46dc3f2890192d05cdaa9e0a64a056eee807e	ASCII text			not-applicable	not-applicable	
+experiment	MonoBleedingEdge/etc/mono/config	3578	107b0d888b6169bb0e51205e967d88fa82899cc6f66bde54ef9b70169dc43b1d	ASCII text			not-applicable	not-applicable	
+experiment	MonoBleedingEdge/etc/mono/mconfig/config.xml	25817	0c56e34c69124510fa8c19e7b4c2ca6c1c4ff460ae19f798dd0ca035809e396d	XML 1.0 document text, ASCII text, with very long lines (334)			not-applicable	not-applicable	
+experiment	UnityCrashHandler64.exe.mengoo	1126464	4dac68e4963d66b9e46a4a744dccc9e701435d494f28daf8ad9c684197462689	PE-native	x64		present	not-applicable	
+experiment	UnityPlayer.dll	29599744	b4e7ea3616e4966cb020d8279e4b8b426fb04d0e62e903e4e8e083b91f1bb522	PE-native	x64		absent	not-applicable	

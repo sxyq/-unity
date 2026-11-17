@@ -1,0 +1,165 @@
+{
+	"alignment": 18.0,
+	"anesthesia": false,
+	"attempts": {
+		"C04:0": {
+			"actions": [],
+			"answered": false,
+			"correct": false,
+			"criterion": "C04",
+			"day": 0,
+			"errors": 0,
+			"observation": "",
+			"operations": 0,
+			"performed": false,
+			"responses": [],
+			"seconds": 4.42158715873015,
+			"started": "2026-11-17T13:41:30"
+		},
+		"C24:1": {
+			"actions": [],
+			"answered": false,
+			"correct": false,
+			"criterion": "C24",
+			"day": 1,
+			"errors": 0,
+			"observation": "",
+			"operations": 0,
+			"performed": false,
+			"responses": [],
+			"seconds": 26.1560606060605,
+			"started": "2026-11-17T13:41:35"
+		},
+		"C24:2": {
+			"actions": [],
+			"answered": false,
+			"correct": false,
+			"criterion": "C24",
+			"day": 2,
+			"errors": 0,
+			"observation": "",
+			"operations": 0,
+			"performed": false,
+			"responses": [],
+			"seconds": 7.27216999999998,
+			"started": "2026-11-17T13:44:12"
+		},
+		"C29:1": {
+			"action_records": [
+				{
+					"action": "比较颜色与皮温",
+					"at": "2026-11-17T13:43:17",
+					"observation": "术后第1天：肢端颜色、皮温具体状态未取得。"
+				},
+				{
+					"action": "触摸足背动脉",
+					"at": "2026-11-17T13:43:22",
+					"observation": "术后第1天：足背动脉具体状态未取得。"
+				}
+			],
+			"actions": [
+				"比较颜色与皮温",
+				"触摸足背动脉"
+			],
+			"answer": "是",
+			"answered": true,
+			"correct": true,
+			"criterion": "C29",
+			"day": 1,
+			"ended": "2026-11-17T13:44:07",
+			"errors": 0,
+			"observation": "原客户端术后第1天实测：存在左下肢肢端血供问题；肢端颜色、皮温、足背动脉具体状态未取得。",
+			"operations": 1,
+			"performed": true,
+			"responses": [
+				{
+					"answer": "是",
+					"at": "2026-11-17T13:44:07",
+					"correct": true
+				}
+			],
+			"seconds": 125.658172616174,
+			"started": "2026-11-17T13:42:01"
+		},
+		"C29:2": {
+			"action_records": [
+				{
+					"action": "比较颜色与皮温",
+					"at": "2026-11-17T13:45:11",
+					"observation": "本日教学情境：肢端颜色正常、皮温温暖。"
+				},
+				{
+					"action": "触摸足背动脉",
+					"at": "2026-11-17T13:45:16",
+					"observation": "本日教学情境：足背动脉可扪及，持续观察变化。"
+				}
+			],
+			"actions": [
+				"比较颜色与皮温",
+				"触摸足背动脉"
+			],
+			"answer": "否",
+			"answered": true,
+			"correct": true,
+			"criterion": "C29",
+			"day": 2,
+			"ended": "2026-11-17T13:46:06",
+			"errors": 0,
+			"observation": "第2天教学情境：肢端颜色正常、皮温温暖、足背动脉可扪及。",
+			"operations": 1,
+			"performed": true,
+			"responses": [
+				{
+					"answer": "否",
+					"at": "2026-11-17T13:46:06",
+					"correct": true
+				}
+			],
+			"seconds": 106.419837222232,
+			"started": "2026-11-17T13:44:19"
+		}
+	},
+	"criterion": 0,
+	"day": 2,
+	"days": {
+		"1": {
+			"exercise": false,
+			"pain": 6,
+			"pin_clean": false,
+			"pressure_relief": false
+		},
+		"2": {
+			"exercise": false,
+			"pain": 4,
+			"pin_clean": false,
+			"pressure_relief": false
+		},
+		"3": {
+			"exercise": false,
+			"pain": 3,
+			"pin_clean": false,
+			"pressure_relief": false
+		},
+		"7": {
+			"exercise": false,
+			"pain": 2,
+			"pin_clean": false,
+			"pressure_relief": false
+		}
+	},
+	"disinfect": false,
+	"drape": false,
+	"exam": false,
+	"gloves": false,
+	"height": 0.26,
+	"id": "1794922889-40496",
+	"module": 2,
+	"pack": false,
+	"pin": false,
+	"review_of": "",
+	"rope": false,
+	"started": "2026-11-17T13:41:29",
+	"submitted": false,
+	"task": 19,
+	"weight": 0.0
+}

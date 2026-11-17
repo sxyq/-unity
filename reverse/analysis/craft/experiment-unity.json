@@ -1,0 +1,1 @@
+{"error":{"category":"target","code":"not_supported","message":"data.unity3d isn't a Unity serialized file.","remediation":"Pass a .assets file, level<n> or globalgamemanagers from the game's <Game>_Data folder, or a bundle.","retryable":false}}

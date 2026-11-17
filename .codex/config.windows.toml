@@ -1,0 +1,14 @@
+# 在项目根目录使用；复制为同目录 config.toml。
+# REA 6.9.0 使用 Node 22.23.4 或更高的 22.x；Craft CLI 需已在 PATH。
+[mcp_servers.rea]
+command = "cmd"
+args = ["/d", "/c", "npx", "-y", "rea-agents@6.9.0", "mcp"]
+startup_timeout_sec = 60
+tool_timeout_sec = 120
+
+[mcp_servers.craft-anything]
+command = "craft-anything-cli.exe"
+args = ["--deep", "--project", "reverse/analysis/craft.cany", "mcp", "--all-tools"]
+startup_timeout_sec = 30
+tool_timeout_sec = 120
+

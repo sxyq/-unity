@@ -1,0 +1,1 @@
+{"error":{"category":"target","code":"not_supported","message":"data.unity3d isn't a UnityFS bundle.","remediation":"Unity bundles are usually .bundle files under <Game>_Data/StreamingAssets, or data.unity3d.","retryable":false}}

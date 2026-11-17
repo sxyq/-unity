@@ -1,0 +1,1 @@
+{"error":{"category":"target","code":"not_supported","message":"unity default resources isn't a Unity serialized file.","remediation":"Pass a .assets file, level<n> or globalgamemanagers from the game's <Game>_Data folder, or a bundle.","retryable":false}}

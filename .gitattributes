@@ -1,0 +1,6 @@
+builds/Windows/TractionCare.exe filter=lfs diff=lfs merge=lfs -text
+builds/Windows/Gateway/node.exe filter=lfs diff=lfs merge=lfs -text
+builds/macOS/TractionCare.zip filter=lfs diff=lfs merge=lfs -text
+work/gateway/Windows/node.exe filter=lfs diff=lfs merge=lfs -text
+work/gateway/macOS/node filter=lfs diff=lfs merge=lfs -text
+

@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!129 &1
+PlayerSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 26
+  productGUID: 4c3c1c35b39f4b17a3f82bf7a92cc7db
+  AndroidProfiler: 0
+  AndroidFilterTouchesWhenObscured: 0
+  defaultScreenOrientation: 4
+  targetDevice: 2
+  useOnDemandResources: 0
+  accelerometerFrequency: 60
+  companyName: HospitalSimulation
+  productName: 骨牵引护理虚拟仿真
+  defaultScreenWidth: 1600
+  defaultScreenHeight: 900
+  fullscreenMode: 3
+  resizableWindow: 1
+  allowFullscreenSwitch: 1
+  usePlayerLog: 1
+  bundleVersion: 0.1.0
+  applicationIdentifier:
+    Standalone: com.hospitalsimulation.tractioncare
+  buildNumber:
+    Standalone: 1
+  scriptingRuntimeVersion: 1
+  gcIncremental: 1
+  allowUnsafeCode: 0
+  useDeterministicCompilation: 1
+  activeInputHandler: 0
+  webGLInitialMemorySize: 32
+  webGLMaximumMemorySize: 2048
+  webGLMemoryGrowthMode: 2
+  scriptingDefineSymbols: {}
+  platformArchitecture: {}
+  scriptingBackend: {}
+  managedStrippingLevel: {}
+  apiCompatibilityLevelPerPlatform: {}
+  metroPackageName: HospitalSimulation
+  metroPackageDisplayName: 骨牵引护理虚拟仿真
+  metroPackageDescription: 独立三维护理教学系统
+  macOSURLSchemes: []

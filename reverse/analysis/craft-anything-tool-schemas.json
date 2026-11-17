@@ -1,0 +1,173 @@
+[
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "List a Unity assets file"
+    },
+    "description": "List the objects in a Unity serialized file (absolute path: a .assets file, level<n>, globalgamemanagers, sharedassets<n>.assets in <Game>_Data) or in a bundle (.bundle, data.unity3d: every serialized file inside it, each object naming its `file`, or only `file`'s): the format version, Unity version, build platform, how many objects of each class (GameObject, Texture2D, AudioClip, MonoBehaviour…), the other files it points to, and the objects with their path id, class, size and name (named assets, GameObjects and MonoBehaviours), paged and optionally filtered by class or name. Unity 5 and later.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "default": null,
+          "description": "For a bundle: only this serialized file inside it (as game_unity_bundle_list shows); every one by default.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "filter": {
+          "default": null,
+          "description": "Only objects whose class or name contains this (any case).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "limit": {
+          "default": 500,
+          "description": "Objects per page (1–20000, default 500).",
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "offset": {
+          "default": 0,
+          "description": "First object of the page.",
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "path": {
+          "description": "Absolute path of the .assets or level file, or of a bundle.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "title": "UnityListParams",
+      "type": "object"
+    },
+    "name": "game_unity_list",
+    "title": "List a Unity assets file"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": "List a Unity bundle"
+    },
+    "description": "List the files inside a Unity asset bundle in the UnityFS format (absolute path: a .bundle, data.unity3d or Addressables file): its format, Unity version, block compression (LZMA, LZ4), and each file with its size, and for each serialized file inside, its Unity version, object count and objects by class. Only the blocks that hold those files' headers are decompressed. Paged and optionally filtered by a part of the path.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "filter": {
+          "default": null,
+          "description": "Only files whose path contains this (any case).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "limit": {
+          "default": 500,
+          "description": "Files per page (1–20000, default 500).",
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "offset": {
+          "default": 0,
+          "description": "First file of the page.",
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "path": {
+          "description": "Absolute path of the archive (.pak, an IoStore container's .utoc or .ucas, a Unity .assets\nor level file, or a Unity bundle).",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "title": "ListParams",
+      "type": "object"
+    },
+    "name": "game_unity_bundle_list",
+    "title": "List a Unity bundle"
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false,
+      "title": ".NET types and methods"
+    },
+    "description": "Types, fields, properties, events and methods of a .NET assembly with C#-like signatures; for each IL method body: header kind, max stack, locals, exception clauses, IL size, il_hash, an il_shape_hash that survives renames, call targets, field accesses and string literals (optionally the IL listing). Filter with type_names; paged by type (offset/limit).",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "properties": {
+        "include_il": {
+          "default": false,
+          "description": "Include each method's IL listing.",
+          "type": "boolean"
+        },
+        "limit": {
+          "default": 100,
+          "description": "Types per page (1–5000).",
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "max_instructions": {
+          "default": 20000,
+          "description": "Most instructions decoded per method (1–1000000).",
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "offset": {
+          "default": 0,
+          "description": "First type of the page.",
+          "format": "uint",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "path": {
+          "default": null,
+          "description": "Absolute path of a .NET assembly; the active target when omitted.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "type_names": {
+          "default": null,
+          "description": "Only these types (full name like `Ns.Type`, nested as `Ns.Outer/Inner`, or simple name).",
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "title": "MembersParams",
+      "type": "object"
+    },
+    "name": "managed_members_list",
+    "title": ".NET types and methods"
+  }
+]

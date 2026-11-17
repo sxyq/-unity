@@ -1,0 +1,134 @@
+{
+	"alignment": 18.0,
+	"anesthesia": false,
+	"attempts": {
+		"C01:0": {
+			"answer": "请患者陈述姓名，并与腕带和病历核对",
+			"answered": true,
+			"correct": true,
+			"criterion": "C01",
+			"day": 0.0,
+			"ended": "2026-11-17T06:29:42",
+			"errors": 0.0,
+			"observation": "腕带：李波，男，33 岁；创伤骨科 2 床。",
+			"operations": 1.0,
+			"performed": true,
+			"responses": [
+				{
+					"answer": "请患者陈述姓名，并与腕带和病历核对",
+					"at": "2026-11-17T06:29:42",
+					"correct": true
+				}
+			],
+			"seconds": 112.468940555567,
+			"started": "2026-11-17T06:27:50"
+		},
+		"C02:0": {
+			"actions": [
+				"受伤经过",
+				"受伤时间",
+				"疼痛"
+			],
+			"answer": "询问疼痛程度、性质与加重因素",
+			"answered": true,
+			"correct": true,
+			"criterion": "C02",
+			"day": 0.0,
+			"ended": "2026-11-17T07:02:58",
+			"errors": 0.0,
+			"observation": "约 6 小时前乘降落伞撞围墙，左大腿肿胀疼痛，膝关节活动受限。",
+			"operations": 1.0,
+			"performed": true,
+			"responses": [
+				{
+					"answer": "询问疼痛程度、性质与加重因素",
+					"at": "2026-11-17T07:02:58",
+					"correct": true
+				}
+			],
+			"seconds": 352.500810000033,
+			"started": "2026-11-17T06:57:06"
+		},
+		"C03:0": {
+			"actions": [
+				"既往病史",
+				"过敏史"
+			],
+			"answer": "当前口述与病历再次核对",
+			"answered": true,
+			"correct": true,
+			"criterion": "C03",
+			"day": 0,
+			"ended": "2026-11-17T07:34:46",
+			"errors": 0,
+			"observation": "慢性胃炎 10 余年；否认食物、药物过敏史；否认既往手术外伤史。",
+			"operations": 1,
+			"performed": true,
+			"responses": [
+				{
+					"answer": "当前口述与病历再次核对",
+					"at": "2026-11-17T07:34:46",
+					"correct": true
+				}
+			],
+			"seconds": 787.014838404371,
+			"started": "2026-11-17T07:21:38"
+		},
+		"C04:0": {
+			"actions": [],
+			"answered": false,
+			"correct": false,
+			"criterion": "C04",
+			"day": 0,
+			"errors": 0,
+			"observation": "",
+			"operations": 0,
+			"performed": false,
+			"responses": [],
+			"seconds": 778.05166666703,
+			"started": "2026-11-17T07:41:47"
+		}
+	},
+	"day": 1.0,
+	"days": {
+		"1": {
+			"exercise": false,
+			"pain": 6.0,
+			"pin_clean": false,
+			"pressure_relief": false
+		},
+		"2": {
+			"exercise": false,
+			"pain": 4.0,
+			"pin_clean": false,
+			"pressure_relief": false
+		},
+		"3": {
+			"exercise": false,
+			"pain": 3.0,
+			"pin_clean": false,
+			"pressure_relief": false
+		},
+		"7": {
+			"exercise": false,
+			"pain": 2.0,
+			"pin_clean": false,
+			"pressure_relief": false
+		}
+	},
+	"disinfect": false,
+	"drape": false,
+	"exam": false,
+	"gloves": false,
+	"height": 0.26,
+	"id": "1794896870-03176",
+	"module": 0,
+	"pack": false,
+	"pin": false,
+	"review_of": "",
+	"rope": false,
+	"started": "2026-11-17T06:27:50",
+	"submitted": false,
+	"task": 2,
+	"weight": 0.0
+}

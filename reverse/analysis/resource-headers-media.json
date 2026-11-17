@@ -1,0 +1,92 @@
+{
+  "HLF10631030_Data/data.unity3d": {
+    "bytes": 293663279,
+    "first64": "37049241acaf72cecb2d7c8a3eb47ec06106c533bd9db0b7d7aa945aeaee6e3e96a3304791551c4e6486d6324e4d8521212ce8ba104ee224ee7e2a4cf749e230",
+    "signature_first_offsets": {
+      "UnityFS": -1,
+      "UnityRaw": -1,
+      "UnityWeb": -1,
+      "BSJB": -1
+    }
+  },
+  "HLF10631030_Data/Managed/Assembly-CSharp.dll": {
+    "bytes": 665128,
+    "first64": "2f306b35d6e921cecf2d7c8df46506eea106f7038fac9e84b99cf26beaee6e3e96b2b0b596551c0d85c398d5d34d8523622ce8ba104ee224ee7e2a4c7749e230",
+    "signature_first_offsets": {
+      "UnityFS": -1,
+      "UnityRaw": -1,
+      "UnityWeb": -1,
+      "BSJB": -1
+    }
+  },
+  "HLF10631030_Data/Managed/Assembly-CSharp-firstpass.dll": {
+    "bytes": 57896,
+    "first64": "2f306b35d6e921cecf2d7c8df46506eea106f7038fac9e84b99cf26beaee6e3e96b2b0b596551c0d85c398d5d34d8523622ce8ba104ee224ee7e2a4c7749e230",
+    "signature_first_offsets": {
+      "UnityFS": -1,
+      "UnityRaw": -1,
+      "UnityWeb": -1,
+      "BSJB": -1
+    }
+  },
+  "HLF10631030_Data/Resources/unity default resources": {
+    "bytes": 4843688,
+    "first64": "626afb35d5e921cecb2d7c9b0b9a06ee1906f7038fac978df99cf26beaa786be96b2b0b596550c0dd686d686d34d8523501cda8b3e7dcc16884f2a49f749e230",
+    "signature_first_offsets": {
+      "UnityFS": -1,
+      "UnityRaw": -1,
+      "UnityWeb": -1,
+      "BSJB": -1
+    }
+  },
+  "HLF10631030_Data/StreamingAssets/Video/handel.mp4": {
+    "programs": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080
+      }
+    ],
+    "format": {
+      "duration": "7.416667"
+    }
+  },
+  "HLF10631030_Data/StreamingAssets/Video/introduce.mp4": {
+    "programs": [],
+    "streams": [
+      {
+        "codec_name": "aac",
+        "codec_type": "audio"
+      },
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080
+      }
+    ],
+    "format": {
+      "duration": "34.304000"
+    }
+  },
+  "HLF10631030_Data/StreamingAssets/Video/xzsjmxs.mp4": {
+    "programs": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "codec_name": "aac",
+        "codec_type": "audio"
+      }
+    ],
+    "format": {
+      "duration": "39.808000"
+    }
+  }
+}

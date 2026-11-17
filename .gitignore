@@ -1,24 +1,33 @@
-# 依赖与系统文件
-node_modules/
+._*
 .DS_Store
-
-# 本地密钥（只保留 example；历史路径也写上，避免误提交）
-proxy/config.json
-apps/model-gateway/config.json
-
-# .NET 构建产物
-bin/
-obj/
-
-# 运行日志
+node_modules/
+**/.godot/
+**/Library/
+**/Temp/
+**/Logs/
+**/UserSettings/
+**/bin/
+**/obj/
 *.log
+*.tmp
+*.blend1
 
-# Unity observer 的本机引用 DLL（厂商专有，不入仓库）
-tools/unity-observer/ref/
+# 本机工具、缓存和配置
+/toolchain/
+/.runtime/
+/.codex/config.toml
+/work/logs/
+/work/unity-download/
+**/model-config.json
+**/runtime/
+.env
+.env.local
 
-# 本地 TTS 模型（120MB，不入库）
-tools/tts/models/
-tools/tts/node_modules/
+# 原厂安装文件和资源仅留本机
+/reverse/input/*
+!/reverse/input/experiment-Version.json
+/reverse/extracted/
+/reverse/experiment/
+/work/original-reference-video/
+/reverse/analysis/craft.cany/investigation/update.lock
 
-# 本地工作记录（不属于交付源码）
-.workbuddy/

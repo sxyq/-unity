@@ -1,0 +1,894 @@
+[
+  {
+    "id": "R01",
+    "title": "核对患者身份",
+    "module": 0,
+    "scenario": 0,
+    "purpose": "建立安全的护患关系，核对腕带与患者陈述。",
+    "source": "独立课程设计；原任务类别参照现有 Windows 运行时与 UI 资料",
+    "criteria": [
+      {
+        "id": "C01",
+        "label": "身份核对",
+        "target": "patient",
+        "operation": "identity",
+        "observation": "腕带：李波，男，33 岁；创伤骨科 2 床。",
+        "question": "身份核对的恰当做法是？",
+        "choices": [
+          "只核对床号",
+          "请患者陈述姓名，并与腕带和病历核对",
+          "由邻床患者确认"
+        ],
+        "answer": 1,
+        "explanation": "采用至少两种患者身份信息；床号不作为唯一依据。",
+        "knowledge": "communication"
+      }
+    ]
+  },
+  {
+    "id": "R02",
+    "title": "病史采集与症状问诊",
+    "module": 0,
+    "scenario": 0,
+    "purpose": "询问受伤经过及疼痛，主动采集既往史和过敏史。",
+    "source": "独立课程设计；原任务类别参照现有 Windows 运行时与 UI 资料",
+    "criteria": [
+      {
+        "id": "C02",
+        "label": "受伤经过与疼痛",
+        "target": "patient",
+        "operation": "history",
+        "observation": "约 6 小时前乘降落伞撞围墙，左大腿肿胀疼痛，膝关节活动受限。",
+        "question": "应继续补充哪项评估？",
+        "choices": [
+          "直接填写 NRS 6 分",
+          "询问疼痛程度、性质与加重因素",
+          "只询问住址"
+        ],
+        "answer": 1,
+        "explanation": "原始病历未记录 NRS；应主动询问，避免自行填写。",
+        "knowledge": "pain-nrs"
+      },
+      {
+        "id": "C03",
+        "label": "既往史与过敏史",
+        "target": "patient",
+        "operation": "allergy",
+        "observation": "慢性胃炎 10 余年；否认食物、药物过敏史；否认既往手术外伤史。",
+        "question": "给药前如何使用这项资料？",
+        "choices": [
+          "当前口述与病历再次核对",
+          "否认过敏后无需再核对",
+          "自行增加药物剂量"
+        ],
+        "answer": 0,
+        "explanation": "过敏史属于给药前必须核对的信息，药名与剂量依据医嘱。",
+        "knowledge": "analgesia"
+      }
+    ]
+  },
+  {
+    "id": "R03",
+    "title": "病历与辅助资料",
+    "module": 0,
+    "scenario": 0,
+    "purpose": "将专科资料与影像资料对应到左侧患肢。",
+    "source": "独立课程设计；原任务类别参照现有 Windows 运行时与 UI 资料",
+    "criteria": [
+      {
+        "id": "C04",
+        "label": "专科资料",
+        "target": "chart",
+        "operation": "record",
+        "observation": "入院记录：左下肢短缩约 2 cm；肢端皮温正常、足背动脉可扪及。",
+        "question": "这份入院资料如何用于术后评估？",
+        "choices": [
+          "直接作为术后实时状态",
+          "作为入院参照，术后重新评估",
+          "无需记录"
+        ],
+        "answer": 1,
+        "explanation": "不同日期的患者状态需要重新观察，不能把入院资料作为术后实时结果。",
+        "knowledge": "neurovascular"
+      },
+      {
+        "id": "C05",
+        "label": "影像资料",
+        "target": "chart",
+        "operation": "image",
+        "observation": "CT：左股骨干中下段骨折，断端错位，远端向后向上移位。",
+        "question": "需要重点核对哪侧患肢？",
+        "choices": [
+          "右侧",
+          "左侧",
+          "两侧任意"
+        ],
+        "answer": 1,
+        "explanation": "以病历、影像、患者陈述和术侧标识共同核对。",
+        "knowledge": "traction-principle"
+      }
+    ]
+  },
+  {
+    "id": "R04",
+    "title": "患者与环境准备",
+    "module": 0,
+    "scenario": 1,
+    "purpose": "维护隐私，整理床单位，备齐护理用物。",
+    "source": "独立课程设计；原任务类别参照现有 Windows 运行时与 UI 资料",
+    "criteria": [
+      {
+        "id": "C06",
+        "label": "环境与患者准备",
+        "target": "cart",
+        "operation": "prepare",
+        "observation": "护理车已备好腕带核对单、无菌包、手套、消毒用品和评估工具。",
+        "question": "操作前应先做什么？",
+        "choices": [
+          "直接开始穿刺",
+          "核对医嘱并告知患者，做好隐私保护",
+          "先增加牵引重量"
+        ],
+        "answer": 1,
+        "explanation": "核对、告知、手卫生与隐私保护贯穿操作准备。",
+        "knowledge": "communication"
+      }
+    ]
+  },
+  {
+    "id": "R05",
+    "title": "术前谈话与知情沟通",
+    "module": 0,
+    "scenario": 1,
+    "purpose": "解释治疗目的、配合方法和风险，回应患者疑问。",
+    "source": "独立课程设计；原任务类别参照现有 Windows 运行时与 UI 资料",
+    "criteria": [
+      {
+        "id": "C07",
+        "label": "术前沟通",
+        "target": "patient",
+        "operation": "consent",
+        "observation": "患者：我怕疼，也担心以后走路受影响。",
+        "question": "较合适的回应是？",
+        "choices": [
+          "完全不会疼，肯定能好",
+          "说明治疗目的和疼痛处理，询问患者是否理解",
+          "不要问这么多"
+        ],
+        "answer": 1,
+        "explanation": "提供清楚的解释和可行的帮助，避免保证疗效或否认患者感受。",
+        "knowledge": "communication"
+      }
+    ]
+  },
+  {
+    "id": "R06",
+    "title": "术中沟通与宣教",
+    "module": 1,
+    "scenario": 2,
+    "purpose": "在关键操作前告知，操作中持续观察患者反应。",
+    "source": "独立课程设计；原任务类别参照现有 Windows 运行时与 UI 资料",
+    "criteria": [
+      {
+        "id": "C08",
+        "label": "术中告知",
+        "target": "patient",
+        "operation": "communicate",
+        "observation": "患者已确认姓名和术侧，等待操作说明。",
+        "question": "操作时应如何沟通？",
+        "choices": [
+          "开始后不再交流",
+          "说明当下操作、配合方式和不适报告方法",
+          "只与旁边同学交流"
+        ],
+        "answer": 1,
+        "explanation": "沟通应与当前操作同步；不适时及时评估并报告。",
+        "knowledge": "communication"
+      }
+    ]
+  },
+  {
+    "id": "R07",
+    "title": "体格评估",
+    "module": 1,
+    "scenario": 4,
+    "purpose": "完成视诊、触诊、动诊和量诊，避免反复诱发骨擦感。",
+    "source": "独立课程设计；原任务类别参照现有 Windows 运行时与 UI 资料",
+    "criteria": [
+      {
+        "id": "C09",
+        "label": "视诊",
+        "target": "limb",
+        "operation": "inspect",
+        "observation": "可见左大腿肿胀，患肢摆位偏外旋。",
+        "question": "下一步合理的做法是？",
+        "choices": [
+          "强行纠正畸形",
+          "记录外观并在保护患肢下继续评估",
+          "立即认为牵引成功"
+        ],
+        "answer": 1,
+        "explanation": "观察外观只是评估的一部分，应结合其他信息。",
+        "knowledge": "neurovascular"
+      },
+      {
+        "id": "C10",
+        "label": "触诊",
+        "target": "foot",
+        "operation": "palpate",
+        "observation": "轻触肢端皮温并触摸足背动脉，避免反复按压骨折端。",
+        "question": "哪种操作应避免？",
+        "choices": [
+          "比较双侧皮温",
+          "轻触足背动脉",
+          "反复摩擦骨折端寻找骨擦感"
+        ],
+        "answer": 2,
+        "explanation": "反复诱发骨擦感可能加重损伤；护理评估应保护患肢。",
+        "knowledge": "neurovascular"
+      },
+      {
+        "id": "C11",
+        "label": "动诊",
+        "target": "foot",
+        "operation": "movement",
+        "observation": "患者可在允许范围内轻动足趾与踝关节。",
+        "question": "护理观察应如何进行？",
+        "choices": [
+          "保护患肢，观察允许范围的活动",
+          "强迫患者屈伸骨折部位",
+          "只观察健康侧"
+        ],
+        "answer": 0,
+        "explanation": "活动观察以安全、医嘱允许范围及患者耐受为前提。",
+        "knowledge": "neurovascular"
+      },
+      {
+        "id": "C12",
+        "label": "量诊",
+        "target": "measure",
+        "operation": "measure",
+        "observation": "入院病例记载左下肢较右侧短缩约 2 cm。",
+        "question": "比较肢体长度应注意？",
+        "choices": [
+          "使用一致的骨性标志和体位",
+          "凭目测填写数值",
+          "只测一次健康侧"
+        ],
+        "answer": 0,
+        "explanation": "采用一致标志与体位，提高双侧比较的意义。",
+        "knowledge": "traction-principle"
+      }
+    ]
+  },
+  {
+    "id": "R08",
+    "title": "确认牵引部位",
+    "module": 1,
+    "scenario": 3,
+    "purpose": "根据教学方案核对左侧胫骨结节区域。",
+    "source": "独立课程设计；原任务类别参照现有 Windows 运行时与 UI 资料",
+    "criteria": [
+      {
+        "id": "C13",
+        "label": "术侧与部位",
+        "target": "site",
+        "operation": "site",
+        "observation": "本课程操作方案：左侧胫骨结节牵引；需与医嘱及术侧标识对应。",
+        "question": "确认部位的依据是？",
+        "choices": [
+          "选看起来方便的一侧",
+          "仅凭床号",
+          "医嘱、术侧标识、病例与患者共同核对"
+        ],
+        "answer": 2,
+        "explanation": "本课程的部位为教学方案；实际操作必须遵照明确医嘱。",
+        "knowledge": "traction-principle"
+      }
+    ]
+  },
+  {
+    "id": "R09",
+    "title": "打开穿刺包",
+    "module": 1,
+    "scenario": 3,
+    "purpose": "确认包装完整与有效期后打开无菌包。",
+    "source": "独立课程设计；原任务类别参照现有 Windows 运行时与 UI 资料",
+    "criteria": [
+      {
+        "id": "C14",
+        "label": "穿刺包",
+        "target": "pack",
+        "operation": "pack",
+        "observation": "包装完整、在有效期内；无菌操作区域已展开。",
+        "question": "打开后应怎样保护无菌区？",
+        "choices": [
+          "避免跨越、触碰无菌区域",
+          "徒手整理所有无菌器械",
+          "让包装边缘接触针具"
+        ],
+        "answer": 0,
+        "explanation": "无菌物品与非无菌边缘保持明确界限。",
+        "knowledge": "pin-care"
+      }
+    ]
+  },
+  {
+    "id": "R10",
+    "title": "戴无菌手套",
+    "module": 1,
+    "scenario": 3,
+    "purpose": "完成手卫生并按无菌原则戴手套。",
+    "source": "独立课程设计；原任务类别参照现有 Windows 运行时与 UI 资料",
+    "criteria": [
+      {
+        "id": "C15",
+        "label": "无菌手套",
+        "target": "gloves",
+        "operation": "gloves",
+        "observation": "手套已戴好；双手保持在无菌操作区域内。",
+        "question": "手套污染后应如何处理？",
+        "choices": [
+          "继续使用",
+          "更换手套并恢复无菌条件",
+          "用床单擦拭"
+        ],
+        "answer": 1,
+        "explanation": "污染的手套需要更换，不能继续接触无菌器械。",
+        "knowledge": "pin-care"
+      }
+    ]
+  },
+  {
+    "id": "R11",
+    "title": "消毒",
+    "module": 1,
+    "scenario": 3,
+    "purpose": "对已核对的操作区域完成规范消毒演示。",
+    "source": "独立课程设计；原任务类别参照现有 Windows 运行时与 UI 资料",
+    "criteria": [
+      {
+        "id": "C16",
+        "label": "皮肤消毒",
+        "target": "swab",
+        "operation": "disinfect",
+        "observation": "消毒演示完成，等待干燥；范围和消毒剂以本单位规范为准。",
+        "question": "正确的下一步是？",
+        "choices": [
+          "未干就铺巾",
+          "用手触摸确认干燥",
+          "等待消毒剂干燥并保持无菌"
+        ],
+        "answer": 2,
+        "explanation": "遵守所用消毒剂的作用时间，避免再次污染。",
+        "knowledge": "pin-care"
+      }
+    ]
+  },
+  {
+    "id": "R12",
+    "title": "铺巾",
+    "module": 1,
+    "scenario": 3,
+    "purpose": "铺设无菌巾，暴露操作区域。",
+    "source": "独立课程设计；原任务类别参照现有 Windows 运行时与 UI 资料",
+    "criteria": [
+      {
+        "id": "C17",
+        "label": "无菌铺巾",
+        "target": "drape",
+        "operation": "drape",
+        "observation": "无菌巾覆盖操作区周边，预定穿刺部位可见。",
+        "question": "铺巾后应避免什么？",
+        "choices": [
+          "保持暴露区域",
+          "随意移动已铺无菌巾",
+          "保持器械在无菌区"
+        ],
+        "answer": 1,
+        "explanation": "随意移动无菌巾可能使已建立的无菌区域污染。",
+        "knowledge": "pin-care"
+      }
+    ]
+  },
+  {
+    "id": "R13",
+    "title": "麻醉配合与观察",
+    "module": 1,
+    "scenario": 2,
+    "purpose": "配合医生完成局部麻醉演示，观察患者反应。",
+    "source": "独立课程设计；原任务类别参照现有 Windows 运行时与 UI 资料",
+    "criteria": [
+      {
+        "id": "C18",
+        "label": "麻醉配合",
+        "target": "syringe",
+        "operation": "anesthesia",
+        "observation": "已核对过敏史并向患者告知；本演示不指定药物剂量。",
+        "question": "护士应重点做什么？",
+        "choices": [
+          "自行确定药物剂量",
+          "核对医嘱并观察不适反应",
+          "保证患者完全无痛"
+        ],
+        "answer": 1,
+        "explanation": "药物与剂量按医嘱，持续观察患者反应。",
+        "knowledge": "analgesia"
+      }
+    ]
+  },
+  {
+    "id": "R14",
+    "title": "骨牵引穿刺配合",
+    "module": 1,
+    "scenario": 3,
+    "purpose": "在教学演示中配合穿刺，持续保持无菌条件。",
+    "source": "独立课程设计；原任务类别参照现有 Windows 运行时与 UI 资料",
+    "criteria": [
+      {
+        "id": "C19",
+        "label": "穿刺与保护",
+        "target": "pin",
+        "operation": "pin",
+        "observation": "牵引针就位，针两端已作保护。",
+        "question": "穿刺完成后如何处理？",
+        "choices": [
+          "保护针端并观察穿刺区域",
+          "频繁转动钢针",
+          "用非无菌物品触碰针道"
+        ],
+        "answer": 0,
+        "explanation": "保护针端和针道，避免污染和不必要的机械刺激。",
+        "knowledge": "pin-care"
+      }
+    ]
+  },
+  {
+    "id": "R15",
+    "title": "调节肢体高度",
+    "module": 1,
+    "scenario": 3,
+    "purpose": "在支架上调整患肢高度并保持稳定支托。",
+    "source": "独立课程设计；原任务类别参照现有 Windows 运行时与 UI 资料",
+    "criteria": [
+      {
+        "id": "C20",
+        "label": "患肢支托",
+        "target": "support",
+        "operation": "height",
+        "observation": "教学设定：支托高度 0.20～0.35 m，避免压迫腘窝。",
+        "question": "怎样判断支托是否合适？",
+        "choices": [
+          "仅看是否足够高",
+          "患肢稳定、无局部压迫，符合方案",
+          "让患肢悬在床边"
+        ],
+        "answer": 1,
+        "explanation": "支托必须与治疗方案、牵引方向和局部受压情况共同评估。",
+        "knowledge": "traction-position"
+      }
+    ]
+  },
+  {
+    "id": "R16",
+    "title": "连接牵引与核对参数",
+    "module": 1,
+    "scenario": 3,
+    "purpose": "完成绳索连接、重量设置与力线调整。",
+    "source": "独立课程设计；原任务类别参照现有 Windows 运行时与 UI 资料",
+    "criteria": [
+      {
+        "id": "C21",
+        "label": "牵引绳与滑轮",
+        "target": "pulley",
+        "operation": "rope",
+        "observation": "牵引绳进入滑轮槽，无结节和阻碍。",
+        "question": "装置应处于什么状态？",
+        "choices": [
+          "滑轮可转动、绳索在槽内",
+          "绳索压在床栏下",
+          "绳索打结固定滑轮"
+        ],
+        "answer": 0,
+        "explanation": "牵引力需要经通畅的绳索和滑轮传递。",
+        "knowledge": "traction-position"
+      },
+      {
+        "id": "C22",
+        "label": "牵引重量",
+        "target": "weight",
+        "operation": "weight",
+        "observation": "本课程教学医嘱：牵引 5 kg；实际值由你调整。",
+        "question": "重量设置依据是什么？",
+        "choices": [
+          "越重越有效",
+          "明确医嘱及复位情况",
+          "仅凭外观估算体重"
+        ],
+        "answer": 1,
+        "explanation": "此处 5 kg 是本课程设定，禁止推广为所有患者统一重量。",
+        "knowledge": "traction-weight"
+      },
+      {
+        "id": "C23",
+        "label": "力线与反牵引",
+        "target": "frame",
+        "operation": "alignment",
+        "observation": "调整牵引力线，使其接近患肢纵轴，砝码保持自由下垂。",
+        "question": "哪种情况使牵引效果受到影响？",
+        "choices": [
+          "砝码自由下垂",
+          "绳索与长轴一致",
+          "砝码触地或靠床"
+        ],
+        "answer": 2,
+        "explanation": "砝码受托或绳索受阻会改变有效牵引力。",
+        "knowledge": "traction-position"
+      }
+    ]
+  },
+  {
+    "id": "R17",
+    "title": "牵引有效性",
+    "module": 2,
+    "scenario": 6,
+    "purpose": "每日查看设备，再结合患者观察结果判断。",
+    "source": "独立课程设计；原任务类别参照现有 Windows 运行时与 UI 资料",
+    "criteria": [
+      {
+        "id": "C24",
+        "label": "装置观察",
+        "target": "weight",
+        "operation": "device-review",
+        "observation": "记录当前重量、绳索、力线及砝码位置。",
+        "question": "哪项能支持装置处于正常工作状态？",
+        "choices": [
+          "绳索通畅、砝码自由下垂且重量符合医嘱",
+          "只要挂了砝码即可",
+          "患者不说话即可"
+        ],
+        "answer": 0,
+        "explanation": "装置评估要结合重量、方向、绳索和砝码状态。",
+        "knowledge": "traction-position"
+      },
+      {
+        "id": "C25",
+        "label": "效果判断",
+        "target": "limb",
+        "operation": "effect",
+        "observation": "本日观察记录与入院资料可供比较；疗效还需结合疼痛、血运和影像。",
+        "question": "能否仅凭挂上砝码判断复位成功？",
+        "choices": [
+          "能",
+          "不能，需结合临床与影像评估"
+        ],
+        "answer": 1,
+        "explanation": "装置状态和骨折复位效果需要分别判断。",
+        "knowledge": "traction-principle"
+      }
+    ]
+  },
+  {
+    "id": "R18",
+    "title": "疼痛评估与护理",
+    "module": 2,
+    "scenario": 6,
+    "purpose": "询问当日疼痛，记录并进行适当护理。",
+    "source": "独立课程设计；原任务类别参照现有 Windows 运行时与 UI 资料",
+    "criteria": [
+      {
+        "id": "C26",
+        "label": "疼痛评估",
+        "target": "patient",
+        "operation": "pain",
+        "observation": "询问患者当前 NRS 评分及疼痛性质。",
+        "question": "出现突然加重的疼痛，应怎样处理？",
+        "choices": [
+          "仅安慰后忽略",
+          "重新评估装置、血运及神经情况，及时报告",
+          "自行增加重量"
+        ],
+        "answer": 1,
+        "explanation": "疼痛变化可能提示局部受压或其他问题，需要综合评估。",
+        "knowledge": "pain-nrs"
+      },
+      {
+        "id": "C27",
+        "label": "疼痛护理与复评",
+        "target": "patient",
+        "operation": "pain-care",
+        "observation": "已采取舒适支持并说明按医嘱镇痛，安排复评。",
+        "question": "镇痛护理后应做什么？",
+        "choices": [
+          "无需再询问",
+          "按医嘱时间复评并记录效果",
+          "固定填写零分"
+        ],
+        "answer": 1,
+        "explanation": "根据患者真实反馈记录，不能用固定评分代替复评。",
+        "knowledge": "analgesia"
+      }
+    ]
+  },
+  {
+    "id": "R19",
+    "title": "患肢神经功能",
+    "module": 2,
+    "scenario": 7,
+    "purpose": "询问感觉并观察足趾活动，及时识别异常。",
+    "source": "独立课程设计；原任务类别参照现有 Windows 运行时与 UI 资料",
+    "criteria": [
+      {
+        "id": "C28",
+        "label": "神经功能评估",
+        "target": "foot",
+        "operation": "neuro",
+        "observation": "本课程当日状态：足趾可活动，未诉新发麻木；观察结果由操作后显示。",
+        "question": "新发麻木和运动受限时，应？",
+        "choices": [
+          "及时评估并报告",
+          "留到出院再问",
+          "自行活动骨折端"
+        ],
+        "answer": 0,
+        "explanation": "神经功能变化应及时处理，避免持续压迫。",
+        "knowledge": "neurovascular"
+      }
+    ]
+  },
+  {
+    "id": "R20",
+    "title": "患肢肢端血供",
+    "module": 2,
+    "scenario": 7,
+    "purpose": "查看颜色、皮温和足背动脉并比较。",
+    "source": "第1天血供事实及判断来自 source/docs/Unity本地状态输出.md 第6.4节；第2、3、7天为独立教学情境，R20/C29编号及评分为自主实现",
+    "criteria": [
+      {
+        "id": "C29",
+        "label": "血运评估",
+        "target": "foot",
+        "operation": "circulation",
+        "observation": "读取本日肢端皮温、颜色与搏动状态。",
+        "question": "术后第1天，患者是否存在左下肢肢端血供问题？",
+        "choices": [
+          "是",
+          "否"
+        ],
+        "answer": 0,
+        "explanation": "原客户端术后第1天实测：存在左下肢肢端血供问题；肢端颜色、皮温、足背动脉具体状态未取得。",
+        "knowledge": "neurovascular"
+      }
+    ]
+  },
+  {
+    "id": "R21",
+    "title": "深静脉血栓观察与预防",
+    "module": 2,
+    "scenario": 7,
+    "purpose": "观察症状并在允许范围内指导活动。",
+    "source": "独立课程设计；原任务类别参照现有 Windows 运行时与 UI 资料",
+    "criteria": [
+      {
+        "id": "C30",
+        "label": "血栓风险观察",
+        "target": "measure",
+        "operation": "dvt",
+        "observation": "本课程当日记录：无突发单侧小腿肿痛；已有风险仍需持续观察。",
+        "question": "疑似血栓时应避免？",
+        "choices": [
+          "报告医生",
+          "按摩和热敷患肢",
+          "记录症状"
+        ],
+        "answer": 1,
+        "explanation": "疑似血栓时禁止按摩和热敷，并及时报告。",
+        "knowledge": "dvt"
+      },
+      {
+        "id": "C31",
+        "label": "康复活动指导",
+        "target": "foot",
+        "operation": "exercise",
+        "observation": "患者按指导进行足趾和踝泵活动演示。",
+        "question": "床上活动如何安排？",
+        "choices": [
+          "按医嘱、耐受情况指导允许的活动",
+          "所有患者做相同强度",
+          "强迫骨折处大幅活动"
+        ],
+        "answer": 0,
+        "explanation": "活动计划需遵照医嘱和患者情况，避免牵拉骨折部位。",
+        "knowledge": "dvt"
+      }
+    ]
+  },
+  {
+    "id": "R22",
+    "title": "创口出血观察",
+    "module": 2,
+    "scenario": 7,
+    "purpose": "观察敷料与创口周围，记录异常。",
+    "source": "独立课程设计；原任务类别参照现有 Windows 运行时与 UI 资料",
+    "criteria": [
+      {
+        "id": "C32",
+        "label": "创口观察",
+        "target": "site",
+        "operation": "bleeding",
+        "observation": "本课程当日敷料未见持续扩大渗血。",
+        "question": "渗血范围持续扩大时应？",
+        "choices": [
+          "持续观察、记录并报告",
+          "反复掀开敷料",
+          "只在记录中写正常"
+        ],
+        "answer": 0,
+        "explanation": "观察变化与伴随症状，及时报告，不反复污染创口。",
+        "knowledge": "complication"
+      }
+    ]
+  },
+  {
+    "id": "R23",
+    "title": "牵引针道护理",
+    "module": 2,
+    "scenario": 7,
+    "purpose": "观察针道红肿、渗液与疼痛，并完成清洁演示。",
+    "source": "独立课程设计；原任务类别参照现有 Windows 运行时与 UI 资料",
+    "criteria": [
+      {
+        "id": "C33",
+        "label": "针道护理",
+        "target": "swab",
+        "operation": "pin-care",
+        "observation": "针道未见脓性分泌物；已依本课程无菌护理步骤完成清洁。",
+        "question": "针道有红肿渗液时应？",
+        "choices": [
+          "随意旋转钢针",
+          "记录并报告，按规范处理",
+          "用床单擦掉"
+        ],
+        "answer": 1,
+        "explanation": "关注感染征象，消毒剂和处理流程遵从本单位规范与医嘱。",
+        "knowledge": "pin-care"
+      }
+    ]
+  },
+  {
+    "id": "R24",
+    "title": "压力性损伤预防",
+    "module": 2,
+    "scenario": 6,
+    "purpose": "观察骨突部位并协助安全减压。",
+    "source": "独立课程设计；原任务类别参照现有 Windows 运行时与 UI 资料",
+    "criteria": [
+      {
+        "id": "C34",
+        "label": "皮肤观察",
+        "target": "skin",
+        "operation": "skin",
+        "observation": "观察骶尾与足跟；教学状态为皮肤完整。",
+        "question": "哪组部位应重点观察？",
+        "choices": [
+          "骶尾部、足跟等骨突部位",
+          "只看手背",
+          "只看头发"
+        ],
+        "answer": 0,
+        "explanation": "结合风险评估观察受压部位。",
+        "knowledge": "skin"
+      },
+      {
+        "id": "C35",
+        "label": "体位与减压",
+        "target": "support",
+        "operation": "turn",
+        "observation": "已协助小幅体位调整，保持患肢支托和牵引连续。",
+        "question": "翻身时应注意？",
+        "choices": [
+          "先卸下砝码",
+          "维持患肢支托和有效牵引",
+          "直接拉拽患肢"
+        ],
+        "answer": 1,
+        "explanation": "体位护理需维护牵引连续性，并保护患肢。",
+        "knowledge": "skin"
+      }
+    ]
+  },
+  {
+    "id": "R25",
+    "title": "肺部感染观察",
+    "module": 2,
+    "scenario": 7,
+    "purpose": "询问呼吸症状并示范有效咳嗽。",
+    "source": "独立课程设计；原任务类别参照现有 Windows 运行时与 UI 资料",
+    "criteria": [
+      {
+        "id": "C36",
+        "label": "呼吸评估",
+        "target": "stethoscope",
+        "operation": "lung",
+        "observation": "本课程当日无新发气促，示范深呼吸和有效咳嗽。",
+        "question": "卧床期间如何降低肺部并发症风险？",
+        "choices": [
+          "始终平躺不动",
+          "按耐受指导深呼吸、有效咳嗽和体位调整",
+          "出现气促也不报告"
+        ],
+        "answer": 1,
+        "explanation": "结合患者耐受指导活动，发现异常及时报告。",
+        "knowledge": "complication"
+      }
+    ]
+  },
+  {
+    "id": "R26",
+    "title": "排泄与日常护理",
+    "module": 2,
+    "scenario": 6,
+    "purpose": "询问排泄情况、协助使用便器并给予生活指导。",
+    "source": "独立课程设计；原任务类别参照现有 Windows 运行时与 UI 资料",
+    "criteria": [
+      {
+        "id": "C37",
+        "label": "排泄护理",
+        "target": "bedpan",
+        "operation": "elimination",
+        "observation": "本课程当日患者希望在保护隐私和患肢的前提下使用便器。",
+        "question": "帮助患者排泄时应？",
+        "choices": [
+          "保护隐私，稳定支托患肢并保持牵引",
+          "解除牵引后独自用力搬动",
+          "忽略患者需求"
+        ],
+        "answer": 0,
+        "explanation": "基础生活护理同样需要保护患肢并维持治疗。",
+        "knowledge": "communication"
+      }
+    ]
+  },
+  {
+    "id": "R27",
+    "title": "心理护理与每日回顾",
+    "module": 2,
+    "scenario": 5,
+    "purpose": "从患者三维交互入口倾听担忧，并确认当日护理计划。",
+    "source": "独立课程设计；原任务类别参照现有 Windows 运行时与 UI 资料",
+    "criteria": [
+      {
+        "id": "C38",
+        "label": "倾听与情绪回应",
+        "target": "patient",
+        "operation": "psych",
+        "observation": "患者陈述随第 1、2、3、7 天教学情境变化。",
+        "question": "面对患者担忧，较合适的做法是？",
+        "choices": [
+          "不要想太多",
+          "倾听并具体回应，说明可行的支持",
+          "保证立即出院"
+        ],
+        "answer": 1,
+        "explanation": "承认患者感受，提供具体支持和适当信息。",
+        "knowledge": "psych-care"
+      },
+      {
+        "id": "C39",
+        "label": "康复与支持计划",
+        "target": "patient",
+        "operation": "support-plan",
+        "observation": "患者与护士共同商定当日活动、休息及寻求帮助的方法。",
+        "question": "如何结束本次沟通？",
+        "choices": [
+          "确认患者理解并约定后续支持",
+          "直接离开",
+          "代替医生保证康复日期"
+        ],
+        "answer": 0,
+        "explanation": "确认理解，提供后续求助方式，避免承诺未知结果。",
+        "knowledge": "psych-care"
+      }
+    ]
+  }
+]

@@ -1,0 +1,39 @@
+{
+  "id": "ev_7274a0964df533b75f97f041bca38b2a645d3b1d25c5ad53329bc04d0c06e4cd",
+  "subject": {
+    "kind": "folder",
+    "name": "raw"
+  },
+  "operation": "game_archives_list",
+  "params": {
+    "path": "/Volumes/Lexar/Project/医院仿真/reverse/experiment/raw"
+  },
+  "result": {
+    "archives": [],
+    "engine": "none",
+    "folder": "/Volumes/Lexar/Project/医院仿真/reverse/experiment/raw",
+    "truncated": false
+  },
+  "summary": "raw: no Unreal, Unity or Godot archives found.",
+  "confidence": "observed",
+  "authority": "original-files",
+  "environment": {
+    "clean_room": false,
+    "engine": "builtin",
+    "engine_version": "0.6.1",
+    "host": "macos-aarch64"
+  },
+  "limitations": [],
+  "coverage": {
+    "status": "complete",
+    "examined": 0,
+    "total": 0
+  },
+  "locations": [
+    {
+      "kind": "path",
+      "value": "/Volumes/Lexar/Project/医院仿真/reverse/experiment/raw"
+    }
+  ],
+  "links": []
+}

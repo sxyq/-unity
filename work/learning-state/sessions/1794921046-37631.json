@@ -1,0 +1,157 @@
+{
+	"alignment": 18.0,
+	"anesthesia": false,
+	"attempts": {
+		"C04:0": {
+			"actions": [],
+			"answered": false,
+			"correct": false,
+			"criterion": "C04",
+			"day": 0,
+			"errors": 0,
+			"observation": "",
+			"operations": 0,
+			"performed": false,
+			"responses": [],
+			"seconds": 27.4806729999999,
+			"started": "2026-11-17T13:10:47"
+		},
+		"C08:0": {
+			"actions": [],
+			"answered": false,
+			"correct": false,
+			"criterion": "C08",
+			"day": 0,
+			"errors": 0,
+			"observation": "",
+			"operations": 0,
+			"performed": false,
+			"responses": [],
+			"seconds": 35.2941953333337,
+			"started": "2026-11-17T13:11:14"
+		},
+		"C13:0": {
+			"actions": [],
+			"answered": false,
+			"correct": false,
+			"criterion": "C13",
+			"day": 0,
+			"errors": 0,
+			"observation": "",
+			"operations": 0,
+			"performed": false,
+			"responses": [],
+			"seconds": 38.8849734444454,
+			"started": "2026-11-17T13:11:50"
+		},
+		"C14:0": {
+			"action_records": [
+				{
+					"action": "查看包装与有效期",
+					"at": "2026-11-17T13:13:35",
+					"observation": "教学物品包装完整、干燥，处于有效期内。"
+				},
+				{
+					"action": "展开无菌区域",
+					"at": "2026-11-17T13:13:39",
+					"observation": "按无菌原则展开穿刺包，避免越过或触碰无菌区域。"
+				}
+			],
+			"actions": [
+				"查看包装与有效期",
+				"展开无菌区域"
+			],
+			"answered": false,
+			"correct": false,
+			"criterion": "C14",
+			"day": 0,
+			"errors": 0,
+			"observation": "包装完整、在有效期内；无菌操作区域已展开。",
+			"operations": 1,
+			"performed": true,
+			"responses": [],
+			"seconds": 103.387497888899,
+			"started": "2026-11-17T13:12:29"
+		},
+		"C15:0": {
+			"action_records": [
+				{
+					"action": "手卫生",
+					"at": "2026-11-17T13:16:51",
+					"observation": "已执行手卫生，保持双手及操作区清洁。"
+				},
+				{
+					"action": "确认手套完整",
+					"at": "2026-11-17T13:16:55",
+					"observation": "教学物品手套完整；污染或破损时更换。"
+				}
+			],
+			"actions": [
+				"手卫生",
+				"确认手套完整"
+			],
+			"answer": "更换手套并恢复无菌条件",
+			"answered": true,
+			"correct": true,
+			"criterion": "C15",
+			"day": 0,
+			"ended": "2026-11-17T13:18:30",
+			"errors": 0,
+			"observation": "手套已戴好；双手保持在无菌操作区域内。",
+			"operations": 1,
+			"performed": true,
+			"responses": [
+				{
+					"answer": "更换手套并恢复无菌条件",
+					"at": "2026-11-17T13:18:30",
+					"correct": true
+				}
+			],
+			"seconds": 257.2644444444,
+			"started": "2026-11-17T13:14:13"
+		}
+	},
+	"criterion": 0,
+	"day": 1,
+	"days": {
+		"1": {
+			"exercise": false,
+			"pain": 6,
+			"pin_clean": false,
+			"pressure_relief": false
+		},
+		"2": {
+			"exercise": false,
+			"pain": 4,
+			"pin_clean": false,
+			"pressure_relief": false
+		},
+		"3": {
+			"exercise": false,
+			"pain": 3,
+			"pin_clean": false,
+			"pressure_relief": false
+		},
+		"7": {
+			"exercise": false,
+			"pain": 2,
+			"pin_clean": false,
+			"pressure_relief": false
+		}
+	},
+	"disinfect": false,
+	"drape": false,
+	"exam": false,
+	"gloves": true,
+	"height": 0.26,
+	"id": "1794921046-37631",
+	"module": 1,
+	"pack": true,
+	"pin": false,
+	"review_of": "",
+	"rope": false,
+	"started": "2026-11-17T13:10:46",
+	"submitted": false,
+	"task": 9,
+	"weight": 0.0
+}

@@ -1,0 +1,103 @@
+{
+  "revision": 34,
+  "brief": {
+    "question": "追踪已下载原版Windows游戏HLF10631030.exe.mengoo的入口、程序集初始化、护理任务及评分数据路径。",
+    "purpose": "为按原版逐功能逐模型复刻取得本地客户端依据。",
+    "targets": [
+      "/Volumes/Lexar/Project/医院仿真/reverse/experiment/raw/HLF10631030.exe.mengoo",
+      "/Volumes/Lexar/Project/医院仿真/reverse/experiment/raw/UnityPlayer.dll",
+      "/Volumes/Lexar/Project/医院仿真/reverse/experiment/raw/HLF10631030_Data"
+    ],
+    "constraints": [
+      "仅静态读取原版，不运行Windows EXE，不解密，不绕过认证，不读写凭据",
+      "成果与工具放外置固态硬盘，保留已有重建源码",
+      "应用默认小窗，编译CPU低于单核80%，运行总内存低于2GB"
+    ],
+    "done_when": "入口与可读平台调用具有地址或CIL位置；与既有Windows业务证据对应；准确记录加密业务与自定义资源缺项。"
+  },
+  "plan": [
+    {
+      "title": "找回现有Windows导出",
+      "status": "blocked",
+      "why": "原Windows输出未进入现有Git或相关本机会话，缺gqy-runtime-dump/gqy-il原位置"
+    },
+    {
+      "title": "第1天血供按原实测对齐",
+      "status": "done",
+      "why": "Mac真实学习操作第1天选是、第2天教学情境选否，两个日期分别保存并正确"
+    },
+    {
+      "title": "助教按任务与日期分会话",
+      "status": "done",
+      "why": "源码键含实验/任务/场景/日期，已进入两平台产物；真实模型行为待凭据"
+    },
+    {
+      "title": "两平台更新与小窗实操",
+      "status": "done",
+      "why": "Mac/Windows已串行导出和包装，采样峰值46.93/42.14%，446/394MiB，应用与网关RSS48.71875MiB"
+    },
+    {
+      "title": "原完整1:1业务资源",
+      "status": "blocked",
+      "why": "原27/39映射、原UI完整流程、资源对象表缺Windows既有导出，保持不解密原文件"
+    },
+    {
+      "title": "真实模型与Windows运行",
+      "status": "blocked",
+      "why": "缺本项目模型凭据及Windows运行入口"
+    }
+  ],
+  "hypotheses": [],
+  "findings": [
+    {
+      "id": "fnd_1",
+      "statement": "启动器 globalgamemanagers 可按 Unity 2019.3.14f1 Windows 32-bit 序列化格式读取，共 18 个对象；该版本属于启动器。",
+      "evidence_ids": [
+        "ev_d1e6061405f5c3d784ef7b663ea871049c7eb54211063e83f2e843506fc1e5b4"
+      ],
+      "confidence": "observed"
+    },
+    {
+      "id": "fnd_2",
+      "statement": "实验 data.unity3d 为 293663279 字节，内置格式识别为 unknown；标准 UnityFS 与 Serialized 解析均不支持该文件。",
+      "evidence_ids": [
+        "ev_77aadf75c82f3ab8cb6fa00c7bc3b40507d6a953b27174fc783712e1c987b097"
+      ],
+      "confidence": "observed"
+    },
+    {
+      "id": "fnd_3",
+      "statement": "MengooPlatform.dll 包含 29 类型、193 字段、171 方法、155 个 CIL 方法体和 815 个调用位置，步骤钩子是委托字段。",
+      "evidence_ids": [
+        "ev_2b5d2f0dc0b566323fb9b1e4793ca6978b8e5052037e54e0dd5165efb96d7f3d"
+      ],
+      "confidence": "observed"
+    },
+    {
+      "id": "fnd_4",
+      "statement": "原游戏MengooPlatform字符串AddTaskQuestion按任务Name和题目Content比较，新增No分别为列表Count+1；整数重载按iLabStep.seq定位，已有项仅更新startTime、endTime、timeUsed、score，首次添加才写其余步骤参数。",
+      "evidence_ids": [
+        "ev_2b5d2f0dc0b566323fb9b1e4793ca6978b8e5052037e54e0dd5165efb96d7f3d"
+      ],
+      "confidence": "derived"
+    },
+    {
+      "id": "fnd_5",
+      "statement": "原版本地游戏HLF10631030.exe.mengoo的PE资源包含9幅图标、1个图标组、1项版本和1项manifest；版本字符串Unity Version为2021.3.6f1_7da38d85baf6。",
+      "evidence_ids": [
+        "ev_a221cfd3882fa6f8849ee7f512ae0dac42900eb16d44ccd099a38af55a76e1b6"
+      ],
+      "confidence": "observed"
+    },
+    {
+      "id": "fnd_6",
+      "statement": "StartStep与EndStep仅在钩子存在且正常返回后读取hookOverride；异常分支记录错误后继续平台计时。stepTimes保存Unix毫秒，iLabStep.timeUsed转为整数秒且零值写1；seq与timeIndex分别传入。",
+      "evidence_ids": [
+        "ev_2b5d2f0dc0b566323fb9b1e4793ca6978b8e5052037e54e0dd5165efb96d7f3d"
+      ],
+      "confidence": "derived"
+    }
+  ],
+  "handoff": "2026-11-17已完成当前可直接依据原记录的血供纠偏与会话隔离。Parfit修改training.gd和Tasks.json后已关闭：原第一天血供问题答案是；具体颜色/皮温/足背动脉未知。第2/3/7天仍明确为自主情境，答案否。criterion按日期返回题目与答案，学习观察显示来源，考核未提交不显示原结论解析。主Agent assistant.gd history_key现为session.id:task.id:scenario:session.day，避免同场景跨任务或跨日期混用。两平台已导出包装新版本，Mac小窗实际点击原脚足对象、两项动作、执行、第一天答是第二天答否。存档1794922889-40496的C29:1和C29:2 performed/answered/correct都true，来源区分已写README。Mac buildCPU46.93%446MiB，Windows42.14%394MiB；运行13:47:29.240Z appPID84467 RSS45383680bytes、gatewayPID84647 RSS5701632，总51085312/48.71875MiB，runtime-usage.json更新fps仍null。Mac运行exec12968；CUA完成summary。原始数据找回本轮已尝试：codex-sessions按骨牵引仅当前任务和清理会话，Codex最近50摘要无原Windows读取入口；git fetch成功origin/main仍cb1ce4a本地无落后。不可再重复搜索和组装自主编号冒充原27/39；原gqy-runtime-dump.txt与gqy-il目前无可读路径。完整1:1还缺原任务映射、原病历UI和完成判定、资源对象目录，原主DLL/data自定义格式禁止解密/执行。真实AI缺项目凭据，Windows无运行环境；这些缺项已经连续三个目标回合存在，当前可直接据实完成的局部修改和实际验证都已交付，余下依赖外部资料/环境。后续收到Windows已有导出路径后只读业务白名单，不读认证数据；不要重启Agent或重装项目级REA/Craft，保留默认1280x720小窗。全工具及缓存外置，编译一次一个树CPU单核80%内，运行含子进程2GB内。",
+  "updated": "2026-11-17T13:48:47Z"
+}
